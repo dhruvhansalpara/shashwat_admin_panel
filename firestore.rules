@@ -1,0 +1,131 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitive Definitions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'info.shashwatholiday@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // 1. Packages
+    match /packages/{packageId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(packageId) && isValidPackage(incoming()) && 
+                       incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if isAdmin() && isValidPackage(incoming()) && 
+                       incoming().updatedAt == request.time &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['name', 'price', 'days', 'description', 'image', 'bannerImage', 'gallery', 'itinerary', 'inclusions', 'exclusions', 'location', 'groupSize', 'languages', 'updatedAt']);
+      allow delete: if isAdmin();
+    }
+
+    function isValidPackage(data) {
+      return data.name is string && data.name.size() >= 3 && data.name.size() <= 100 &&
+             data.price is number && data.price >= 0 &&
+             data.days is int && data.days > 0 &&
+             data.description is string && data.description.size() >= 10 && data.description.size() <= 5000 &&
+             data.image is string && data.image.size() <= 1000 &&
+             (data.get('location', '') is string && data.get('location', '').size() <= 200) &&
+             (data.get('bannerImage', '') is string && data.get('bannerImage', '').size() <= 1000) &&
+             (data.get('gallery', []) is list) &&
+             (data.get('itinerary', []) is list) &&
+             (data.get('inclusions', []) is list) &&
+             (data.get('exclusions', []) is list) &&
+             (data.get('groupSize', '') is string && data.get('groupSize', '').size() <= 100) &&
+             (data.get('languages', '') is string && data.get('languages', '').size() <= 200) &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp;
+    }
+
+    // 1.1 Destinations
+    match /destinations/{destinationId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(destinationId) && isValidDestination(incoming()) &&
+                       incoming().createdAt == request.time && incoming().updatedAt == request.time;
+      allow update: if isAdmin() && isValidDestination(incoming()) &&
+                       incoming().updatedAt == request.time &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['name', 'description', 'image', 'category', 'updatedAt']);
+      allow delete: if isAdmin();
+    }
+
+    function isValidDestination(data) {
+      return data.name is string && data.name.size() >= 2 && data.name.size() <= 100 &&
+             data.description is string && data.description.size() <= 2000 &&
+             data.image is string && data.image.size() <= 1000 &&
+             data.category in ['domestic', 'international'] &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp;
+    }
+
+    // 2. Banners
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow create: if isAdmin() && isValidId(bannerId) && isValidBanner(incoming()) &&
+                       incoming().createdAt == request.time;
+      allow update: if isAdmin() && isValidBanner(incoming()) &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['title', 'image']);
+      allow delete: if isAdmin();
+    }
+
+    function isValidBanner(data) {
+      return (data.get('title', '') is string && data.get('title', '').size() <= 100) &&
+             data.image is string && data.image.size() <= 500 &&
+             data.createdAt is timestamp;
+    }
+
+    // 3. Inquiries
+    match /inquiries/{inquiryId} {
+      allow read: if isAdmin();
+      allow create: if isValidId(inquiryId) && isValidInquiry(incoming()) &&
+                       incoming().createdAt == request.time;
+      allow delete: if isAdmin();
+    }
+
+    function isValidInquiry(data) {
+      return data.name is string && data.name.size() >= 2 && data.name.size() <= 100 &&
+             data.phone is string && data.phone.size() >= 7 && data.phone.size() <= 20 &&
+             (data.get('email', '') is string && data.get('email', '').size() <= 100) &&
+             data.message is string && data.message.size() >= 5 && data.message.size() <= 1000 &&
+             (data.get('packageId', '') is string && data.get('packageId', '').size() <= 128) &&
+             data.createdAt is timestamp;
+    }
+
+    // 4. Settings
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin() && docId == 'global' && isValidSettings(incoming()) &&
+                      incoming().updatedAt == request.time;
+    }
+
+    function isValidSettings(data) {
+      return data.whatsappNumber is string && data.whatsappNumber.size() <= 20 &&
+             data.defaultMessage is string && data.defaultMessage.size() <= 500 &&
+             data.updatedAt is timestamp;
+    }
+  }
+}

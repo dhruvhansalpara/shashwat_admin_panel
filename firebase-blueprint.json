@@ -1,0 +1,112 @@
+{
+  "entities": {
+    "Package": {
+      "title": "Tour Package",
+      "description": "A travel package offering specific destinations and experiences.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the tour package" },
+        "price": { "type": "number", "description": "Price of the package" },
+        "days": { "type": "integer", "description": "Duration in days" },
+        "description": { "type": "string", "description": "Detailed description of the package" },
+        "image": { "type": "string", "description": "URL of the main package image (card)" },
+        "bannerImage": { "type": "string", "description": "URL of the wide banner image for the tour page" },
+        "gallery": { 
+          "type": "array", 
+          "items": { "type": "string" },
+          "description": "List of URLs for the image gallery"
+        },
+        "itinerary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "day": { "type": "integer" },
+              "title": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "inclusions": { "type": "array", "items": { "type": "string" } },
+        "exclusions": { "type": "array", "items": { "type": "string" } },
+        "location": { "type": "string" },
+        "groupSize": { "type": "string" },
+        "languages": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "price", "days", "description", "image"]
+    },
+    "Banner": {
+      "title": "Homepage Banner",
+      "description": "Banner images displayed on the travel website homepage.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title or caption for the banner" },
+        "image": { "type": "string", "description": "URL of the banner image" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["image"]
+    },
+    "Inquiry": {
+      "title": "Customer Inquiry",
+      "description": "Inquiry submitted by a potential traveler.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Customer name" },
+        "phone": { "type": "string", "description": "Customer phone number" },
+        "email": { "type": "string", "description": "Customer email" },
+        "message": { "type": "string", "description": "Inquiry message" },
+        "packageId": { "type": "string", "description": "ID of the specific package they are interested in" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "phone", "message"]
+    },
+    "Settings": {
+      "title": "Global Settings",
+      "description": "Global application settings like WhatsApp integration.",
+      "type": "object",
+      "properties": {
+        "whatsappNumber": { "type": "string", "description": "WhatsApp number for inquiries" },
+        "defaultMessage": { "type": "string", "description": "Default message prefix for WhatsApp" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Destination": {
+      "title": "Destination",
+      "description": "Popular destinations managed in the app.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "image": { "type": "string" },
+        "category": { "type": "string", "enum": ["domestic", "international"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "image", "category"]
+    }
+  },
+  "firestore": {
+    "/packages/{packageId}": {
+      "schema": "Package",
+      "description": "Collection of all available tour packages."
+    },
+    "/banners/{bannerId}": {
+      "schema": "Banner",
+      "description": "Collection of homepage display banners."
+    },
+    "/destinations/{destinationId}": {
+      "schema": "Destination",
+      "description": "Popular destinations catalog."
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": "Inquiry",
+      "description": "Collection of customer inquiries."
+    },
+    "/settings/global": {
+      "schema": "Settings",
+      "description": "Global settings document."
+    }
+  }
+}
