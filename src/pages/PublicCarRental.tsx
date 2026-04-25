@@ -11,7 +11,7 @@ interface PublicCarRentalProps {
 
 export function PublicCarRental({ cars, whatsappNumber }: PublicCarRentalProps) {
   const getWhatsAppLink = (carName: string) => {
-    const message = encodeURIComponent(`Hello Shashwa Holidays, I'm interested in renting a ${carName}. Please provide more details.`);
+    const message = encodeURIComponent(`Hello Shashwat Holidays, I'm interested in renting a ${carName}. Please provide more details.`);
     return `https://wa.me/${whatsappNumber}?text=${message}`;
   };
 

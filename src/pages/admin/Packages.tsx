@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Package } from '@/types';
+import { Package, Destination } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
   Plus, Search, MoreHorizontal, Edit, Trash2, 
   Image as ImageIcon, ListPlus, MapPin, 
-  CheckCircle2, XCircle, PlusCircle, Trash, X
+  CheckCircle2, XCircle, PlusCircle, Trash, X,
+  Map as MapIcon
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +19,7 @@ import {
   DropdownMenuLabel, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -44,6 +46,7 @@ const packageSchema = z.object({
   inclusions: z.string().optional(),
   exclusions: z.string().optional(),
   location: z.string().min(1, "Location is required"),
+  destination_ids: z.array(z.string()).min(1, "At least one destination is required"),
   groupSize: z.string().optional(),
   languages: z.string().optional(),
   itinerary: z.array(itinerarySchema).optional(),
@@ -53,12 +56,13 @@ type PackageFormValues = z.infer<typeof packageSchema>;
 
 interface PackagesPageProps {
   packages: Package[];
+  destinations: Destination[];
   onAdd: (pkg: Omit<Package, 'id' | 'createdAt' | 'updatedAt'>) => void;
   onEdit: (id: string, pkg: Partial<Package>) => void;
   onDelete: (id: string) => void;
 }
 
-export function PackagesPage({ packages, onAdd, onEdit, onDelete }: PackagesPageProps) {
+export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }: PackagesPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
@@ -81,6 +85,7 @@ export function PackagesPage({ packages, onAdd, onEdit, onDelete }: PackagesPage
       inclusions: '',
       exclusions: '',
       location: '',
+      destination_ids: [],
       groupSize: '',
       languages: '',
       itinerary: [],
@@ -129,6 +134,7 @@ export function PackagesPage({ packages, onAdd, onEdit, onDelete }: PackagesPage
       inclusions: pkg.inclusions ? pkg.inclusions.join('\n') : '',
       exclusions: pkg.exclusions ? pkg.exclusions.join('\n') : '',
       location: pkg.location || '',
+      destination_ids: pkg.destination_ids || [],
       groupSize: pkg.groupSize || '',
       languages: pkg.languages || '',
       itinerary: pkg.itinerary || [],
@@ -217,26 +223,26 @@ export function PackagesPage({ packages, onAdd, onEdit, onDelete }: PackagesPage
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[800px] w-[95vw] h-[85vh] sm:h-[80vh] flex flex-col p-0 overflow-hidden">
-          <DialogHeader className="p-6 pb-2">
-            <DialogTitle>{editingPackage ? 'Edit Package' : 'Add New Package'}</DialogTitle>
+        <DialogContent className="sm:max-w-[900px] w-[95vw] max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="p-6 pb-2 shrink-0">
+            <DialogTitle className="text-2xl">{editingPackage ? 'Edit Package' : 'Add New Package'}</DialogTitle>
             <DialogDescription>
               Fill in the details for the tour package. Use tabs to navigate through different sections.
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <Tabs defaultValue="basic" className="flex-1 flex flex-col min-h-0">
-              <div className="px-6 shrink-0">
-                <TabsList className="grid grid-cols-4 w-full">
-                  <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                  <TabsTrigger value="media">Media</TabsTrigger>
-                  <TabsTrigger value="itinerary">Itinerary</TabsTrigger>
-                  <TabsTrigger value="details">Details</TabsTrigger>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col overflow-hidden">
+            <Tabs defaultValue="basic" className="flex-1 flex flex-col overflow-hidden">
+              <div className="px-6 shrink-0 border-b">
+                <TabsList className="w-full justify-start bg-transparent h-auto p-0 gap-6">
+                  <TabsTrigger value="basic" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3">Basic Info</TabsTrigger>
+                  <TabsTrigger value="media" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3">Media</TabsTrigger>
+                  <TabsTrigger value="itinerary" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3">Itinerary</TabsTrigger>
+                  <TabsTrigger value="details" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3">Details</TabsTrigger>
                 </TabsList>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 pt-4 min-h-0 scrollbar-thin scrollbar-thumb-muted-foreground/20 hover:scrollbar-thumb-muted-foreground/40 pb-20">
+              <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
                 <TabsContent value="basic" className="space-y-4 mt-0">
                   <div className="space-y-2">
                     <Label htmlFor="name">Package Name</Label>
@@ -277,6 +283,45 @@ export function PackagesPage({ packages, onAdd, onEdit, onDelete }: PackagesPage
                     <Label htmlFor="description">Short Description</Label>
                     <Textarea id="description" placeholder="Describe the overview of the tour..." className="min-h-[100px]" {...register('description')} />
                     {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="flex items-center gap-2">
+                       <MapIcon className="w-4 h-4 text-primary" /> Multi-Select Destinations
+                    </Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 border rounded-xl bg-muted/20">
+                      {destinations.map((dest) => (
+                        <div key={dest.id} className="flex items-center space-x-2">
+                          <Controller
+                            control={control}
+                            name="destination_ids"
+                            render={({ field }) => (
+                              <Checkbox 
+                                id={`dest-${dest.id}`}
+                                checked={field.value?.includes(dest.id)}
+                                onCheckedChange={(checked) => {
+                                  const current = field.value || [];
+                                  if (checked) {
+                                    field.onChange([...current, dest.id]);
+                                  } else {
+                                    field.onChange(current.filter(id => id !== dest.id));
+                                  }
+                                }}
+                              />
+                            )}
+                          />
+                          <Label htmlFor={`dest-${dest.id}`} className="text-sm font-normal cursor-pointer truncate">
+                            {dest.name}
+                          </Label>
+                        </div>
+                      ))}
+                      {destinations.length === 0 && (
+                        <p className="col-span-full text-xs text-muted-foreground italic">
+                           No destinations created yet. Please create destinations first.
+                        </p>
+                      )}
+                    </div>
+                    {errors.destination_ids && <p className="text-xs text-destructive">{errors.destination_ids.message}</p>}
                   </div>
                 </TabsContent>
 
@@ -450,8 +495,9 @@ export function PackagesPage({ packages, onAdd, onEdit, onDelete }: PackagesPage
               </div>
             </Tabs>
 
-            <DialogFooter className="p-6 bg-muted/30 border-t">
-              <Button type="submit" className="w-[200px]">{editingPackage ? 'Update Package' : 'Create Package'}</Button>
+            <DialogFooter className="p-4 px-6 bg-muted/30 border-t shrink-0">
+              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)} className="mr-auto">Cancel</Button>
+              <Button type="submit" className="min-w-[150px]">{editingPackage ? 'Update Package' : 'Create Package'}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

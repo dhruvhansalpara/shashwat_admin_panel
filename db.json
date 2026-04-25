@@ -1,0 +1,71 @@
+{
+  "packages": [
+    {
+      "id": "pkg_1",
+      "name": "Manali Volvo Tour",
+      "description": "Experience the beauty of Manali with our exclusive Volvo tour package.",
+      "category": "Himachal",
+      "destination_ids": ["dest_1"],
+      "price": 5999,
+      "days": 4,
+      "duration": "4 Days / 3 Nights",
+      "location": "Manali, Himachal Pradesh",
+      "image": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1000&auto=format&fit=crop",
+      "bannerImage": "https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?q=80&w=1400&auto=format&fit=crop",
+      "gallery": [],
+      "itinerary": [
+        { "day": 1, "title": "Arrival in Manali", "description": "Check in to hotel and rest." },
+        { "day": 2, "title": "Local Sightseeing", "description": "Visit Hadimba Temple and Mall Road." }
+      ],
+      "highlights": "Luxurious Volvo, Stay in 3-star hotel, All meals included",
+      "inclusions": ["AC Volvo", "Hotel Stay", "Breakfast & Dinner"],
+      "exclusions": ["Airfare", "Personal expenses"],
+      "groupSize": "2-20",
+      "languages": "English, Hindi",
+      "isFeatured": true,
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "banners": [
+    {
+      "id": "banner_1",
+      "image": "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2070&auto=format&fit=crop",
+      "title": "Unforgettable Journeys",
+      "subtitle": "Discover the hidden gems of the world with Shashwat Holidays",
+      "link": "/destinations",
+      "createdAt": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "destinations": [
+    {
+      "id": "dest_1",
+      "name": "Himachal",
+      "slug": "himachal",
+      "image": "https://images.unsplash.com/photo-1544084944-15269ec7b5a0?q=80&w=1000&auto=format&fit=crop",
+      "packageCount": 12,
+      "createdAt": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "cars": [],
+  "inquiries": [],
+  "admins": [
+    {
+      "id": "admin_1",
+      "name": "Super Admin",
+      "email": "info.shashwatholiday@gmail.com",
+      "password": "$2a$10$7v2M1Uv.6L1N6E7L5uT6eO.YhLqYw6D5uT6eJ.YhLqYw6D5uT6eJ.", 
+      "role": "super_admin",
+      "status": "active",
+      "createdAt": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "settings": {
+    "whatsappNumber": "919876543210",
+    "defaultMessage": "Hello Shashwat Holidays, I'm interested in your packages.",
+    "allow_login": true,
+    "allowed_emails": "info.shashwatholiday@gmail.com",
+    "site_name": "Shashwat Holidays",
+    "updatedAt": "2024-01-01T00:00:00Z"
+  }
+}

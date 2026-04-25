@@ -1,82 +1,103 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import * as React from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Package } from '../types';
-
-const inquirySchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  phone: z.string().min(10, "Please enter a valid phone number"),
-  email: z.string().email("Please enter a valid email address").optional().or(z.literal('')),
-  message: z.string().min(10, "Message must be at least 10 characters"),
-});
-
-type InquiryFormValues = z.infer<typeof inquirySchema>;
+import { toast } from 'sonner';
 
 interface InquiryFormProps {
-  selectedPackage?: Package;
-  onSubmit: (values: InquiryFormValues) => void;
-  isSubmitting?: boolean;
+  packageId?: string;
+  packageName?: string;
+  onSubmit?: (data: any) => void;
 }
 
-export function InquiryForm({ selectedPackage, onSubmit, isSubmitting }: InquiryFormProps) {
-  const { register, handleSubmit, formState: { errors } } = useForm<InquiryFormValues>({
-    resolver: zodResolver(inquirySchema),
-    defaultValues: {
-      name: '',
-      phone: '',
-      email: '',
-      message: selectedPackage ? `I am interested in the ${selectedPackage.name} package. Please provide more details.` : '',
-    },
+export function InquiryForm({ packageId, packageName, onSubmit }: InquiryFormProps) {
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: packageName ? `I'm interested in the ${packageName} tour.` : ''
   });
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      if (onSubmit) {
+        await onSubmit({ ...formData, packageId });
+      } else {
+        const res = await fetch('/api/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...formData, packageId })
+        });
+        
+        if (res.ok) {
+          toast.success("Thank you! Your inquiry has been sent.");
+          setFormData({ name: '', email: '', phone: '', message: '' });
+        } else {
+          toast.error("Failed to send inquiry. Please try again.");
+        }
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {selectedPackage && (
-        <div className="bg-muted p-4 rounded-lg mb-6 flex items-center gap-4">
-          <img src={selectedPackage.image} className="w-16 h-16 rounded object-cover" alt="" />
-          <div>
-            <p className="text-sm font-medium">Inquiry for:</p>
-            <p className="font-bold">{selectedPackage.name}</p>
-          </div>
-        </div>
-      )}
-      
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="name">Full Name</Label>
-        <Input id="name" placeholder="John Doe" {...register('name')} />
-        {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+        <Input 
+          id="name" 
+          required 
+          value={formData.name}
+          onChange={e => setFormData({...formData, name: e.target.value})}
+          placeholder="Your name"
+        />
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone Number</Label>
-          <Input id="phone" placeholder="+1 234 567 8900" {...register('phone')} />
-          {errors.phone && <p className="text-xs text-destructive">{errors.phone.message}</p>}
+          <Label htmlFor="email">Email Address</Label>
+          <Input 
+            id="email" 
+            type="email" 
+            required 
+            value={formData.email}
+            onChange={e => setFormData({...formData, email: e.target.value})}
+            placeholder="your@email.com"
+          />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email (Optional)</Label>
-          <Input id="email" placeholder="john@example.com" type="email" {...register('email')} />
-          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+          <Label htmlFor="phone">Phone Number</Label>
+          <Input 
+            id="phone" 
+            type="tel" 
+            required 
+            value={formData.phone}
+            onChange={e => setFormData({...formData, phone: e.target.value})}
+            placeholder="+91 ..."
+          />
         </div>
       </div>
-
       <div className="space-y-2">
-        <Label htmlFor="message">Message</Label>
+        <Label htmlFor="message">How can we help you?</Label>
         <Textarea 
-          id="message"
-          placeholder="Tell us what you are looking for..." 
+          id="message" 
+          required 
+          value={formData.message}
+          onChange={e => setFormData({...formData, message: e.target.value})}
+          placeholder="Share your travel requirements..."
           className="min-h-[120px]"
-          {...register('message')} 
         />
-        {errors.message && <p className="text-xs text-destructive">{errors.message.message}</p>}
       </div>
-
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? "Sending..." : "Submit Inquiry"}
+      <Button type="submit" className="w-full h-12" disabled={loading}>
+        {loading ? "Sending..." : "Send Inquiry"}
       </Button>
     </form>
   );

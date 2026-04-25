@@ -224,7 +224,7 @@ export function TourDetails({ packages, onInquiry, whatsappNumber }: TourDetails
                 
                 <div className="space-y-4">
                   <p className="font-bold text-center text-sm uppercase tracking-widest text-muted-foreground/80">Send Inquiry</p>
-                  <InquiryForm selectedPackage={pkg} onSubmit={(values) => onInquiry(values, pkg)} />
+                  <InquiryForm packageId={pkg.id} packageName={pkg.name} onSubmit={(values) => onInquiry(values, pkg)} />
                 </div>
               </CardContent>
             </Card>

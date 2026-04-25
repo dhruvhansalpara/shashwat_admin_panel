@@ -66,57 +66,61 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
               <Plus className="w-4 h-4" /> Add Vehicle
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
+          <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden">
+            <DialogHeader className="p-6 pb-2 shrink-0">
               <DialogTitle>Add New Vehicle</DialogTitle>
               <DialogDescription>
                 Add a new car or traveller to your fleet.
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Vehicle Name</Label>
-                  <Input id="name" name="name" placeholder="e.g. Toyota Innova Crysta" required />
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-6 scrollbar-hide space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Vehicle Name</Label>
+                    <Input id="name" name="name" placeholder="e.g. Toyota Innova Crysta" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="type">Vehicle Type</Label>
+                    <Input id="type" name="type" placeholder="e.g. Luxury SUV" required />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="seats">Seats</Label>
+                    <Input id="seats" name="seats" type="number" placeholder="7" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="luggage">Luggage Capacity</Label>
+                    <Input id="luggage" name="luggage" type="number" placeholder="3" required />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="pricePerKm">Price per KM (₹)</Label>
+                    <Input id="pricePerKm" name="pricePerKm" type="number" step="0.1" placeholder="18" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="pricePerDay">Price per Day (₹)</Label>
+                    <Input id="pricePerDay" name="pricePerDay" type="number" placeholder="4500" />
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="type">Vehicle Type</Label>
-                  <Input id="type" name="type" placeholder="e.g. Luxury SUV" required />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="seats">Seats</Label>
-                  <Input id="seats" name="seats" type="number" placeholder="7" required />
+                  <Label htmlFor="image">Image URL</Label>
+                  <Input id="image" name="image" placeholder="https://..." required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="luggage">Luggage Capacity</Label>
-                  <Input id="luggage" name="luggage" type="number" placeholder="3" required />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="pricePerKm">Price per KM (₹)</Label>
-                  <Input id="pricePerKm" name="pricePerKm" type="number" step="0.1" placeholder="18" required />
+                  <Label htmlFor="features">Features (comma separated)</Label>
+                  <Input id="features" name="features" placeholder="AC, Music System, First Aid, Luggage Carrier" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="pricePerDay">Price per Day (₹)</Label>
-                  <Input id="pricePerDay" name="pricePerDay" type="number" placeholder="4500" />
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea id="description" name="description" placeholder="Vehicle details..." />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="image">Image URL</Label>
-                <Input id="image" name="image" placeholder="https://..." required />
+              <div className="p-4 px-6 border-t bg-muted/30 shrink-0">
+                <Button type="submit" className="w-full">Save Vehicle</Button>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="features">Features (comma separated)</Label>
-                <Input id="features" name="features" placeholder="AC, Music System, First Aid, Luggage Carrier" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea id="description" name="description" placeholder="Vehicle details..." />
-              </div>
-              <Button type="submit" className="w-full">Save Vehicle</Button>
             </form>
           </DialogContent>
         </Dialog>
@@ -197,54 +201,58 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
 
       {editingCar && (
         <Dialog open={!!editingCar} onOpenChange={() => setEditingCar(null)}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
+          <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden">
+            <DialogHeader className="p-6 pb-2 shrink-0">
               <DialogTitle>Edit Vehicle</DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-name">Vehicle Name</Label>
-                  <Input id="edit-name" name="name" defaultValue={editingCar.name} required />
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex-1 overflow-y-auto p-6 scrollbar-hide space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-name">Vehicle Name</Label>
+                    <Input id="edit-name" name="name" defaultValue={editingCar.name} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-type">Vehicle Type</Label>
+                    <Input id="edit-type" name="type" defaultValue={editingCar.type} required />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-seats">Seats</Label>
+                    <Input id="edit-seats" name="seats" type="number" defaultValue={editingCar.seats} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-luggage">Luggage Capacity</Label>
+                    <Input id="edit-luggage" name="luggage" type="number" defaultValue={editingCar.luggage} required />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-pricePerKm">Price per KM (₹)</Label>
+                    <Input id="edit-pricePerKm" name="pricePerKm" type="number" step="0.1" defaultValue={editingCar.pricePerKm} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-pricePerDay">Price per Day (₹)</Label>
+                    <Input id="edit-pricePerDay" name="pricePerDay" type="number" defaultValue={editingCar.pricePerDay} />
+                  </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-type">Vehicle Type</Label>
-                  <Input id="edit-type" name="type" defaultValue={editingCar.type} required />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-seats">Seats</Label>
-                  <Input id="edit-seats" name="seats" type="number" defaultValue={editingCar.seats} required />
+                  <Label htmlFor="edit-image">Image URL</Label>
+                  <Input id="edit-image" name="image" defaultValue={editingCar.image} required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-luggage">Luggage Capacity</Label>
-                  <Input id="edit-luggage" name="luggage" type="number" defaultValue={editingCar.luggage} required />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-pricePerKm">Price per KM (₹)</Label>
-                  <Input id="edit-pricePerKm" name="pricePerKm" type="number" step="0.1" defaultValue={editingCar.pricePerKm} required />
+                  <Label htmlFor="edit-features">Features (comma separated)</Label>
+                  <Input id="edit-features" name="features" defaultValue={editingCar.features?.join(', ')} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-pricePerDay">Price per Day (₹)</Label>
-                  <Input id="edit-pricePerDay" name="pricePerDay" type="number" defaultValue={editingCar.pricePerDay} />
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Textarea id="edit-description" name="description" defaultValue={editingCar.description} />
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-image">Image URL</Label>
-                <Input id="edit-image" name="image" defaultValue={editingCar.image} required />
+              <div className="p-4 px-6 border-t bg-muted/30 shrink-0">
+                <Button type="submit" className="w-full">Update Vehicle</Button>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-features">Features (comma separated)</Label>
-                <Input id="edit-features" name="features" defaultValue={editingCar.features?.join(', ')} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-description">Description</Label>
-                <Textarea id="edit-description" name="description" defaultValue={editingCar.description} />
-              </div>
-              <Button type="submit" className="w-full">Update Vehicle</Button>
             </form>
           </DialogContent>
         </Dialog>

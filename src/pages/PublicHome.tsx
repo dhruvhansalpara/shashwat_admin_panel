@@ -8,6 +8,8 @@ import { InquiryForm } from '@/components/InquiryForm';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useSearchParams, Link } from 'react-router-dom';
 
+import { Logo } from '@/components/Logo';
+
 interface HomePageProps {
   packages: Package[];
   banners: Banner[];
@@ -19,7 +21,7 @@ interface HomePageProps {
 
 export function PublicHome({ packages, banners, destinations, onInquiry, whatsappNumber, defaultMessage }: HomePageProps) {
   const [searchParams] = useSearchParams();
-  const searchQuery = searchParams.get('search')?.toLowerCase() || '';
+  const searchQuery = (searchParams.get('search') || searchParams.get('destination'))?.toLowerCase() || '';
   const [selectedPkg, setSelectedPkg] = useState<Package | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [activeBanner, setActiveBanner] = useState(0);
@@ -32,11 +34,20 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
     return () => clearInterval(interval);
   }, [banners.length]);
 
-  const filteredPackages = packages.filter(pkg => 
-    (pkg.name?.toLowerCase() || '').includes(searchQuery) ||
-    (pkg.location?.toLowerCase() || '').includes(searchQuery) ||
-    (pkg.description?.toLowerCase() || '').includes(searchQuery)
-  );
+  const filteredPackages = packages.filter(pkg => {
+    const isSearchMatch = 
+      (pkg.name?.toLowerCase() || '').includes(searchQuery) ||
+      (pkg.location?.toLowerCase() || '').includes(searchQuery) ||
+      (pkg.description?.toLowerCase() || '').includes(searchQuery);
+
+    const linkedDestinations = destinations.filter(d => pkg.destination_ids?.includes(d.id));
+    const isDestMatch = linkedDestinations.some(d => 
+      d.name.toLowerCase().includes(searchQuery) || 
+      (d.slug && d.slug.toLowerCase().includes(searchQuery))
+    );
+
+    return isSearchMatch || isDestMatch;
+  });
 
   const featuredPackages = filteredPackages.filter(p => p.isFeatured).slice(0, 6);
   const displayPackages = featuredPackages.length > 0 ? featuredPackages : filteredPackages.slice(0, 6);
@@ -96,7 +107,7 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
                       transition={{ delay: 0.6 }}
                       className="text-lg md:text-xl font-light opacity-90 max-w-xl mb-10 leading-relaxed"
                     >
-                      {banner.subtitle || 'Unforgettable journeys crafted just for you by Shashwa Holidays. Experience luxury and adventure in every step.'}
+                      {banner.subtitle || 'Unforgettable journeys crafted just for you by Shashwat Holidays. Experience luxury and adventure in every step.'}
                     </motion.p>
                     <motion.div
                       initial={{ y: 20, opacity: 0 }}
@@ -157,7 +168,7 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
                   <p className="text-white/60 text-xs font-bold uppercase tracking-widest translate-y-4 group-hover:translate-y-0 transition-all duration-300 opacity-0 group-hover:opacity-100">
                     Explore Packages
                   </p>
-                  <Link to={`/?search=${dest.name}`} className="absolute inset-0" />
+                  <Link to={`/home?search=${dest.slug || dest.name.toLowerCase()}`} className="absolute inset-0" />
                 </div>
               </motion.div>
             ))
@@ -257,7 +268,7 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
           <div className="space-y-10">
             <div className="space-y-4">
-              <span className="text-primary font-bold uppercase tracking-widest text-xs">Shashwa Experience</span>
+              <span className="text-primary font-bold uppercase tracking-widest text-xs">Shashwat Experience</span>
               <h3 className="text-5xl font-display font-bold tracking-tight leading-tight">Crafting Unforgettable Global Memories</h3>
               <p className="text-muted-foreground text-lg font-light leading-relaxed">
                 Since our inception, we've focused on one thing: providing the most authentic and luxury travel experiences across India and the globe.
@@ -351,7 +362,8 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
           </DialogHeader>
           <div className="px-4 pb-8">
             <InquiryForm 
-              selectedPackage={selectedPkg || undefined} 
+              packageId={selectedPkg?.id} 
+              packageName={selectedPkg?.name}
               onSubmit={handleInquiry} 
             />
           </div>
@@ -363,7 +375,7 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
             <div className="md:col-span-2 space-y-8">
-              <h4 className="text-3xl font-display font-bold tracking-tighter italic">SHASHWA</h4>
+              <Logo variant="light" className="scale-125 origin-left" />
               <p className="text-slate-400 font-light leading-relaxed max-w-sm">
                 Luxury Travel Agency based in Ahmedabad, Gujarat. Specialists in Rajasthan, Himachal, Kerala, and International bespoke tours.
               </p>
@@ -391,7 +403,7 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
             </div>
           </div>
           <div className="pt-12 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-slate-500 text-xs">© 2024 Shashwa Holiday & Travels. All rights reserved.</p>
+            <p className="text-slate-500 text-xs">© 2024 Shashwat Holiday & Travels. All rights reserved.</p>
             <div className="flex gap-8 text-slate-500 text-xs uppercase tracking-widest font-bold">
               <Link to="/privacy" className="hover:text-white">Privacy</Link>
               <Link to="/terms" className="hover:text-white">Terms</Link>

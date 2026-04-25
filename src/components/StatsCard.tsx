@@ -1,12 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LucideIcon } from "lucide-react";
+import * as React from 'react';
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { LucideIcon } from 'lucide-react';
 
 interface StatsCardProps {
   title: string;
   value: string | number;
+  description: string;
   icon: LucideIcon;
-  description?: string;
   trend?: {
     value: number;
     isPositive: boolean;
@@ -14,37 +15,32 @@ interface StatsCardProps {
   className?: string;
 }
 
-export function StatsCard({ title, value, icon: Icon, description, trend, className }: StatsCardProps) {
+export function StatsCard({ title, value, description, icon: Icon, trend, className }: StatsCardProps) {
   return (
-    <Card className={cn("relative overflow-hidden border-none shadow-sm bg-card hover:shadow-md transition-all duration-300", className)}>
-      <div className="absolute top-0 right-0 p-8 opacity-[0.03] scale-[3] pointer-events-none">
-        <Icon className="w-12 h-12" />
-      </div>
-      <CardHeader className="flex flex-row items-center justify-between pb-2 pt-6 px-6">
-        <CardTitle className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
-          {title}
-        </CardTitle>
-        <div className="w-8 h-8 flex items-center justify-center bg-primary/5 rounded-lg border border-primary/10">
-          <Icon className="w-4 h-4 text-primary" />
-        </div>
-      </CardHeader>
-      <CardContent className="px-6 pb-6 pt-0">
-        <div className="text-3xl font-display font-bold tabular-nums tracking-tight">{value}</div>
-        {(description || trend) && (
-          <div className="flex items-center gap-2 mt-2">
-            {trend && (
-              <div className={cn(
-                "flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded",
-                trend.isPositive ? "bg-emerald-500/10 text-emerald-600" : "bg-rose-500/10 text-rose-600"
-              )}>
-                {trend.isPositive ? "↑" : "↓"} {trend.value}%
-              </div>
-            )}
-            <p className="text-[11px] text-muted-foreground leading-none">
-              {description}
-            </p>
+    <Card className={cn("overflow-hidden border-none shadow-sm transition-all hover:shadow-md", className)}>
+      <CardContent className="p-6">
+        <div className="flex items-start justify-between">
+          <div className="space-y-4">
+            <div className="p-2.5 bg-primary/10 rounded-xl w-fit">
+              <Icon className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-muted-foreground tracking-tight">{title}</p>
+              <h3 className="text-3xl font-display font-bold tracking-tight mt-1">{value}</h3>
+            </div>
           </div>
-        )}
+          {trend && (
+            <div className={cn(
+              "px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1",
+              trend.isPositive ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
+            )}>
+              {trend.isPositive ? "+" : "-"}{trend.value}%
+            </div>
+          )}
+        </div>
+        <div className="mt-4 pt-4 border-t border-border/50 flex items-center justify-between">
+          <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider">{description}</p>
+        </div>
       </CardContent>
     </Card>
   );

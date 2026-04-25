@@ -2,8 +2,9 @@ import * as React from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Menu, X } from 'lucide-react';
+import { MessageCircle, Menu, X, Package as PackageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Logo } from './Logo';
 
 interface NavbarProps {
   whatsappNumber: string;
@@ -21,13 +22,8 @@ export function Navbar({ whatsappNumber }: NavbarProps) {
   return (
     <nav className="fixed top-0 inset-x-0 bg-white/80 backdrop-blur-md z-50 border-b border-border/50">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm border border-border/50 overflow-hidden">
-            <img src="/logo.png" className="w-full h-full object-contain" alt="Logo" />
-          </div>
-          <span className="font-display font-bold text-xl tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Shashwat Holidays
-          </span>
+        <Link to="/" className="flex items-center gap-3 group">
+          <Logo />
         </Link>
 
         {/* Desktop Nav */}

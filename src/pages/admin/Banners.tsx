@@ -70,14 +70,14 @@ export function BannersPage({ banners, onAdd, onDelete }: BannersPageProps) {
       </div>
 
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent>
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[500px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="p-6 pb-2 shrink-0">
             <DialogTitle>Add Homepage Banner</DialogTitle>
             <DialogDescription>
-              Provide an image URL and an optional title for the banner. Banners are best in 21:9 aspect ratio.
+              Provide an image for the banner. Banners are best in 21:9 aspect ratio.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="flex-1 overflow-y-auto p-6 pt-2 scrollbar-hide space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title">Banner Title (Optional)</Label>
               <Input 
@@ -96,8 +96,8 @@ export function BannersPage({ banners, onAdd, onDelete }: BannersPageProps) {
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+          <DialogFooter className="p-4 px-6 border-t bg-muted/30 shrink-0 capitalize">
+            <Button variant="outline" onClick={() => setIsAddOpen(false)} className="mr-auto">Cancel</Button>
             <Button onClick={handleAdd} disabled={!newBanner.image}>Upload Banner</Button>
           </DialogFooter>
         </DialogContent>

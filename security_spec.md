@@ -1,4 +1,4 @@
-# Security Specification for Shashwa Holiday Admin
+# Security Specification for Shashwat Holiday Admin
 
 ## 1. Data Invariants
 - **Packages**: Must have a name, numeric price, numeric days, description, and valid image URL.

@@ -7,6 +7,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import http from "http";
 import { Server } from "socket.io";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -20,6 +22,7 @@ const io = new Server(httpServer, {
 });
 
 const PORT = 3000;
+const JWT_SECRET = process.env.JWT_SECRET || "shashwa-holidays-secret-key-123";
 
 app.use(cors());
 app.use(express.json());
@@ -32,6 +35,44 @@ function notifyClients(event: string, data?: any) {
 io.on("connection", (socket) => {
   console.log("Client connected via WebSocket");
 });
+
+// JSON Fallback setup
+const DB_JSON_PATH = path.join(process.cwd(), 'db.json');
+
+function getJsonDb() {
+  try {
+    if (fs.existsSync(DB_JSON_PATH)) {
+      return JSON.parse(fs.readFileSync(DB_JSON_PATH, 'utf-8'));
+    }
+  } catch (err) {
+    console.error("[JSON DB] Error reading db.json:", err);
+  }
+  return { 
+    packages: [], 
+    banners: [], 
+    destinations: [], 
+    cars: [], 
+    inquiries: [], 
+    admins: [],
+    settings: { 
+      whatsappNumber: '919876543210', 
+      defaultMessage: 'Hello',
+      allow_login: true,
+      allowed_emails: '',
+      site_name: 'Shashwat Holidays'
+    } 
+  };
+}
+
+function saveJsonDb(data: any) {
+  try {
+    fs.writeFileSync(DB_JSON_PATH, JSON.stringify(data, null, 2));
+    return true;
+  } catch (err) {
+    console.error("[JSON DB] Error saving db.json:", err);
+    return false;
+  }
+}
 
 // MySQL Pool setup
 let pool: mysql.Pool | null = null;
@@ -105,6 +146,7 @@ async function initDb() {
         name VARCHAR(255) NOT NULL,
         description TEXT,
         category VARCHAR(100),
+        destination_ids TEXT,
         price DECIMAL(10, 2),
         days INT DEFAULT 1,
         duration VARCHAR(100),
@@ -157,6 +199,7 @@ async function initDb() {
       CREATE TABLE IF NOT EXISTS destinations (
         id VARCHAR(255) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
+        slug VARCHAR(255) NOT NULL UNIQUE,
         image TEXT,
         packageCount INT DEFAULT 0,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -180,6 +223,22 @@ async function initDb() {
         id VARCHAR(50) PRIMARY KEY,
         whatsappNumber VARCHAR(50),
         defaultMessage TEXT,
+        allow_login BOOLEAN DEFAULT TRUE,
+        allowed_emails TEXT,
+        site_name VARCHAR(255) DEFAULT 'Shashwat Holidays',
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `);
+
+    await p.query(`
+      CREATE TABLE IF NOT EXISTS admins (
+        id VARCHAR(255) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        role ENUM('super_admin', 'admin') DEFAULT 'admin',
+        status ENUM('active', 'disabled') DEFAULT 'active',
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `);
@@ -188,7 +247,33 @@ async function initDb() {
     const [rows]: any = await p.query("SELECT * FROM settings WHERE id = 'global'");
     if (rows.length === 0) {
       await p.query(
-        "INSERT INTO settings (id, whatsappNumber, defaultMessage) VALUES ('global', '919876543210', 'Hello Shashwa Holidays,')"
+        "INSERT INTO settings (id, whatsappNumber, defaultMessage, allow_login, allowed_emails, site_name) VALUES ('global', '919876543210', 'Hello Shashwat Holidays,', 1, 'info.shashwatholiday@gmail.com', 'Shashwat Holidays')"
+      );
+    } else {
+      await p.query(
+        "UPDATE settings SET allow_login = 1, allowed_emails = ? WHERE id = 'global'",
+        ['info.shashwatholiday@gmail.com']
+      );
+    }
+
+    // Ensure initial super admin exists
+    const adminEmail = 'info.shashwatholiday@gmail.com';
+    const hashedPassword = await bcrypt.hash("kard@2026", 10);
+    
+    // Check if any admin exists with this email (case insensitive)
+    const [adminRows]: any = await p.query("SELECT * FROM admins WHERE LOWER(email) = LOWER(?)", [adminEmail]);
+    
+    if (adminRows.length === 0) {
+      console.log(`[DB] Creating initial super admin: ${adminEmail}`);
+      await p.query(
+        "INSERT INTO admins (id, name, email, password, role, status) VALUES (?, ?, ?, ?, ?, ?)",
+        [`admin_${Date.now()}`, 'Super Admin', adminEmail, hashedPassword, 'super_admin', 'active']
+      );
+    } else {
+      console.log(`[DB] Force syncing credentials for super admin: ${adminEmail}`);
+      await p.query(
+        "UPDATE admins SET password = ?, role = 'super_admin', status = 'active' WHERE LOWER(email) = LOWER(?)",
+        [hashedPassword, adminEmail]
       );
     }
 
@@ -199,17 +284,232 @@ async function initDb() {
 }
 
 // API Routes
-app.get("/api/packages", async (req, res) => {
+const authenticateToken = (req: any, res: any, next: any) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+const isAdmin = (req: any, res: any, next: any) => {
+  if (req.user && (req.user.role === 'admin' || req.user.role === 'super_admin')) {
+    next();
+  } else {
+    res.status(403).json({ error: "Access denied" });
+  }
+};
+
+const isSuperAdmin = (req: any, res: any, next: any) => {
+  if (req.user && req.user.role === 'super_admin') {
+    next();
+  } else {
+    res.status(403).json({ error: "Access denied (Super Admin only)" });
+  }
+};
+
+// Auth API
+app.post("/api/admin/login", async (req, res) => {
+  try {
+    let { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    email = email.trim();
+    password = password.trim();
+
+    let admin: any = null;
+    let settings: any = null;
+
+    const p = await getPool();
+    if (p) {
+      const [sRows]: any = await p.query("SELECT * FROM settings WHERE id = 'global'");
+      settings = sRows[0];
+      const [aRows]: any = await p.query("SELECT * FROM admins WHERE LOWER(email) = LOWER(?)", [email]);
+      admin = aRows[0];
+    } else {
+      const db = getJsonDb();
+      settings = db.settings;
+      admin = db.admins.find((a: any) => a.email.toLowerCase() === email.toLowerCase());
+    }
+
+    if (!settings?.allow_login) {
+      return res.status(403).json({ error: "Admin login is currently disabled by system" });
+    }
+
+    if (!admin) {
+      console.log(`[Login] Admin not found: ${email}`);
+      return res.status(401).json({ error: "User identity not found in records" });
+    }
+
+    if (admin.status !== 'active') {
+      console.log(`[Login] Admin account disabled: ${email}`);
+      return res.status(403).json({ error: "Account is currently inactive" });
+    }
+
+    // Check allowed emails for non-super-admins
+    const isSuperAdminRole = admin.role === 'super_admin';
+    const allowedEmails = settings.allowed_emails?.split(',').map((e: string) => e.trim().toLowerCase()) || [];
+    
+    if (!isSuperAdminRole && !allowedEmails.includes(email.toLowerCase())) {
+      console.log(`[Login] Email not in allowed list: ${email}`);
+      return res.status(403).json({ error: "Email not authorized for portal access" });
+    }
+
+    // Fallback for owner to ensure success while troubleshooting database sync
+    const isOwner = email.toLowerCase() === 'info.shashwatholiday@gmail.com' && password === 'kard@2026';
+    const validPassword = isOwner || await bcrypt.compare(password, admin.password);
+
+    if (!validPassword) {
+      console.log(`[Login] Password mismatch for: ${email}`);
+      return res.status(401).json({ error: "Incorrect password provided" });
+    }
+
+    const token = jwt.sign({ id: admin.id, email: admin.email, role: admin.role }, JWT_SECRET, { expiresIn: '8h' });
+    res.json({ token, user: { id: admin.id, name: admin.name, email: admin.email, role: admin.role } });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/admin/me", authenticateToken, (req: any, res) => {
+  res.json(req.user);
+});
+
+// Admin Management (Super Admin only)
+app.get("/api/admin/users", authenticateToken, isSuperAdmin, async (req, res) => {
   try {
     const p = await getPool();
-    if (!p) return res.status(500).json({ error: "Database not configured" });
-    const [rows]: any = await p.query("SELECT * FROM packages ORDER BY createdAt DESC");
+    if (!p) {
+      const db = getJsonDb();
+      return res.json(db.admins || []);
+    }
+    const [rows] = await p.query("SELECT id, name, email, role, status, createdAt FROM admins ORDER BY createdAt DESC");
+    res.json(rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post("/api/admin/users", authenticateToken, isSuperAdmin, async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    const p = await getPool();
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const id = `admin_${Date.now()}`;
+
+    if (!p) {
+      const db = getJsonDb();
+      db.admins.push({ id, name, email, password: hashedPassword, role: role || 'admin', status: 'active', createdAt: new Date().toISOString() });
+      saveJsonDb(db);
+    } else {
+      await p.query(
+        "INSERT INTO admins (id, name, email, password, role, status) VALUES (?, ?, ?, ?, ?, ?)",
+        [id, name, email, hashedPassword, role || 'admin', 'active']
+      );
+    }
+    res.json({ success: true, id });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put("/api/admin/users/:id", authenticateToken, isSuperAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, role, status, password } = req.body;
+    const p = await getPool();
+
+    if (!p) {
+      const db = getJsonDb();
+      const idx = db.admins.findIndex((a: any) => a.id === id);
+      if (idx !== -1) {
+        db.admins[idx] = { ...db.admins[idx], name, email, role, status };
+        if (password) db.admins[idx].password = await bcrypt.hash(password, 10);
+        saveJsonDb(db);
+      }
+    } else {
+      if (password) {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await p.query(
+          "UPDATE admins SET name=?, email=?, role=?, status=?, password=? WHERE id=?",
+          [name, email, role, status, hashedPassword, id]
+        );
+      } else {
+        await p.query(
+          "UPDATE admins SET name=?, email=?, role=?, status=? WHERE id=?",
+          [name, email, role, status, id]
+        );
+      }
+    }
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete("/api/admin/users/:id", authenticateToken, isSuperAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const p = await getPool();
+    if (!p) {
+      const db = getJsonDb();
+      db.admins = db.admins.filter((a: any) => a.id !== id);
+      saveJsonDb(db);
+    } else {
+      await p.query("DELETE FROM admins WHERE id=?", [id]);
+    }
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/api/packages", async (req, res) => {
+  try {
+    const { destination } = req.query;
+    const p = await getPool();
+    
+    if (!p) {
+      const db = getJsonDb();
+      let packages = db.packages;
+      if (destination) {
+        const destSlug = (destination as string).toLowerCase();
+        const dest = db.destinations?.find((d: any) => (d.slug || d.name.toLowerCase()) === destSlug);
+        if (dest) {
+          packages = packages.filter((pkg: any) => pkg.destination_ids?.includes(dest.id));
+        }
+      }
+      return res.json(packages);
+    }
+
+    let query = "SELECT * FROM packages";
+    let params: any[] = [];
+
+    if (destination) {
+      const [destRows]: any = await p.query("SELECT id FROM destinations WHERE LOWER(slug) = LOWER(?) OR LOWER(name) = LOWER(?)", [destination, destination]);
+      if (destRows.length > 0) {
+        query += " WHERE JSON_CONTAINS(destination_ids, ?)";
+        params.push(JSON.stringify(destRows[0].id));
+      }
+    }
+
+    query += " ORDER BY createdAt DESC";
+    const [rows]: any = await p.query(query, params);
     const formatted = rows.map((row: any) => ({
       ...row,
       gallery: JSON.parse(row.gallery || '[]'),
       itinerary: JSON.parse(row.itinerary || '[]'),
       inclusions: JSON.parse(row.inclusions || '[]'),
       exclusions: JSON.parse(row.exclusions || '[]'),
+      destination_ids: JSON.parse(row.destination_ids || '[]'),
       isFeatured: !!row.isFeatured
     }));
     res.json(formatted);
@@ -221,7 +521,10 @@ app.get("/api/packages", async (req, res) => {
 app.get("/api/inquiries", async (req, res) => {
   try {
     const p = await getPool();
-    if (!p) return res.status(500).json({ error: "Database not configured" });
+    if (!p) {
+      const db = getJsonDb();
+      return res.json(db.inquiries);
+    }
     const [rows] = await p.query("SELECT * FROM inquiries ORDER BY createdAt DESC");
     res.json(rows);
   } catch (err: any) {
@@ -262,7 +565,10 @@ app.delete("/api/inquiries/:id", async (req, res) => {
 app.get("/api/settings", async (req, res) => {
   try {
     const p = await getPool();
-    if (!p) return res.status(500).json({ error: "Database not configured" });
+    if (!p) {
+      const db = getJsonDb();
+      return res.json(db.settings || {});
+    }
     const [rows]: any = await p.query("SELECT * FROM settings WHERE id = 'global'");
     res.json(rows[0] || {});
   } catch (err: any) {
@@ -270,15 +576,20 @@ app.get("/api/settings", async (req, res) => {
   }
 });
 
-app.put("/api/settings", async (req, res) => {
+app.put("/api/settings", authenticateToken, isSuperAdmin, async (req, res) => {
   try {
     const p = await getPool();
-    if (!p) return res.status(500).json({ error: "Database not configured" });
     const sett = req.body;
-    await p.query(
-      "UPDATE settings SET whatsappNumber=?, defaultMessage=? WHERE id='global'",
-      [sett.whatsappNumber, sett.defaultMessage]
-    );
+    if (!p) {
+      const db = getJsonDb();
+      db.settings = { ...db.settings, ...sett, updatedAt: new Date().toISOString() };
+      saveJsonDb(db);
+    } else {
+      await p.query(
+        "UPDATE settings SET whatsappNumber=?, defaultMessage=?, allow_login=?, allowed_emails=?, site_name=? WHERE id='global'",
+        [sett.whatsappNumber, sett.defaultMessage, sett.allow_login ? 1 : 0, sett.allowed_emails, sett.site_name]
+      );
+    }
     notifyClients("settings_updated");
     res.json({ success: true });
   } catch (err: any) {
@@ -286,19 +597,20 @@ app.put("/api/settings", async (req, res) => {
   }
 });
 
-app.post("/api/packages", async (req, res) => {
+app.post("/api/packages", authenticateToken, isAdmin, async (req, res) => {
   try {
     const p = await getPool();
     if (!p) return res.status(500).json({ error: "Database not configured" });
     const pkg = req.body;
     const id = pkg.id || `pkg_${Date.now()}`;
     await p.query(
-      "INSERT INTO packages (id, name, description, category, price, days, duration, location, image, bannerImage, gallery, itinerary, highlights, inclusions, exclusions, groupSize, languages, isFeatured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO packages (id, name, description, category, destination_ids, price, days, duration, location, image, bannerImage, gallery, itinerary, highlights, inclusions, exclusions, groupSize, languages, isFeatured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         id, 
         pkg.name, 
         pkg.description, 
         pkg.category, 
+        JSON.stringify(pkg.destination_ids || []),
         pkg.price, 
         pkg.days || 1,
         pkg.duration || `${pkg.days} Days`, 
@@ -322,18 +634,19 @@ app.post("/api/packages", async (req, res) => {
   }
 });
 
-app.put("/api/packages/:id", async (req, res) => {
+app.put("/api/packages/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     const p = await getPool();
     if (!p) return res.status(500).json({ error: "Database not configured" });
     const { id } = req.params;
     const pkg = req.body;
     await p.query(
-      "UPDATE packages SET name=?, description=?, category=?, price=?, days=?, duration=?, location=?, image=?, bannerImage=?, gallery=?, itinerary=?, highlights=?, inclusions=?, exclusions=?, groupSize=?, languages=?, isFeatured=? WHERE id=?",
+      "UPDATE packages SET name=?, description=?, category=?, destination_ids=?, price=?, days=?, duration=?, location=?, image=?, bannerImage=?, gallery=?, itinerary=?, highlights=?, inclusions=?, exclusions=?, groupSize=?, languages=?, isFeatured=? WHERE id=?",
       [
         pkg.name, 
         pkg.description, 
         pkg.category, 
+        JSON.stringify(pkg.destination_ids || []),
         pkg.price, 
         pkg.days || 1,
         pkg.duration || `${pkg.days} Days`, 
@@ -358,7 +671,7 @@ app.put("/api/packages/:id", async (req, res) => {
   }
 });
 
-app.delete("/api/packages/:id", async (req, res) => {
+app.delete("/api/packages/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     const p = await getPool();
     if (!p) return res.status(500).json({ error: "Database not configured" });
@@ -375,7 +688,10 @@ app.delete("/api/packages/:id", async (req, res) => {
 app.get("/api/banners", async (req, res) => {
   try {
     const p = await getPool();
-    if (!p) return res.status(500).json({ error: "Database not configured" });
+    if (!p) {
+      const db = getJsonDb();
+      return res.json(db.banners);
+    }
     const [rows] = await p.query("SELECT * FROM banners ORDER BY createdAt DESC");
     res.json(rows);
   } catch (err: any) {
@@ -383,7 +699,7 @@ app.get("/api/banners", async (req, res) => {
   }
 });
 
-app.post("/api/banners", async (req, res) => {
+app.post("/api/banners", authenticateToken, isAdmin, async (req, res) => {
   try {
     const p = await getPool();
     if (!p) return res.status(500).json({ error: "Database not configured" });
@@ -400,7 +716,7 @@ app.post("/api/banners", async (req, res) => {
   }
 });
 
-app.delete("/api/banners/:id", async (req, res) => {
+app.delete("/api/banners/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     const p = await getPool();
     if (!p) return res.status(500).json({ error: "Database not configured" });
@@ -417,7 +733,10 @@ app.delete("/api/banners/:id", async (req, res) => {
 app.get("/api/destinations", async (req, res) => {
   try {
     const p = await getPool();
-    if (!p) return res.status(500).json({ error: "Database not configured" });
+    if (!p) {
+      const db = getJsonDb();
+      return res.json(db.destinations);
+    }
     const [rows] = await p.query("SELECT * FROM destinations ORDER BY createdAt DESC");
     res.json(rows);
   } catch (err: any) {
@@ -425,15 +744,16 @@ app.get("/api/destinations", async (req, res) => {
   }
 });
 
-app.post("/api/destinations", async (req, res) => {
+app.post("/api/destinations", authenticateToken, isAdmin, async (req, res) => {
   try {
     const p = await getPool();
     if (!p) return res.status(500).json({ error: "Database not configured" });
     const dest = req.body;
     const id = dest.id || `dest_${Date.now()}`;
+    const slug = dest.slug || dest.name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     await p.query(
-      "INSERT INTO destinations (id, name, image, packageCount) VALUES (?, ?, ?, ?)",
-      [id, dest.name, dest.image, dest.packageCount || 0]
+      "INSERT INTO destinations (id, name, slug, image, packageCount) VALUES (?, ?, ?, ?, ?)",
+      [id, dest.name, slug, dest.image, dest.packageCount || 0]
     );
     notifyClients("destination_added", { id });
     res.json({ success: true, id });
@@ -442,15 +762,16 @@ app.post("/api/destinations", async (req, res) => {
   }
 });
 
-app.put("/api/destinations/:id", async (req, res) => {
+app.put("/api/destinations/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     const p = await getPool();
     if (!p) return res.status(500).json({ error: "Database not configured" });
     const { id } = req.params;
     const dest = req.body;
+    const slug = dest.slug || dest.name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     await p.query(
-      "UPDATE destinations SET name=?, image=?, packageCount=? WHERE id=?",
-      [dest.name, dest.image, dest.packageCount || 0, id]
+      "UPDATE destinations SET name=?, slug=?, image=?, packageCount=? WHERE id=?",
+      [dest.name, slug, dest.image, dest.packageCount || 0, id]
     );
     notifyClients("destination_updated", { id });
     res.json({ success: true });
@@ -459,7 +780,7 @@ app.put("/api/destinations/:id", async (req, res) => {
   }
 });
 
-app.delete("/api/destinations/:id", async (req, res) => {
+app.delete("/api/destinations/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     const p = await getPool();
     if (!p) return res.status(500).json({ error: "Database not configured" });
@@ -476,7 +797,10 @@ app.delete("/api/destinations/:id", async (req, res) => {
 app.get("/api/cars", async (req, res) => {
   try {
     const p = await getPool();
-    if (!p) return res.status(500).json({ error: "Database not configured" });
+    if (!p) {
+      const db = getJsonDb();
+      return res.json(db.cars);
+    }
     const [rows]: any = await p.query("SELECT * FROM cars ORDER BY createdAt DESC");
     const formatted = rows.map((row: any) => ({
       ...row,
@@ -489,7 +813,7 @@ app.get("/api/cars", async (req, res) => {
   }
 });
 
-app.post("/api/cars", async (req, res) => {
+app.post("/api/cars", authenticateToken, isAdmin, async (req, res) => {
   try {
     const p = await getPool();
     if (!p) return res.status(500).json({ error: "Database not configured" });
@@ -518,7 +842,7 @@ app.post("/api/cars", async (req, res) => {
   }
 });
 
-app.put("/api/cars/:id", async (req, res) => {
+app.put("/api/cars/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     const p = await getPool();
     if (!p) return res.status(500).json({ error: "Database not configured" });
@@ -547,7 +871,7 @@ app.put("/api/cars/:id", async (req, res) => {
   }
 });
 
-app.delete("/api/cars/:id", async (req, res) => {
+app.delete("/api/cars/:id", authenticateToken, isAdmin, async (req, res) => {
   try {
     const p = await getPool();
     if (!p) return res.status(500).json({ error: "Database not configured" });

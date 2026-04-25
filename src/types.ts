@@ -16,6 +16,7 @@ export interface Package {
   days?: number;
   duration?: string;
   category?: string;
+  destination_ids?: string[];
   description: string;
   image: string;
   bannerImage?: string;
@@ -35,6 +36,7 @@ export interface Package {
 export interface Destination {
   id: string;
   name: string;
+  slug: string;
   description: string;
   image: string;
   category: 'domestic' | 'international';

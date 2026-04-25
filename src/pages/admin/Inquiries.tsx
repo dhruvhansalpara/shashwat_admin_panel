@@ -69,15 +69,15 @@ export function InquiriesPage({ inquiries, onDelete }: InquiriesPageProps) {
                       <DialogTrigger asChild>
                         <Button variant="ghost" size="icon"><ExternalLink className="w-4 h-4" /></Button>
                       </DialogTrigger>
-                      <DialogContent className="sm:max-w-[500px]">
-                        <DialogHeader>
+                      <DialogContent className="sm:max-w-[500px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden">
+                        <DialogHeader className="p-6 pb-2 shrink-0">
                           <DialogTitle>Inquiry Details</DialogTitle>
                           <DialogDescription>
                             Received on {format(new Date(inquiry.createdAt), 'PPPP p')}
                           </DialogDescription>
                         </DialogHeader>
-                        <div className="space-y-6 pt-4">
-                          <div className="grid grid-cols-2 gap-4">
+                        <div className="flex-1 overflow-y-auto p-6 pt-4 scrollbar-hide space-y-6">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-1">
                               <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1">
                                 <User className="w-3 h-3" /> Customer
@@ -95,7 +95,7 @@ export function InquiriesPage({ inquiries, onDelete }: InquiriesPageProps) {
                              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1">
                                <MessageSquare className="w-3 h-3" /> Message
                              </p>
-                             <div className="bg-muted p-4 rounded-lg text-sm leading-relaxed whitespace-pre-wrap">
+                             <div className="bg-muted/50 p-4 rounded-xl text-sm leading-relaxed whitespace-pre-wrap border">
                                {inquiry.message}
                              </div>
                           </div>

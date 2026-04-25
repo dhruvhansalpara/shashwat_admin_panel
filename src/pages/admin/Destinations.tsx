@@ -27,6 +27,7 @@ import { ImageUpload } from '@/components/ImageUpload';
 
 const destinationSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
+  slug: z.string().min(2, "Slug must be at least 2 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   image: z.string().url("Please enter a valid image URL"),
   category: z.enum(['domestic', 'international']),
@@ -55,6 +56,7 @@ export function DestinationsPage({ destinations, onAdd, onEdit, onDelete }: Dest
     resolver: zodResolver(destinationSchema),
     defaultValues: {
       name: '',
+      slug: '',
       description: '',
       image: '',
       category: 'domestic',
@@ -63,6 +65,14 @@ export function DestinationsPage({ destinations, onAdd, onEdit, onDelete }: Dest
 
   const categoryValue = watch('category');
   const imageUrl = watch('image');
+  const nameValue = watch('name');
+
+  React.useEffect(() => {
+    if (!editingDestination && nameValue) {
+      const generatedSlug = nameValue.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      setValue('slug', generatedSlug);
+    }
+  }, [nameValue, editingDestination, setValue]);
 
   const onSubmit = (values: DestinationFormValues) => {
     if (editingDestination) {
@@ -78,6 +88,7 @@ export function DestinationsPage({ destinations, onAdd, onEdit, onDelete }: Dest
   const handleEdit = (dest: Destination) => {
     setEditingDestination(dest);
     setValue('name', dest.name);
+    setValue('slug', dest.slug || '');
     setValue('description', dest.description);
     setValue('image', dest.image);
     setValue('category', dest.category);
@@ -176,61 +187,71 @@ export function DestinationsPage({ destinations, onAdd, onEdit, onDelete }: Dest
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="p-6 pb-2 shrink-0">
             <DialogTitle>{editingDestination ? 'Edit Destination' : 'Add New Destination'}</DialogTitle>
             <DialogDescription>
               Provide information about this travel location.
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Destination Name</Label>
-              <Input id="name" placeholder="e.g. Rajasthan, Switzerland" {...register('name')} />
-              {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+          <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-6 pt-2 scrollbar-hide space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Destination Name</Label>
+                  <Input id="name" placeholder="e.g. Rajasthan" {...register('name')} />
+                  {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="slug">Slug</Label>
+                  <Input id="slug" placeholder="e.g. rajasthan" {...register('slug')} />
+                  {errors.slug && <p className="text-xs text-destructive">{errors.slug.message}</p>}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select 
+                  value={categoryValue} 
+                  onValueChange={(val: any) => setValue('category', val)}
+                >
+                  <SelectTrigger id="category">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="domestic">Domestic (India)</SelectItem>
+                    <SelectItem value="international">International</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Controller
+                  control={control}
+                  name="image"
+                  render={({ field }) => (
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      label="Destination Image"
+                      folder="destinations"
+                    />
+                  )}
+                />
+                {errors.image && <p className="text-xs text-destructive">{errors.image.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea id="description" placeholder="A brief about the destination..." className="min-h-[100px]" {...register('description')} />
+                {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Select 
-                value={categoryValue} 
-                onValueChange={(val: any) => setValue('category', val)}
-              >
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="domestic">Domestic (India)</SelectItem>
-                  <SelectItem value="international">International</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Controller
-                control={control}
-                name="image"
-                render={({ field }) => (
-                  <ImageUpload
-                    value={field.value}
-                    onChange={field.onChange}
-                    label="Destination Image"
-                    folder="destinations"
-                  />
-                )}
-              />
-              {errors.image && <p className="text-xs text-destructive">{errors.image.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea id="description" placeholder="A brief about the destination..." className="min-h-[100px]" {...register('description')} />
-              {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
-            </div>
-
-            <DialogFooter>
-              <Button type="submit" className="w-full">{editingDestination ? 'Update' : 'Create'}</Button>
+            <DialogFooter className="p-4 px-6 border-t bg-muted/30 shrink-0">
+              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)} className="mr-auto">Cancel</Button>
+              <Button type="submit" className="min-w-[120px]">{editingDestination ? 'Update' : 'Create'}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

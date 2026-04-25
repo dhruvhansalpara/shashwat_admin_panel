@@ -30,6 +30,7 @@
         "inclusions": { "type": "array", "items": { "type": "string" } },
         "exclusions": { "type": "array", "items": { "type": "string" } },
         "location": { "type": "string" },
+        "destination_ids": { "type": "array", "items": { "type": "string" } },
         "groupSize": { "type": "string" },
         "languages": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
@@ -78,13 +79,14 @@
       "type": "object",
       "properties": {
         "name": { "type": "string" },
+        "slug": { "type": "string" },
         "description": { "type": "string" },
         "image": { "type": "string" },
         "category": { "type": "string", "enum": ["domestic", "international"] },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["name", "image", "category"]
+      "required": ["name", "slug", "image", "category"]
     }
   },
   "firestore": {
