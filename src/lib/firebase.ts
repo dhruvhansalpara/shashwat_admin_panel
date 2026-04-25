@@ -14,8 +14,17 @@ const app = initializeApp(firebaseConfig);
 const dbId = firebaseConfig.firestoreDatabaseId || '(default)';
 export const db = getFirestore(app, dbId);
 export const auth = getAuth(app);
-// Explicitly pass storage bucket if available to avoid resolution issues
-export const storage = getStorage(app, firebaseConfig.storageBucket ? `gs://${firebaseConfig.storageBucket.replace('gs://', '')}` : undefined);
+// Normalize storage bucket value so both `appspot.com` and `firebasestorage.app` styles work.
+const storageBucketRaw = String(firebaseConfig.storageBucket || '').trim();
+const normalizedStorageBucket = storageBucketRaw
+  ? storageBucketRaw.startsWith('gs://')
+    ? storageBucketRaw
+    : storageBucketRaw.includes('.firebasestorage.app')
+      ? `gs://${storageBucketRaw.replace('.firebasestorage.app', '.appspot.com')}`
+      : `gs://${storageBucketRaw}`
+  : undefined;
+
+export const storage = getStorage(app, normalizedStorageBucket);
 
 /**
  * Validates connection to Firestore as required by integration guidelines.
