@@ -8,6 +8,7 @@ import { useAdmin } from '@/context/AdminContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Logo } from '@/components/Logo';
+import { motion } from 'motion/react';
 
 export function LoginPage() {
   const { login } = useAdmin();
@@ -53,76 +54,111 @@ export function LoginPage() {
   return (
     <div className="min-h-screen flex font-display bg-[#fcfdfe]">
       {/* Left Section - Aesthetic Visual */}
-      <div className="hidden lg:flex w-[50%] bg-[#009688] relative overflow-hidden items-center justify-center p-24">
+      <motion.div 
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="hidden lg:flex w-[50%] bg-[#009688] relative overflow-hidden items-center justify-center p-24"
+      >
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
           <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] bg-[radial-gradient(circle,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:40px_40px]" />
         </div>
         <div className="relative z-10 space-y-12 max-w-xl text-white">
-          <div className="space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-6"
+          >
             <Logo className="scale-[1.8] origin-left brightness-0 invert" variant="light" />
             <div className="w-24 h-1.5 bg-white/20 rounded-full" />
-          </div>
+          </motion.div>
           <div className="space-y-8">
-            <h1 className="text-7xl font-black tracking-tighter leading-[0.9] uppercase italic">
-              Central <br /> Command <br /> System
-            </h1>
-            <p className="text-xl font-medium text-white/70 max-w-md leading-relaxed">
-              Managing the high-altitude intelligence and logistics for Shashwat Holidays.
-            </p>
+            <motion.h1 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="text-7xl font-black tracking-tighter leading-[0.9] uppercase italic"
+            >
+              Admin <br /> Control <br /> Panel
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="text-xl font-medium text-white/70 max-w-md leading-relaxed"
+            >
+              Managing tours, bookings, and customer inquiries for Shashwat Holidays.
+            </motion.p>
           </div>
-          <div className="flex items-center gap-10 pt-10 border-t border-white/10">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="flex items-center gap-10 pt-10 border-t border-white/10"
+          >
             <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">System State</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Server Status</p>
               <p className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
-                Operational
+                Online
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Security Protocols</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Security</p>
               <p className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                Verified
+                Protected
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
-        <div className="absolute bottom-20 left-24 text-[150px] font-black text-white/5 pointer-events-none leading-none select-none">
+        <motion.div 
+          initial={{ opacity: 0, scale: 1.2 }}
+          animate={{ opacity: 0.05, scale: 1 }}
+          transition={{ duration: 1.5 }}
+          className="absolute bottom-20 left-24 text-[150px] font-black text-white pointer-events-none leading-none select-none"
+        >
           SHASHWAT
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Right Section - Form */}
       <div className="flex-1 flex items-center justify-center p-12 bg-white">
-        <div className="w-full max-w-[440px] space-y-12 animate-in fade-in slide-in-from-right-10 duration-700">
+        <motion.div 
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="w-full max-w-[440px] space-y-12"
+        >
           <div className="space-y-4">
             <div className="lg:hidden mb-12">
                <Logo className="scale-125 origin-left" variant="dark" />
             </div>
-            <h2 className="text-4xl font-black text-slate-800 tracking-tighter uppercase italic leading-none">Initialize <br /> Dashboard Access</h2>
-            <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.25em] pl-1">Input your administrative security credentials</p>
+            <h2 className="text-4xl font-black text-slate-800 tracking-tighter uppercase italic leading-none">Admin <br /> Login</h2>
+            <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.25em] pl-1">Enter your admin credentials to continue</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-8">
             <div className="space-y-6">
               <div className="space-y-3">
-                <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-[#009688] pl-1">Identity Terminal (Email)</Label>
-                <div className="relative group">
+                <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-[#009688] pl-1">Email Address</Label>
+                <motion.div whileFocus={{ scale: 1.01 }} className="relative group">
                   <Input 
                     id="email" 
                     type="email" 
-                    placeholder="agent@shashwa.in"
+                    placeholder="admin@shashwat.in"
                     required 
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     className="h-16 w-full rounded-2xl bg-slate-50 border-2 border-transparent focus:border-[#009688]/20 focus:bg-white px-6 font-bold text-slate-800 placeholder:text-slate-300 transition-all text-lg shadow-sm"
                   />
-                </div>
+                </motion.div>
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-[#009688] pl-1">Access Passkey</Label>
-                <div className="relative group">
+                <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-[#009688] pl-1">Password</Label>
+                <motion.div whileFocus={{ scale: 1.01 }} className="relative group">
                   <Input 
                     id="password" 
                     type={showPassword ? "text" : "password"} 
@@ -139,7 +175,7 @@ export function LoginPage() {
                   >
                     {showPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
                   </button>
-                </div>
+                </motion.div>
               </div>
             </div>
 
@@ -151,29 +187,19 @@ export function LoginPage() {
               {isLoading ? (
                 <div className="flex items-center gap-3">
                   <Loader2 className="w-6 h-6 animate-spin" />
-                  <span>SYNCING...</span>
+                  <span>Logging in...</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
                   <Lock className="w-5 h-5" />
-                  <span>Authorize Access</span>
+                  <span>Login Now</span>
                 </div>
               )}
             </Button>
 
-            <div className="pt-8 border-t border-slate-50">
-              <div className="p-6 rounded-2xl bg-slate-50/50 border-2 border-slate-50 flex items-center gap-4">
-                 <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#009688] shadow-sm">
-                   <Info className="w-5 h-5" />
-                 </div>
-                 <div className="space-y-0.5">
-                   <p className="text-[9px] font-black uppercase tracking-widest text-[#009688]">System Default Port</p>
-                   <p className="text-[10px] font-bold text-slate-400">Dhansalpara13@gmail.com / super@2026</p>
-                 </div>
-              </div>
-            </div>
+
           </form>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

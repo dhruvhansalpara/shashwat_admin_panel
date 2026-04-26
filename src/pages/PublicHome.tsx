@@ -1,4 +1,5 @@
 import { Package, Banner, Destination } from '../types';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageCircle, Clock, MapPin, Eye, Car as CarIcon } from 'lucide-react';
@@ -92,7 +93,7 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
                       transition={{ delay: 0.2 }}
                       className="text-primary font-bold uppercase tracking-[0.3em] text-sm mb-4"
                     >
-                      Escape to Paradise
+                      Explore Incredible India
                     </motion.span>
                     <motion.h2 
                       initial={{ x: -20, opacity: 0 }}
@@ -117,10 +118,10 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
                       className="flex gap-4"
                     >
                       <Button size="lg" className="rounded-full px-8 h-14 text-base font-bold translate-hover tracking-wide shadow-xl shadow-primary/20" asChild>
-                        <Link to="/destinations">Explore Tours</Link>
+                        <Link to="/destinations">View Tour Packages</Link>
                       </Button>
                       <Button size="lg" variant="outline" className="rounded-full px-8 h-14 text-base font-bold border-white/30 text-white hover:bg-white/10" asChild>
-                        <a href="#featured">View Featured</a>
+                        <a href="#featured">Featured Trips</a>
                       </Button>
                     </motion.div>
                   </div>
@@ -139,15 +140,19 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
       </section>
 
       {/* Featured Destinations */}
-      <section className="py-24 px-6 max-w-7xl mx-auto">
+      <motion.section 
+        whileHover={{ backgroundColor: "rgba(0, 150, 136, 0.02)" }}
+        transition={{ duration: 0.5 }}
+        className="py-24 px-6 max-w-7xl mx-auto rounded-[4rem] transition-colors duration-500 my-10"
+      >
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
           <div className="space-y-4">
-            <span className="text-primary font-bold uppercase tracking-widest text-xs">Our Collection</span>
-            <h3 className="text-4xl md:text-5xl font-display font-bold tracking-tight">Top Destinations</h3>
-            <p className="text-muted-foreground max-w-md">The most sought-after travel spots curated by our luxury travel experts.</p>
+            <span className="text-primary font-bold uppercase tracking-widest text-xs">Special Collection</span>
+            <h3 className="text-4xl md:text-5xl font-display font-bold tracking-tight">Best Selling Destinations</h3>
+            <p className="text-muted-foreground max-w-md">Our most loved travel spots handpicked by Shashwat Holidays experts.</p>
           </div>
           <Button asChild variant="ghost" className="font-bold uppercase tracking-widest text-[10px] gap-2 border-b-2 border-transparent hover:border-primary rounded-none h-12">
-            <Link to="/destinations">View All Destinations <Clock className="w-4 h-4" /></Link>
+            <Link to="/destinations">View All Places <Clock className="w-4 h-4" /></Link>
           </Button>
         </div>
 
@@ -156,8 +161,13 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
             destinations.slice(0, 4).map((dest) => (
               <motion.div
                 key={dest.id}
-                whileHover={{ y: -10 }}
-                className="group relative h-[400px] rounded-[32px] overflow-hidden shadow-2xl"
+                whileHover={{ 
+                  y: -15,
+                  scale: 1.03,
+                  boxShadow: "0 25px 50px -12px rgba(0, 150, 136, 0.25)"
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                className="group relative h-[400px] rounded-[32px] overflow-hidden shadow-2xl transition-all duration-300"
               >
                 <img 
                   src={dest.image} 
@@ -179,17 +189,21 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
             </div>
           )}
         </div>
-      </section>
+      </motion.section>
 
       {/* Featured Tours */}
-      <section id="featured" className="py-24 bg-muted/10">
+      <motion.section 
+        id="featured" 
+        whileHover={{ backgroundColor: "rgba(0, 150, 136, 0.03)" }}
+        className="py-24 bg-muted/10 transition-colors duration-500 rounded-v-t-[4rem] rounded-v-b-[4rem]"
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-8">
             <div className="space-y-4">
-              <h3 className="text-6xl md:text-8xl font-display font-black tracking-tighter text-emerald-900/10 absolute -top-10 left-0 pointer-events-none select-none">TOURS</h3>
+              <h3 className="text-6xl md:text-8xl font-display font-black tracking-tighter text-emerald-900/10 absolute -top-10 left-0 pointer-events-none select-none">TRIPS</h3>
               <div className="relative">
-                <span className="text-primary font-bold uppercase tracking-widest text-xs">Curated For You</span>
-                <h3 className="text-5xl md:text-7xl font-display font-bold tracking-tight leading-none text-[#004D40]">All Tour <br /> <span className="text-primary italic">Packages</span></h3>
+                <span className="text-primary font-bold uppercase tracking-widest text-xs">Handpicked For You</span>
+                <h3 className="text-5xl md:text-7xl font-display font-bold tracking-tight leading-none text-[#004D40]">Explore Our Popular <br /> <span className="text-primary italic">Tour Packages</span></h3>
               </div>
             </div>
 
@@ -232,14 +246,19 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {filteredPackages.map((pkg) => (
+            {displayPackages.map((pkg) => (
               <motion.div
                 key={pkg.id}
                 initial={{ y: 20, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
+                whileHover={{ 
+                  y: -12,
+                  transition: { duration: 0.3, ease: "easeOut" }
+                }}
               >
-                <Card className="overflow-hidden border-none shadow-[0_20px_60px_rgba(0,0,0,0.05)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-500 bg-white rounded-[2.5rem] group border border-slate-50">
+                <Card className="overflow-hidden border-none shadow-[0_20px_60px_rgba(0,0,0,0.05)] hover:shadow-[0_45px_90px_rgba(0,150,136,0.12)] transition-all duration-500 bg-white rounded-[2.5rem] group border border-slate-50 relative">
+                  <div className="absolute inset-0 rounded-[2.5rem] border-2 border-transparent group-hover:border-[#009688]/10 transition-all duration-500 pointer-events-none" />
                   <Link to={`/tour/${pkg.id}`} className="block relative aspect-[1.4] overflow-hidden">
                     <img 
                       src={pkg.image} 
@@ -261,7 +280,7 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
 
                     <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-8">
                        <div className="flex items-center justify-center w-24 h-24 rounded-full border border-white/20 backdrop-blur-md bg-white/10 mx-auto text-center transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
-                          <span className="text-white text-[10px] font-black leading-tight uppercase tracking-tighter">Enjoy Exciting<br/>Escapes In<br/><span className="text-xs text-primary">Gorgeous Gujarat</span></span>
+                          <span className="text-white text-[10px] font-black leading-tight uppercase tracking-tighter">Explore The Beauty<br/>Of Colorful<br/><span className="text-xs text-primary">Gujarat Heritage</span></span>
                        </div>
                     </div>
                   </Link>
@@ -291,7 +310,7 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
                           setIsFormOpen(true);
                         }}
                       >
-                        Inquiry Now
+                        Inquire Now
                       </Button>
                       <Button 
                         variant="secondary"
@@ -309,10 +328,13 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Why Choose Us / Features */}
-      <section className="py-24 bg-background">
+      <motion.section 
+        whileHover={{ backgroundColor: "rgba(0, 150, 136, 0.01)" }}
+        className="py-24 bg-background transition-colors duration-500"
+      >
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
           <div className="space-y-10">
             <div className="space-y-4">
@@ -355,7 +377,7 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Car Rental Preview */}
       <section className="py-24 bg-slate-900 text-white overflow-hidden relative">
@@ -401,21 +423,38 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
 
       {/* Inquiry Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[500px] rounded-[2rem] border-none shadow-2xl">
-          <DialogHeader className="p-4">
-            <DialogTitle className="text-2xl font-bold">Inquire Now</DialogTitle>
-            <DialogDescription className="text-base">
-              Plan your dream vacation with {selectedPkg?.name || 'us'}.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="px-4 pb-8">
-            <InquiryForm 
-              packageId={selectedPkg?.id} 
-              packageName={selectedPkg?.name}
-              onSubmit={handleInquiry} 
-            />
-          </div>
-        </DialogContent>
+        <AnimatePresence>
+          {isFormOpen && (
+            <DialogContent className="sm:max-w-[550px] p-0 rounded-[48px] border-none shadow-[0_32px_120px_rgba(0,0,0,0.15)] overflow-hidden bg-[#fcfdfe]">
+              <div className="relative p-12">
+                <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl -mr-20 -mt-20" />
+                <div className="relative z-10 space-y-10">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                       <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                         <MessageCircle className="w-6 h-6" strokeWidth={3} />
+                       </div>
+                       <h2 className="text-3xl font-black text-slate-800 tracking-tighter uppercase font-display leading-none">Plan Your Dream Trip</h2>
+                    </div>
+                    <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px] pl-1 opacity-70">
+                      Planning your journey for: <span className="text-primary">{selectedPkg?.name || 'CUSTOM TOUR'}</span>
+                    </p>
+                  </div>
+
+                  <InquiryForm 
+                    packageId={selectedPkg?.id} 
+                    packageName={selectedPkg?.name}
+                    onSubmit={handleInquiry} 
+                  />
+                  
+                  <div className="pt-6 border-t border-slate-100 flex items-center justify-center gap-6">
+                     <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.3em]">Secure Data Link Established</p>
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          )}
+        </AnimatePresence>
       </Dialog>
 
       {/* Luxury Footer */}

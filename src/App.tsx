@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'sonner';
+import { motion } from 'motion/react';
 
 // Types
 import { Package, Banner, Destination, Car, Inquiry, Settings } from './types';
@@ -73,24 +74,6 @@ export default function App() {
   useEffect(() => {
     fetchData();
   }, []);
-
-  // Admin Wrapper
-  const AdminLayout = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex min-h-screen bg-[#f8fafc] relative overflow-hidden">
-      {/* Decorative background blobs - matching website aesthetics */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
-      
-      <AdminSidebar />
-      <main className="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto relative z-10 scrollbar-hide">
-        <div className="max-w-7xl mx-auto">
-          {children}
-        </div>
-      </main>
-    </div>
-  );
 
   // Authenticated Actions
   const handleAuthAction = async (url: string, method: string, body: any, successMsg: string, token: string | null) => {
@@ -288,6 +271,47 @@ export default function App() {
   );
 }
 
+// Global Admin Layout
+const AdminLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex min-h-screen bg-[#fcfdfe] relative overflow-hidden font-display">
+    {/* High-Contrast Futuristic Background */}
+    <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.2, 1],
+          opacity: [0.03, 0.07, 0.03],
+          x: [-20, 20, -20]
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#009688]/20 rounded-full blur-[160px]" 
+      />
+      <motion.div 
+        animate={{ 
+          scale: [1.2, 1, 1.2],
+          opacity: [0.02, 0.05, 0.02],
+          y: [20, -20, 20]
+        }}
+        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        className="absolute bottom-[-15%] right-[-10%] w-[50%] h-[50%] bg-[#009688]/10 rounded-full blur-[140px]" 
+      />
+      {/* Subtle grid overlay */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.02] mix-blend-overlay" />
+    </div>
+    
+    <AdminSidebar />
+    <main className="flex-1 p-8 md:p-12 lg:p-16 overflow-y-auto relative z-10 scrollbar-hide">
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="max-w-7xl mx-auto"
+      >
+        {children}
+      </motion.div>
+    </main>
+  </div>
+);
+
 // Helper to pass token to action handlers
 function AuthPageWrapper({ component: Component, props, actionHandlers }: any) {
   const { token } = useAdmin();
@@ -298,19 +322,8 @@ function AuthPageWrapper({ component: Component, props, actionHandlers }: any) {
   }, {});
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] relative overflow-hidden">
-      {/* Decorative background blobs */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
-      
-      <AdminSidebar />
-      <main className="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto relative z-10 scrollbar-hide">
-        <div className="max-w-7xl mx-auto">
-          <Component {...props} {...wrappedHandlers} />
-        </div>
-      </main>
-    </div>
+    <AdminLayout>
+      <Component {...props} {...wrappedHandlers} />
+    </AdminLayout>
   );
 }

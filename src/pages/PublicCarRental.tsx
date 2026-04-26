@@ -26,7 +26,7 @@ export function PublicCarRental({ cars, whatsappNumber }: PublicCarRentalProps) 
             animate={{ opacity: 1, y: 0 }}
             className="text-primary font-bold uppercase tracking-[0.3em] text-sm"
           >
-            Premium Transport
+            OUR VEHICLE FLEET
           </motion.span>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
@@ -34,7 +34,7 @@ export function PublicCarRental({ cars, whatsappNumber }: PublicCarRentalProps) 
             transition={{ delay: 0.2 }}
             className="text-5xl md:text-7xl font-display font-bold text-white tracking-tight"
           >
-            Travel in Luxury
+            Comfortable Travel Across India
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -57,8 +57,13 @@ export function PublicCarRental({ cars, whatsappNumber }: PublicCarRentalProps) 
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
+              whileHover={{ 
+                y: -15,
+                transition: { duration: 0.3 }
+              }}
             >
-              <Card className="overflow-hidden border-none shadow-2xl hover:shadow-primary/5 transition-all duration-500 bg-card rounded-[2.5rem] group h-full flex flex-col">
+              <Card className="overflow-hidden border-none shadow-2xl transition-all duration-500 bg-card rounded-[2.5rem] group h-full flex flex-col relative">
+                <div className="absolute inset-0 rounded-[2.5rem] border-2 border-transparent group-hover:border-primary/10 transition-all duration-500 pointer-events-none" />
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <img 
                     src={car.image} 
@@ -124,8 +129,8 @@ export function PublicCarRental({ cars, whatsappNumber }: PublicCarRentalProps) 
         {cars.length === 0 && (
           <div className="text-center py-20 bg-muted/30 rounded-[3rem] border-2 border-dashed border-muted">
             <CarIcon className="w-16 h-16 mx-auto mb-6 text-muted-foreground opacity-20" />
-            <h3 className="text-2xl font-display font-bold text-muted-foreground">Fleet Updating</h3>
-            <p className="text-muted-foreground mt-2">Checking with our transport team for availability.</p>
+            <h3 className="text-2xl font-display font-bold text-muted-foreground">Updating Our Fleet...</h3>
+            <p className="text-muted-foreground mt-2">We are adding more vehicles. Please check back later or contact us directly.</p>
           </div>
         )}
       </section>
@@ -151,7 +156,7 @@ export function PublicCarRental({ cars, whatsappNumber }: PublicCarRentalProps) 
               </ul>
             </div>
             <div className="pt-6 border-t font-medium text-center">
-              Need a custom quote? <a href={`https://wa.me/${whatsappNumber}`} className="text-primary underline underline-offset-4">Talk to our transport manager</a>
+              Need a custom quote? <a href={`https://wa.me/${whatsappNumber}`} className="text-primary underline underline-offset-4">WhatsApp our transport manager</a>
             </div>
           </div>
         </div>

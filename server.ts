@@ -11,12 +11,27 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 
-const upload = multer({ dest: 'uploads/' });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = 'uploads/';
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+  }
+});
+
+const upload = multer({ storage });
 
 dotenv.config();
 
 const app = express();
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -116,7 +131,7 @@ async function getPool() {
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
-      connectTimeout: 10000 // 10 seconds
+      connectTimeout: 3000 // 3 seconds
     };
 
     console.log(`[DB] Attempting connection to ${config.user}@${config.host}:${config.port}/${config.database}`);
@@ -128,12 +143,19 @@ async function getPool() {
     }
 
     try {
-      pool = mysql.createPool(config);
+      const p = mysql.createPool(config);
+      // Fast check if connection works
+      await Promise.race([
+        p.query('SELECT 1'),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Connection check timeout')), 3000))
+      ]);
+      pool = p;
       // Initialize tables
       await initDb();
     } catch (err) {
-      console.error("Failed to connect to MySQL database:", err);
+      console.error("[DB] Failed to connect to MySQL database, will use JSON fallback:", err);
       pool = null;
+      return null;
     }
   }
   return pool;
@@ -1054,24 +1076,42 @@ app.post("/api/db-config", async (req, res) => {
 });
 
 async function startServer() {
-  // Vite middleware for development
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
-  }
+  try {
+    // Vite middleware for development
+    if (process.env.NODE_ENV !== "production") {
+      try {
+        console.log("[SERVER] Initializing Vite development server...");
+        const vite = await createViteServer({
+          server: { middlewareMode: true },
+          appType: "spa",
+        });
+        app.use(vite.middlewares);
+        console.log("[SERVER] Vite middleware attached.");
+      } catch (viteErr) {
+        console.error("[SERVER] Failed to initialize Vite server:", viteErr);
+        // Fallback to static serving if dist exists, or just log error
+        const distPath = path.join(process.cwd(), "dist");
+        if (fs.existsSync(distPath)) {
+          console.log("[SERVER] Falling back to static files from dist/");
+          app.use(express.static(distPath));
+        }
+      }
+    } else {
+      const distPath = path.join(process.cwd(), "dist");
+      app.use(express.static(distPath));
+      app.get("*", (req, res) => {
+        res.sendFile(path.join(distPath, "index.html"));
+      });
+    }
 
-  httpServer.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+    httpServer.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error("[SERVER] Fatal error during startup:", err);
+  }
 }
 
-startServer();
+startServer().catch(err => {
+  console.error("[SERVER] Unhandled error starting server:", err);
+});

@@ -1,11 +1,13 @@
 import * as React from 'react';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Link, Upload, Image as ImageIcon, FileUp } from 'lucide-react';
+import { Link, Upload, Image as ImageIcon, FileUp, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
+import { Badge } from './ui/badge';
 
 interface ImageUploadProps {
   value: string;
@@ -32,8 +34,12 @@ export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
 
     setUploading(true);
     try {
+      const token = localStorage.getItem('admin_token');
       const resp = await fetch('/api/upload', {
         method: 'POST',
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: formData,
       });
       if (!resp.ok) throw new Error('Upload failed');
@@ -49,60 +55,87 @@ export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
   };
 
   return (
-    <div className="space-y-3">
-      {label && <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</Label>}
-      <div className="bg-muted/30 rounded-xl p-4 border border-dashed border-border/60">
-        <Tabs defaultValue="url">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="url" className="gap-2">
-              <Link className="w-3 h-3" /> Image URL
+    <div className="space-y-4 font-display">
+      {label && <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-[#009688] pl-1">{label}</Label>}
+      <div className="bg-[#f8fafb] rounded-[32px] p-8 border-2 border-slate-50 shadow-inner group/upload">
+        <Tabs defaultValue="upload" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-8 p-1.5 bg-slate-100/50 rounded-2xl h-auto">
+            <TabsTrigger value="upload" className="gap-2.5 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-[#009688]">
+              <FileUp className="w-4 h-4" /> Machine Upload
             </TabsTrigger>
-            <TabsTrigger value="upload" className="gap-2">
-              <FileUp className="w-3 h-3" /> Upload
+            <TabsTrigger value="url" className="gap-2.5 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-lg data-[state=active]:text-[#009688]">
+              <Link className="w-4 h-4" /> Remote Source
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="upload" className="space-y-4">
-            <Input type="file" onChange={handleFileChange} disabled={uploading} accept="image/*" />
-            {uploading && <p className="text-xs">Uploading...</p>}
+          <TabsContent value="upload" className="space-y-6 focus-visible:outline-none">
+            <div className="relative group/file">
+              <input 
+                type="file" 
+                onChange={handleFileChange} 
+                disabled={uploading} 
+                accept="image/*" 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              <div className={cn(
+                "h-32 rounded-[24px] border-2 border-dashed flex flex-col items-center justify-center gap-4 transition-all duration-500",
+                uploading ? "bg-slate-100 border-slate-200" : "bg-white border-slate-200 group-hover/file:border-[#009688] group-hover/file:bg-[#009688]/5"
+              )}>
+                {uploading ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-8 h-8 border-4 border-[#009688]/20 border-t-[#009688] rounded-full animate-spin" />
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-[#009688] animate-pulse">Syncing...</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-12 h-12 rounded-[16px] bg-slate-50 flex items-center justify-center text-slate-300 group-hover/file:scale-110 group-hover/file:bg-[#009688] group-hover/file:text-white transition-all duration-500">
+                      <Upload className="w-6 h-6" strokeWidth={2.5} />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover/file:text-[#009688] transition-colors">Select local asset</p>
+                      <p className="text-[8px] font-bold text-slate-300 uppercase mt-1 tracking-widest leading-none">Limit: 5MB</p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
           </TabsContent>
 
-          <TabsContent value="url" className="space-y-4">
-            <div className="space-y-2">
+          <TabsContent value="url" className="space-y-6 focus-visible:outline-none">
+            <div className="space-y-4">
               <Input 
                 value={url} 
                 onChange={handleUrlChange} 
-                placeholder="https://images.unsplash.com/..." 
-                className="bg-background"
+                placeholder="https://cdn.shashwa.in/assets/v1/..." 
+                className="h-16 px-8 rounded-2xl border-slate-100 bg-white font-black text-lg shadow-sm focus:ring-[#009688]/20 transition-all placeholder:text-slate-200"
               />
-              <p className="text-[10px] text-muted-foreground italic">Paste a direct image link from Unsplash, Pixabay, or your own storage.</p>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest pl-2 opacity-60">Input direct endpoint for remote visual data</p>
             </div>
-            
-            {value && (
-              <div className="relative group">
-                <div className="aspect-video rounded-lg overflow-hidden border border-border/50 bg-black/5">
-                  <img src={value} alt="Preview" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                </div>
-                <Button 
-                  type="button" 
-                  variant="destructive" 
-                  size="icon" 
-                  className="absolute top-2 right-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                  onClick={() => { setUrl(''); onChange(''); }}
-                >
-                  <Upload className="w-4 h-4 rotate-180" />
-                </Button>
-              </div>
-            )}
-            
-            {!value && (
-              <div className="aspect-video rounded-lg border border-dashed border-border flex flex-col items-center justify-center gap-2 text-muted-foreground bg-muted/20">
-                <ImageIcon className="w-8 h-8 opacity-20" />
-                <span className="text-[10px] uppercase font-bold tracking-widest opacity-50">Preview Area</span>
-              </div>
-            )}
           </TabsContent>
         </Tabs>
+
+        {value && (
+          <div className="mt-8 relative group/preview">
+            <div className="aspect-video rounded-[24px] overflow-hidden border-2 border-slate-100 bg-slate-50 shadow-sm relative">
+              <img src={value} alt="Preview" className="w-full h-full object-cover transition-transform group-hover/preview:scale-110 duration-1000" />
+              <div className="absolute inset-0 bg-slate-900/0 group-hover/preview:bg-slate-900/40 transition-colors duration-500" />
+            </div>
+            <Button 
+              type="button" 
+              variant="destructive" 
+              size="icon" 
+              className="absolute top-4 right-4 rounded-2xl h-12 w-12 opacity-0 group-hover/preview:opacity-100 transition-all duration-300 hover:scale-110 shadow-2xl"
+              onClick={() => { setUrl(''); onChange(''); }}
+            >
+              <Trash2 className="w-5 h-5" strokeWidth={3} />
+            </Button>
+            <div className="absolute top-4 left-4">
+               <Badge className="bg-[#009688] text-white px-4 py-1.5 rounded-lg font-black text-[9px] uppercase tracking-widest shadow-xl shadow-[#009688]/20 border-none">
+                 ACTIVE_BUFFER
+               </Badge>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

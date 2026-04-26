@@ -27,9 +27,9 @@ export function TourDetails({ packages, onInquiry, whatsappNumber }: TourDetails
   if (!pkg) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background">
-        <h2 className="text-2xl font-bold mb-4">Tour Package Not Found</h2>
+        <h2 className="text-2xl font-bold mb-4">Package Details Not Found</h2>
         <Button asChild variant="outline">
-          <Link to="/">Return to Home</Link>
+          <Link to="/">Back to Home Page</Link>
         </Button>
       </div>
     );
@@ -77,26 +77,22 @@ export function TourDetails({ packages, onInquiry, whatsappNumber }: TourDetails
             
             {/* Highlights Grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-muted/30 p-4 rounded-2xl border border-border/50 text-center">
-                <Calendar className="w-6 h-6 mx-auto mb-2 text-primary" />
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Duration</p>
-                <p className="font-bold text-sm">{pkg.days} Days</p>
-              </div>
-              <div className="bg-muted/30 p-4 rounded-2xl border border-border/50 text-center">
-                <MapPin className="w-6 h-6 mx-auto mb-2 text-primary" />
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Location</p>
-                <p className="font-bold text-sm truncate">{pkg.location || 'India'}</p>
-              </div>
-              <div className="bg-muted/30 p-4 rounded-2xl border border-border/50 text-center">
-                <Users className="w-6 h-6 mx-auto mb-2 text-primary" />
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Group Size</p>
-                <p className="font-bold text-sm">{pkg.groupSize || '10+ People'}</p>
-              </div>
-              <div className="bg-muted/30 p-4 rounded-2xl border border-border/50 text-center">
-                <Globe className="w-6 h-6 mx-auto mb-2 text-primary" />
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Language</p>
-                <p className="font-bold text-sm">{pkg.languages || 'English, Hindi'}</p>
-              </div>
+              {[
+                { icon: Calendar, label: 'Duration', value: `${pkg.days} Days` },
+                { icon: MapPin, label: 'Location', value: pkg.location || 'India' },
+                { icon: Users, label: 'Group Size', value: pkg.groupSize || '10+ People' },
+                { icon: Globe, label: 'Language', value: pkg.languages || 'English, Hindi' }
+              ].map((item, i) => (
+                <motion.div 
+                  key={i}
+                  whileHover={{ y: -5, backgroundColor: 'rgba(255, 255, 255, 1)', borderColor: 'rgba(var(--primary), 0.3)' }}
+                  className="bg-muted/30 p-4 rounded-2xl border border-border/50 text-center transition-colors shadow-sm hover:shadow-md"
+                >
+                  <item.icon className="w-6 h-6 mx-auto mb-2 text-primary" />
+                  <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">{item.label}</p>
+                  <p className="font-bold text-sm truncate">{item.value}</p>
+                </motion.div>
+              ))}
             </div>
 
             {/* Overview */}
@@ -115,8 +111,8 @@ export function TourDetails({ packages, onInquiry, whatsappNumber }: TourDetails
                   {pkg.gallery.map((img, i) => (
                     <motion.div 
                       key={i} 
-                      whileHover={{ scale: 1.02 }}
-                      className="aspect-square rounded-2xl overflow-hidden border border-border/50 shadow-sm"
+                      whileHover={{ scale: 1.05, rotate: 1, zIndex: 10 }}
+                      className="aspect-square rounded-2xl overflow-hidden border border-border/50 shadow-sm transition-all shadow-lg hover:shadow-primary/20"
                     >
                       <img src={img} className="w-full h-full object-cover" alt="" />
                     </motion.div>
@@ -207,13 +203,13 @@ export function TourDetails({ packages, onInquiry, whatsappNumber }: TourDetails
             <Card className="sticky top-24 border-none shadow-xl bg-card overflow-hidden">
               <div className="bg-primary p-6 text-white text-center">
                 <p className="text-xs uppercase font-bold tracking-widest opacity-80">Starting from</p>
-                <p className="text-4xl font-display font-bold mt-1">${pkg.price}</p>
-                <p className="text-[10px] uppercase font-medium mt-1 opacity-60">Per Person / All Inclusive</p>
+                <p className="text-4xl font-display font-bold mt-1">₹{pkg.price}</p>
+                <p className="text-[10px] uppercase font-medium mt-1 opacity-60">Per Person / Including Taxes</p>
               </div>
               <CardContent className="p-8 space-y-6">
                 <div className="space-y-4">
                   <Button className="w-full h-12 rounded-xl text-md font-bold" size="lg" onClick={handleWhatsApp}>
-                    Quick Booking
+                    Book This Trip
                   </Button>
                   <Button variant="outline" className="w-full h-12 rounded-xl text-md font-bold gap-2" size="lg" onClick={handleWhatsApp}>
                     <MessageSquare className="w-4 h-4" /> WhatsApp Us
@@ -232,7 +228,7 @@ export function TourDetails({ packages, onInquiry, whatsappNumber }: TourDetails
             <div className="bg-muted/30 p-6 rounded-2xl border border-border/50 text-center space-y-2">
               <p className="text-xs font-bold uppercase text-muted-foreground tracking-widest">Need Help?</p>
               <p className="text-lg font-bold">+91 {whatsappNumber}</p>
-              <p className="text-[10px] text-muted-foreground">Available Mon-Sat 9AM-7PM</p>
+              <p className="text-[10px] text-muted-foreground">We are open Mon-Sat 9AM-7PM IST</p>
             </div>
           </div>
 

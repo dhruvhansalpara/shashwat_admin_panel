@@ -137,15 +137,15 @@ export default function AdminManagement() {
   return (
     <div className="space-y-12 pb-20 font-display">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-        <div className="space-y-1">
-          <h2 className="text-4xl font-black tracking-tighter text-slate-800 uppercase leading-none">Security Node</h2>
-          <p className="text-slate-400 font-medium text-sm opacity-80 pl-1">Hierarchical permission layering for system operators.</p>
+        <div>
+          <h2 className="text-5xl font-black tracking-tighter text-slate-800 uppercase font-display leading-none italic">Admin Users</h2>
+          <p className="text-[#009688] mt-2 font-black uppercase tracking-[0.4em] text-[10px] pl-0.5 opacity-100">Add or remove team members who can manage the website content</p>
         </div>
         <Button 
           onClick={() => setIsAddOpen(true)} 
-          className="rounded-2xl h-14 px-10 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-[0.2em] text-[11px]"
+          className="rounded-2xl h-16 px-10 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-[0.25em] text-[11px]"
         >
-          <UserPlus className="w-5 h-5" strokeWidth={3} /> Synchronize Agent
+          <UserPlus className="w-5 h-5" strokeWidth={3} /> Add New Admin
         </Button>
       </div>
 
@@ -154,11 +154,11 @@ export default function AdminManagement() {
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow className="hover:bg-transparent border-b border-slate-100/50">
-                <TableHead className="pl-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Identity Details</TableHead>
-                <TableHead className="py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Security Clearance</TableHead>
+                <TableHead className="pl-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">User Details</TableHead>
+                <TableHead className="py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Access Role</TableHead>
                 <TableHead className="py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Status</TableHead>
-                <TableHead className="py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Registry Date</TableHead>
-                <TableHead className="text-right pr-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Directives</TableHead>
+                <TableHead className="py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Joined Date</TableHead>
+                <TableHead className="text-right pr-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -187,7 +187,7 @@ export default function AdminManagement() {
                         ? "bg-[#009688]/5 text-[#009688] border-[#009688]/10" 
                         : "bg-slate-50 text-slate-400 border-slate-100"
                     )}>
-                      {adm.role === 'super_admin' ? "ROOT ACCESS" : "OPERATOR"}
+                      {adm.role === 'super_admin' ? "SUPER ADMIN" : "STAFF ADMIN"}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -237,96 +237,96 @@ export default function AdminManagement() {
       </div>
 
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent className="sm:max-w-[500px] w-[95vw] p-0 overflow-hidden bg-white border-none shadow-2xl rounded-[32px] font-display">
+        <DialogContent className="sm:max-w-[550px] w-[95vw] p-0 overflow-hidden bg-[#fcfdfe] border-none shadow-2xl rounded-[48px] font-display">
           <form onSubmit={handleAdd}>
-            <DialogHeader className="p-10 pb-6">
-              <DialogTitle className="text-3xl font-black tracking-tighter text-slate-800 uppercase leading-none">Authorize Agent</DialogTitle>
-              <DialogDescription className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px] mt-2">Granting mission-critical system clearance.</DialogDescription>
+            <DialogHeader className="p-12 pb-8 bg-white border-b-2 border-slate-50">
+              <DialogTitle className="text-4xl font-black tracking-tighter text-slate-800 uppercase italic leading-none">Add Admin User</DialogTitle>
+              <DialogDescription className="text-[#009688] font-black uppercase tracking-[0.4em] text-[10px] mt-2 pl-1">Give a team member access to the admin panel.</DialogDescription>
             </DialogHeader>
-            <div className="p-10 pt-4 space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Identity Name</Label>
-                <Input id="name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="John Doe" required className="h-14 px-6 rounded-2xl border-slate-100 bg-slate-50/50 font-bold text-base focus:ring-[#009688]/20 transition-all" />
+            <div className="p-12 pt-8 space-y-8">
+              <div className="space-y-3">
+                <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-2">Subject Identity</Label>
+                <Input id="name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="e.g. Agent Smith" required className="h-16 px-8 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-lg focus:ring-[#009688]/20 transition-all shadow-sm" />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Email Terminal</Label>
-                <Input id="email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="agent@shashwa.in" required className="h-14 px-6 rounded-2xl border-slate-100 bg-slate-50/50 font-bold text-base focus:ring-[#009688]/20 transition-all" />
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-2">Communication Terminal (Email)</Label>
+                <Input id="email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} placeholder="agent@shashwa.in" required className="h-16 px-8 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-lg focus:ring-[#009688]/20 transition-all shadow-sm" />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Access Protocol</Label>
-                <Input id="password" type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="••••••••" required className="h-14 px-6 rounded-2xl border-slate-100 bg-slate-50/50 font-black text-lg focus:ring-[#009688]/20 transition-all" />
+              <div className="space-y-3">
+                <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-2">Access Key (Password)</Label>
+                <Input id="password" type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="••••••••" required className="h-16 px-8 rounded-2xl border-slate-50 bg-slate-50/50 font-black text-xl focus:ring-[#009688]/20 transition-all shadow-sm" />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="role" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Authorization Tier</Label>
+              <div className="space-y-3">
+                <Label htmlFor="role" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-2">Access Role</Label>
                 <Select value={formData.role} onValueChange={(val: any) => setFormData({...formData, role: val})}>
-                  <SelectTrigger className="h-14 px-6 rounded-2xl border-slate-100 bg-slate-50/50 font-bold text-base shadow-none">
+                  <SelectTrigger className="h-16 px-8 rounded-2xl border-slate-50 bg-slate-50/50 font-black text-lg shadow-none border-none">
                     <SelectValue placeholder="Select Tier" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-slate-100">
-                    <SelectItem value="admin" className="rounded-xl py-3 font-bold uppercase text-[11px] tracking-widest">Standard Operator</SelectItem>
-                    <SelectItem value="super_admin" className="rounded-xl py-3 font-black text-[#009688] uppercase text-[11px] tracking-widest">Core Administrator</SelectItem>
+                  <SelectContent>
+                    <SelectItem value="admin">Standard Operator</SelectItem>
+                    <SelectItem value="super_admin">Root Level Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            <DialogFooter className="p-10 pt-4 bg-slate-50/50 border-t border-slate-50">
-              <Button type="button" variant="ghost" onClick={() => setIsAddOpen(false)} className="rounded-xl font-black uppercase tracking-widest text-[10px] text-slate-400">Abort</Button>
-              <Button type="submit" className="rounded-2xl h-14 px-10 bg-[#009688] hover:bg-[#00796b] text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-lg shadow-[#009688]/20">Establish Node</Button>
+            <DialogFooter className="p-12 pt-6 bg-white border-t-2 border-slate-50 flex justify-between gap-6">
+              <Button type="button" variant="ghost" onClick={() => setIsAddOpen(false)} className="h-16 px-10 rounded-2xl font-black uppercase tracking-widest text-[11px] text-slate-400 hover:bg-slate-50">Abort</Button>
+              <Button type="submit" className="h-16 px-12 rounded-2xl bg-[#009688] hover:bg-[#00796b] text-white font-black uppercase tracking-[0.25em] text-[11px] min-w-[260px] shadow-2xl shadow-[#009688]/20">Establish Presence</Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="sm:max-w-[500px] w-[95vw] p-0 overflow-hidden bg-white border-none shadow-2xl rounded-[32px] font-display">
+        <DialogContent className="sm:max-w-[550px] w-[95vw] p-0 overflow-hidden bg-[#fcfdfe] border-none shadow-2xl rounded-[48px] font-display">
           <form onSubmit={handleEdit}>
-            <DialogHeader className="p-10 pb-6">
-              <DialogTitle className="text-3xl font-black tracking-tighter text-slate-800 uppercase leading-none">Modify Clearance</DialogTitle>
-              <DialogDescription className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px] mt-2">Adjusting operational parameters for agent.</DialogDescription>
+            <DialogHeader className="p-12 pb-8 bg-white border-b-2 border-slate-50">
+              <DialogTitle className="text-4xl font-black tracking-tighter text-slate-800 uppercase italic leading-none">Edit Access</DialogTitle>
+              <DialogDescription className="text-[#009688] font-black uppercase tracking-[0.4em] text-[10px] mt-2 pl-1">Adjusting user permissions and access levels.</DialogDescription>
             </DialogHeader>
-            <div className="p-10 pt-4 space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="edit-name" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Identity Name</Label>
-                <Input id="edit-name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required className="h-14 px-6 rounded-2xl border-slate-100 bg-slate-50/50 font-bold text-base focus:ring-[#009688]/20 transition-all" />
+            <div className="p-12 pt-8 space-y-8">
+              <div className="space-y-3">
+                <Label htmlFor="edit-name" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-2">Subject Identity</Label>
+                <Input id="edit-name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required className="h-16 px-8 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-lg focus:ring-[#009688]/20 transition-all shadow-sm" />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-email" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Email Terminal</Label>
-                <Input id="edit-email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} required className="h-14 px-6 rounded-2xl border-slate-100 bg-slate-50/50 font-bold text-base focus:ring-[#009688]/20 transition-all" />
+              <div className="space-y-3">
+                <Label htmlFor="edit-email" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-2">Communication Terminal (Email)</Label>
+                <Input id="edit-email" type="email" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} required className="h-16 px-8 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-lg focus:ring-[#009688]/20 transition-all shadow-sm" />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-password" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Revise Protocol (Optional)</Label>
-                <Input id="edit-password" type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="Leave blank to retain current" className="h-14 px-6 rounded-2xl border-slate-100 bg-slate-50/50 font-bold text-base focus:ring-[#009688]/20 transition-all" />
+              <div className="space-y-3">
+                <Label htmlFor="edit-password" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-2">Revise Protocol (Optional Password)</Label>
+                <Input id="edit-password" type="password" value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})} placeholder="Leave blank to retain current" className="h-16 px-8 rounded-2xl border-slate-50 bg-slate-50/50 font-black text-xl focus:ring-[#009688]/20 transition-all shadow-sm" />
               </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-role" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Access Level</Label>
+              <div className="grid grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <Label htmlFor="edit-role" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-2">Access Level</Label>
                   <Select value={formData.role} onValueChange={(val: any) => setFormData({...formData, role: val})}>
-                    <SelectTrigger className="h-14 px-6 rounded-2xl border-slate-100 bg-slate-50/50 font-bold text-base shadow-none">
+                    <SelectTrigger className="h-16 px-8 rounded-2xl border-slate-50 bg-slate-50/50 font-black text-lg shadow-none border-none">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="rounded-2xl border-slate-100">
-                      <SelectItem value="admin" className="rounded-xl py-3 font-bold uppercase text-[10px] tracking-widest">Operator</SelectItem>
-                      <SelectItem value="super_admin" className="rounded-xl py-3 font-black text-[#009688] uppercase text-[10px] tracking-widest">Root</SelectItem>
+                    <SelectContent>
+                      <SelectItem value="admin">Operator</SelectItem>
+                      <SelectItem value="super_admin">Root Node</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-status" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">System State</Label>
+                <div className="space-y-3">
+                  <Label htmlFor="edit-status" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-2">System State</Label>
                   <Select value={formData.status} onValueChange={(val: any) => setFormData({...formData, status: val})}>
-                    <SelectTrigger className="h-14 px-6 rounded-2xl border-slate-100 bg-slate-50/50 font-bold text-base shadow-none">
+                    <SelectTrigger className="h-16 px-8 rounded-2xl border-slate-50 bg-slate-50/50 font-black text-lg shadow-none border-none">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="rounded-2xl border-slate-100">
-                      <SelectItem value="active" className="rounded-xl py-3 font-bold text-emerald-500 uppercase text-[10px] tracking-widest">Operational</SelectItem>
-                      <SelectItem value="disabled" className="rounded-xl py-3 font-bold text-rose-500 uppercase text-[10px] tracking-widest">Restricted</SelectItem>
+                    <SelectContent>
+                      <SelectItem value="active">Operational</SelectItem>
+                      <SelectItem value="disabled">Restricted</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
             </div>
-            <DialogFooter className="p-10 pt-4 bg-slate-50/50 border-t border-slate-50">
-              <Button type="button" variant="ghost" onClick={() => setIsEditOpen(false)} className="rounded-xl font-black uppercase tracking-widest text-[10px] text-slate-400">Discard</Button>
-              <Button type="submit" className="rounded-2xl h-14 px-10 bg-slate-800 hover:bg-slate-900 text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-lg shadow-slate-200/50">Apply Synchronization</Button>
+            <DialogFooter className="p-12 pt-6 bg-white border-t-2 border-slate-50 flex justify-between gap-6">
+              <Button type="button" variant="ghost" onClick={() => setIsEditOpen(false)} className="h-16 px-10 rounded-2xl font-black uppercase tracking-widest text-[11px] text-slate-400 hover:bg-slate-50">Abort</Button>
+              <Button type="submit" className="h-16 px-12 rounded-2xl bg-slate-800 hover:bg-slate-900 text-white font-black uppercase tracking-[0.25em] text-[11px] min-w-[260px] shadow-2xl shadow-slate-200/50">Apply Changes</Button>
             </DialogFooter>
           </form>
         </DialogContent>

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Package, Destination } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Plus, Search, MoreHorizontal, Edit, Trash2, 
   Image as ImageIcon, ListPlus, MapPin, 
@@ -42,8 +43,8 @@ const packageSchema = z.object({
   days: z.preprocess((val) => Number(val), z.number().int().min(1, "Duration must be at least 1 day")),
   category: z.string().min(1, "Category is required"),
   description: z.string().min(20, "Description must be at least 20 characters"),
-  image: z.string().url("Please enter a valid image URL"),
-  bannerImage: z.string().url("Please enter a valid banner image URL").optional().or(z.literal('')),
+  image: z.string().min(1, "Image is required"),
+  bannerImage: z.string().optional().or(z.literal('')),
   gallery: z.string().optional(), // We'll handle CSV splitting in onSubmit
   inclusions: z.string().optional(),
   exclusions: z.string().optional(),
@@ -149,105 +150,138 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
   const imageUrl = watch('image');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="space-y-10 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <>
+    <motion.div 
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="space-y-10 pb-20"
+    >
+      <motion.div variants={item} className="flex flex-col md:flex-row md:items-center justify-between gap-8">
         <div>
-          <h2 className="text-4xl font-black tracking-tighter text-slate-900 uppercase">Experience Catalog</h2>
-          <p className="text-slate-500 mt-2 font-bold uppercase tracking-[0.2em] text-[10px]">Managing high-yield travel assets and curated journey parameters</p>
+          <h2 className="text-5xl font-black tracking-tighter text-slate-800 uppercase font-display leading-none italic">Tour Packages</h2>
+          <p className="text-[#009688] mt-2 font-black uppercase tracking-[0.4em] text-[10px] pl-0.5 opacity-100">Managing travel packages and guest experiences</p>
         </div>
         <Button 
           onClick={() => { setEditingPackage(null); reset(); setIsFormOpen(true); }} 
-          className="rounded-[20px] h-14 px-10 gap-3 bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-widest text-[11px]"
+          className="rounded-2xl h-16 px-10 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-[0.25em] text-[11px]"
         >
-          <Plus className="w-5 h-5" strokeWidth={3} /> Synchronize Package
+          <Plus className="w-5 h-5" strokeWidth={3} /> Add New Package
         </Button>
-      </div>
+      </motion.div>
       
-      <div className="flex items-center gap-4 bg-white p-3 rounded-[24px] border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] focus-within:ring-4 focus-within:ring-primary/10 transition-all group overflow-hidden">
-        <div className="pl-5 text-slate-300 group-focus-within:text-primary transition-colors">
-          <Search className="w-6 h-6" strokeWidth={2.5} />
+      <motion.div variants={item} className="flex items-center gap-5 bg-white p-4 rounded-[32px] border-2 border-slate-50 shadow-[0_8px_32px_rgba(0,0,0,0.02)] focus-within:ring-4 focus-within:ring-[#009688]/5 transition-all group overflow-hidden">
+        <div className="pl-6 text-slate-300 group-focus-within:text-[#009688] transition-colors">
+          <Search className="w-6 h-6" strokeWidth={3} />
         </div>
         <Input 
-          placeholder="Query by asset name, location or internal parameters..." 
-          className="border-0 focus-visible:ring-0 text-lg py-7 h-14 bg-transparent placeholder:text-slate-300 font-bold tracking-tight shadow-none"
+          placeholder="Search packages by name, location or details..." 
+          className="border-0 focus-visible:ring-0 text-lg py-7 h-16 bg-transparent placeholder:text-slate-300 font-bold tracking-tight shadow-none"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-      </div>
+      </motion.div>
 
-      <div className="bg-white rounded-[40px] border border-slate-100 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden">
+      <motion.div variants={item} className="bg-white rounded-[40px] border border-slate-100 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-50 bg-slate-50/30 hover:bg-slate-50/30 transition-none">
-                <th className="pl-10 py-6 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Preview Asset</th>
-                <th className="py-6 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Package Parameters</th>
-                <th className="py-6 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Deployment</th>
-                <th className="py-6 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Valuation</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 text-right">Directives</th>
+              <tr className="border-b-2 border-slate-50 bg-slate-50/10 hover:bg-slate-50/10 transition-none">
+                <th className="pl-12 py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Package Image</th>
+                <th className="py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Package Details</th>
+                <th className="py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Destinations</th>
+                <th className="py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Price & Duration</th>
+                <th className="px-12 py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 text-right font-display italic">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
-              {filteredPackages.length > 0 ? filteredPackages.map((pkg) => (
-                <tr key={pkg.id} className="group hover:bg-slate-50/50 transition-all duration-300 border-none">
-                  <td className="pl-10 py-7">
-                    <div className="relative w-20 h-20 rounded-[24px] overflow-hidden shadow-inner ring-4 ring-slate-50/50 shadow-inner group-hover:rounded-2xl transition-all duration-700">
-                      <img src={pkg.image} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" alt="" />
-                    </div>
-                  </td>
-                  <td className="py-7">
-                    <div className="space-y-1.5">
-                      <div className="font-black text-slate-900 text-xl tracking-tighter group-hover:text-primary transition-colors leading-tight">{pkg.name}</div>
-                      <div className="flex items-center gap-2 text-slate-400">
-                        <MapPin className="w-3.5 h-3.5 text-primary" strokeWidth={3} />
-                        <span className="text-[10px] font-black uppercase tracking-[0.15em]">{pkg.location}</span>
+            <tbody className="divide-y-2 divide-slate-50/20">
+              <AnimatePresence mode="popLayout">
+                {filteredPackages.length > 0 ? filteredPackages.map((pkg, idx) => (
+                  <motion.tr 
+                    key={pkg.id} 
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="group hover:bg-slate-50/60 transition-all duration-300 border-none"
+                  >
+                    <td className="pl-12 py-10">
+                      <div className="relative w-24 h-24 rounded-[36px] overflow-hidden shadow-2xl shadow-slate-200 group-hover:rounded-2xl transition-all duration-700 ring-8 ring-slate-50/30">
+                        <img src={pkg.image} className="w-full h-full object-cover transition-transform group-hover:scale-125 duration-1000" alt="" />
                       </div>
-                    </div>
-                  </td>
-                  <td className="py-7">
-                    <div className="flex flex-wrap gap-2">
-                      {pkg.destination_ids?.map(id => {
-                        const dest = destinations.find(d => d.id === id);
-                        return dest ? (
-                          <Badge key={`dest-${id}`} variant="outline" className="bg-slate-50 text-slate-500 text-[8px] font-black uppercase tracking-widest py-1 px-3 rounded-lg border-slate-100">
-                            {dest.name}
-                          </Badge>
-                        ) : null;
-                      })}
-                    </div>
-                  </td>
-                  <td className="py-7">
-                    <div className="space-y-1.5">
-                      <div className="font-black text-slate-900 text-2xl tracking-tighter leading-none">${pkg.price}</div>
-                      <div className="text-[9px] font-black text-slate-300 uppercase tracking-[0.25em]">{pkg.days}D / {pkg.days - 1}N Cycle</div>
-                    </div>
-                  </td>
-                  <td className="px-10 py-7 text-right">
-                    <div className="flex justify-end items-center gap-3 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                      <Button variant="ghost" size="icon" onClick={() => handleEditClick(pkg)} className="h-11 w-11 rounded-2xl hover:bg-primary/10 hover:text-primary transition-all">
-                         <Edit className="w-5 h-5" strokeWidth={2.5} />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => setDeleteConfirmId(pkg.id)} className="h-11 w-11 rounded-2xl hover:bg-rose-50 hover:text-rose-500 transition-all">
-                        <Trash2 className="w-5 h-5" strokeWidth={2.5} />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              )) : (
-                <tr>
-                  <td colSpan={5} className="text-center py-20">
-                    <div className="flex flex-col items-center gap-3 text-slate-300">
-                      <Search className="w-12 h-12 opacity-20" />
-                      <p className="font-black uppercase tracking-widest text-xs">No matching packages found</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
+                    </td>
+                    <td className="py-10">
+                      <div className="space-y-2">
+                        <div className="font-black text-slate-800 text-2xl tracking-tighter group-hover:text-[#009688] transition-colors leading-none italic uppercase font-display">{pkg.name}</div>
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-1 px-2.5 bg-[#e0f2f1] rounded-lg">
+                            <MapPin className="w-3 h-3 text-[#009688]" strokeWidth={3} />
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{pkg.location}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-10">
+                      <div className="flex flex-wrap gap-2.5">
+                        {pkg.destination_ids?.map(id => {
+                          const dest = destinations.find(d => d.id === id);
+                          return dest ? (
+                            <Badge key={`dest-${id}`} variant="outline" className="bg-[#e0f2f1]/50 text-[#009688] text-[9px] font-black uppercase tracking-widest py-1.5 px-4 rounded-xl border-[#009688]/10 shadow-sm">
+                              {dest.name}
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
+                    </td>
+                    <td className="py-10">
+                      <div className="space-y-1.5">
+                        <div className="font-black text-slate-900 text-3xl tracking-tighter leading-none italic font-display">₹{pkg.price}</div>
+                        <div className="text-[10px] font-black text-[#009688] uppercase tracking-[0.3em] opacity-60">DURATION: {pkg.days}D</div>
+                      </div>
+                    </td>
+                    <td className="px-12 py-10 text-right">
+                      <div className="flex justify-end items-center gap-4 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
+                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(pkg)} className="h-12 w-12 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-[#009688]/10 hover:text-[#009688] transition-all border border-slate-50">
+                           <Edit className="w-5 h-5" strokeWidth={3} />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => setDeleteConfirmId(pkg.id)} className="h-12 w-12 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-rose-50 hover:text-rose-500 transition-all border border-slate-50">
+                          <Trash2 className="w-5 h-5" strokeWidth={3} />
+                        </Button>
+                      </div>
+                    </td>
+                  </motion.tr>
+                )) : (
+                  <tr className="border-none">
+                    <td colSpan={5} className="text-center py-20 border-none">
+                      <div className="flex flex-col items-center gap-3 text-slate-300">
+                        <Search className="w-12 h-12 opacity-20" />
+                        <p className="font-black uppercase tracking-widest text-xs">No matching packages found</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
+    </motion.div>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="sm:max-w-[950px] w-[98vw] max-h-[95vh] flex flex-col p-0 overflow-hidden bg-[#fcfdfe] border-none shadow-2xl rounded-[40px]">
@@ -264,16 +298,16 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
             <Tabs defaultValue="basic" className="flex-1 flex flex-col overflow-hidden">
               <div className="px-8 border-b border-slate-100 bg-white shrink-0">
                 <TabsList className="w-full justify-start bg-transparent h-auto p-0 gap-8">
-                  <TabsTrigger value="basic" className="rounded-none border-b-4 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-4 text-slate-400 data-[state=active]:text-primary shadow-none text-xs font-black uppercase tracking-widest transition-all">
-                    01. Essentials
+                  <TabsTrigger value="basic" className="rounded-none border-b-4 border-transparent data-[state=active]:border-[#009688] data-[state=active]:bg-transparent px-0 py-4 text-slate-400 data-[state=active]:text-[#009688] shadow-none text-xs font-black uppercase tracking-widest transition-all">
+                    01. Basic Info
                   </TabsTrigger>
-                  <TabsTrigger value="media" className="rounded-none border-b-4 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-4 text-slate-400 data-[state=active]:text-primary shadow-none text-xs font-black uppercase tracking-widest transition-all">
-                    02. Visuals
+                  <TabsTrigger value="media" className="rounded-none border-b-4 border-transparent data-[state=active]:border-[#009688] data-[state=active]:bg-transparent px-0 py-4 text-slate-400 data-[state=active]:text-[#009688] shadow-none text-xs font-black uppercase tracking-widest transition-all">
+                    02. Photos
                   </TabsTrigger>
-                  <TabsTrigger value="itinerary" className="rounded-none border-b-4 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-4 text-slate-400 data-[state=active]:text-primary shadow-none text-xs font-black uppercase tracking-widest transition-all">
-                    03. Journey
+                  <TabsTrigger value="itinerary" className="rounded-none border-b-4 border-transparent data-[state=active]:border-[#009688] data-[state=active]:bg-transparent px-0 py-4 text-slate-400 data-[state=active]:text-[#009688] shadow-none text-xs font-black uppercase tracking-widest transition-all">
+                    03. Itinerary
                   </TabsTrigger>
-                  <TabsTrigger value="details" className="rounded-none border-b-4 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-4 text-slate-400 data-[state=active]:text-primary shadow-none text-xs font-black uppercase tracking-widest transition-all">
+                  <TabsTrigger value="details" className="rounded-none border-b-4 border-transparent data-[state=active]:border-[#009688] data-[state=active]:bg-transparent px-0 py-4 text-slate-400 data-[state=active]:text-[#009688] shadow-none text-xs font-black uppercase tracking-widest transition-all">
                     04. Inclusions
                   </TabsTrigger>
                 </TabsList>
@@ -291,7 +325,7 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
 
                       <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-3">
-                          <Label htmlFor="price" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Display Price ($)</Label>
+                          <Label htmlFor="price" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Display Price (₹)</Label>
                           <Input id="price" type="number" {...register('price')} className="h-14 px-5 rounded-2xl border-slate-100 bg-slate-50/50 shadow-sm text-base font-bold" />
                           {errors.price && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1">{errors.price.message}</p>}
                         </div>
@@ -312,14 +346,14 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                               <SelectTrigger id="category" className="h-14 px-5 rounded-2xl border-slate-100 bg-slate-50/50 shadow-sm text-base font-bold">
                                 <SelectValue placeholder="Select Category" />
                               </SelectTrigger>
-                              <SelectContent className="rounded-2xl border-slate-100 p-2">
-                                <SelectItem value="HERITAGE" className="rounded-xl py-3 font-bold">HERITAGE</SelectItem>
-                                <SelectItem value="HILL STATION" className="rounded-xl py-3 font-bold">HILL STATION</SelectItem>
-                                <SelectItem value="SPIRITUAL" className="rounded-xl py-3 font-bold">SPIRITUAL</SelectItem>
-                                <SelectItem value="BEACH & LEISURE" className="rounded-xl py-3 font-bold">BEACH & LEISURE</SelectItem>
-                                <SelectItem value="WILDLIFE & DESERT" className="rounded-xl py-3 font-bold">WILDLIFE & DESERT</SelectItem>
-                                <SelectItem value="ADVENTURE" className="rounded-xl py-3 font-bold">ADVENTURE</SelectItem>
-                                <SelectItem value="HOLIDAY" className="rounded-xl py-3 font-bold">HOLIDAY</SelectItem>
+                              <SelectContent>
+                                <SelectItem value="HERITAGE">HERITAGE</SelectItem>
+                                <SelectItem value="HILL STATION">HILL STATION</SelectItem>
+                                <SelectItem value="SPIRITUAL">SPIRITUAL</SelectItem>
+                                <SelectItem value="BEACH & LEISURE">BEACH & LEISURE</SelectItem>
+                                <SelectItem value="WILDLIFE & DESERT">WILDLIFE & DESERT</SelectItem>
+                                <SelectItem value="ADVENTURE">ADVENTURE</SelectItem>
+                                <SelectItem value="HOLIDAY">HOLIDAY</SelectItem>
                               </SelectContent>
                             </Select>
                           )}
@@ -359,7 +393,7 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
 
                   <div className="space-y-4 pt-4">
                     <Label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-800">
-                       <MapIcon className="w-5 h-5 text-primary" /> Multi-Select Destinations
+                       <MapIcon className="w-5 h-5 text-[#009688]" /> Multi-Select Destinations
                     </Label>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 p-6 border rounded-[32px] bg-slate-50/50 border-slate-100 shadow-inner">
                       {destinations.map((dest) => (
@@ -379,7 +413,7 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                                     field.onChange(current.filter(id => id !== dest.id));
                                   }
                                 }}
-                                className="w-5 h-5 rounded-md border-slate-200 data-[state=checked]:bg-primary"
+                                className="w-5 h-5 rounded-md border-slate-200 data-[state=checked]:bg-[#009688]"
                               />
                             )}
                           />
@@ -454,38 +488,40 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {(watch('gallery') || '').split(',').map((url, index) => {
                         const trimmedUrl = url.trim();
                         const allUrls = (watch('gallery') || '').split(',').map(s => s.trim());
 
                         return (
-                          <div key={index} className="relative bg-white rounded-[24px] p-4 border border-slate-100 shadow-sm group hover:border-primary/20 transition-all hover:shadow-md">
-                            <div className="flex justify-between items-center mb-3">
-                              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Image {index + 1}</span>
+                          <div key={index} className="relative bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm group hover:border-[#009688]/30 transition-all hover:shadow-lg">
+                            <div className="flex justify-between items-center mb-5">
+                              <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none">Slot {index + 1}</span>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
+                                className="h-8 w-8 rounded-full text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
                                 onClick={() => {
                                   const newList = [...allUrls];
                                   newList.splice(index, 1);
                                   setValue('gallery', newList.join(', '));
                                 }}
                               >
-                                <X className="w-3.5 h-3.5" strokeWidth={3} />
+                                <X className="w-4 h-4" strokeWidth={3} />
                               </Button>
                             </div>
-                            <ImageUpload
-                              value={trimmedUrl}
-                              onChange={(newUrl) => {
-                                const newList = [...allUrls];
-                                newList[index] = newUrl;
-                                setValue('gallery', newList.join(', '));
-                              }}
-                              folder={`packages/gallery/${index}`}
-                            />
+                            <div className="h-[200px] w-full flex items-center justify-center">
+                              <ImageUpload
+                                value={trimmedUrl}
+                                onChange={(newUrl) => {
+                                  const newList = [...allUrls];
+                                  newList[index] = newUrl;
+                                  setValue('gallery', newList.join(', '));
+                                }}
+                                folder={`packages/gallery/${index}`}
+                              />
+                            </div>
                           </div>
                         );
                       })}
@@ -617,9 +653,9 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
               </Button>
               <Button 
                 type="submit" 
-                className="h-14 px-12 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-[0.2em] text-[11px] min-w-[240px] shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="h-14 px-12 rounded-2xl bg-[#009688] hover:bg-[#00796b] text-white font-black uppercase tracking-[0.2em] text-[11px] min-w-[240px] shadow-xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
               >
-                {editingPackage ? 'Update Experience' : 'Deploy Package'}
+                {editingPackage ? 'Update Package' : 'Save Package'}
               </Button>
             </DialogFooter>
           </form>
@@ -659,6 +695,6 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

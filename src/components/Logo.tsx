@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { motion } from 'motion/react';
 
 interface LogoProps {
   className?: string;
@@ -10,7 +11,10 @@ export function Logo({ className, showText = true, variant = 'dark' }: LogoProps
   const logoUrl = "https://shashwatholidays.com/wp-content/uploads/2023/12/Shashwat-Logo-1.png";
 
   return (
-    <div className={cn("flex items-center gap-4", className)}>
+    <motion.div 
+      whileHover={{ scale: 1.05 }}
+      className={cn("flex items-center gap-4 cursor-pointer", className)}
+    >
       <div className="relative w-14 h-14 flex items-center justify-center">
          <img 
           src={logoUrl} 
@@ -35,6 +39,6 @@ export function Logo({ className, showText = true, variant = 'dark' }: LogoProps
           </span>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

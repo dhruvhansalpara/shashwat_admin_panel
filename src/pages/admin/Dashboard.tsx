@@ -1,5 +1,5 @@
 import { StatsCard } from '@/components/StatsCard';
-import { Package, TrendingUp, ArrowRight, MapPin, MessageSquare } from 'lucide-react';
+import { Package, TrendingUp, ArrowRight, MapPin, MessageSquare, Sparkles } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { Package as PackageType, Inquiry } from '@/types';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { motion } from 'motion/react';
 
 const chartData = [
   { name: 'Mon', value: 4 },
@@ -18,6 +19,21 @@ const chartData = [
   { name: 'Sat', value: 8 },
   { name: 'Sun', value: 6 },
 ];
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
+};
 
 interface DashboardProps {
   stats: {
@@ -47,20 +63,41 @@ export function Dashboard({ stats, recentInquiries, topPackages }: DashboardProp
   }, []);
 
   return (
-    <div className="space-y-12 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-        <div className="space-y-1">
-          <div className="flex items-center gap-4">
-            <h2 className="text-4xl font-black tracking-tighter text-slate-800 uppercase font-display leading-none">Dashboard</h2>
-            {dbStatus === 'connected' && (
-              <Badge className="bg-emerald-500/10 text-emerald-600 border-none rounded-full px-4 text-[9px] font-black uppercase tracking-widest ring-1 ring-emerald-500/20">System Online</Badge>
-            )}
+    <motion.div 
+      variants={container}
+      initial="hidden"
+      animate="show"
+      className="space-y-12 pb-20"
+    >
+      <motion.div variants={item} className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+        <div className="space-y-3">
+          <div className="flex items-center gap-5">
+            <div className="p-4 bg-[#009688]/10 rounded-[20px] text-[#009688] shadow-[0_4px_20px_rgba(0,150,136,0.1)]">
+              <Sparkles className="w-7 h-7 animate-pulse" strokeWidth={2.5} />
+            </div>
+            <div className="space-y-0.5">
+               <h2 className="text-5xl font-black tracking-tight text-slate-800 uppercase font-display leading-none italic">Admin Dashboard</h2>
+               <div className="flex items-center gap-3">
+                 <p className="text-[#009688] text-[10px] font-black uppercase tracking-[0.3em] opacity-100 pl-0.5">Shashwat Holidays Overview</p>
+                 {dbStatus === 'connected' && (
+                   <span className="flex items-center gap-1.5 px-3 py-0.5 bg-emerald-500/10 text-emerald-600 rounded-full text-[8px] font-black uppercase tracking-tighter ring-1 ring-emerald-500/20 shadow-[0_2px_10px_rgba(16,185,129,0.1)]">
+                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                     ONLINE
+                   </span>
+                 )}
+               </div>
+            </div>
           </div>
-          <p className="text-slate-400 text-sm font-medium opacity-80 pl-1">Monitoring real-time agency performance metrics.</p>
         </div>
-      </div>
+        <div className="flex flex-col items-end gap-2 bg-white p-6 rounded-[32px] border-2 border-slate-50 shadow-sm">
+           <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">Last Synchronization</p>
+           <div className="text-xl font-black text-[#009688] font-display italic leading-none">
+             {format(new Date(), 'HH:mm:ss')} <span className="text-[10px] text-slate-400 not-italic ml-1">GMT</span>
+           </div>
+        </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <motion.div variants={container} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <StatsCard 
           title="Active Packages" 
           value={stats.totalPackages} 
@@ -90,25 +127,29 @@ export function Dashboard({ stats, recentInquiries, topPackages }: DashboardProp
           description="Inquiry to lead"
           trend={{ value: 0.5, isPositive: true }}
         />
-      </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <div className="xl:col-span-2 border border-slate-50 bg-white p-12 rounded-[32px] shadow-[0_8px_40px_rgba(0,0,0,0.02)] relative group border-2">
-          <div className="flex justify-between items-start mb-12">
-            <div className="space-y-1.5">
-              <h3 className="text-3xl font-black text-slate-800 tracking-tighter uppercase font-display leading-none">Traffic Analysis</h3>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] opacity-60">Inquiry volume trends over the last week.</p>
+        <motion.div variants={item} className="xl:col-span-2 border-2 border-slate-50 bg-white p-12 rounded-[48px] shadow-[0_24px_80px_rgba(0,0,0,0.03)] relative group overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-[0.03] overflow-hidden">
+             <div className="absolute inset-0 bg-[radial-gradient(circle,#009688_1px,transparent_1px)] bg-[size:32px_32px]" />
+          </div>
+          <div className="flex justify-between items-start mb-16 relative z-10">
+            <div className="space-y-2">
+              <h3 className="text-4xl font-black text-slate-800 tracking-tighter uppercase font-display leading-none italic">Inquiry Trends</h3>
+              <p className="text-[10px] font-black text-[#009688] uppercase tracking-[0.4em] opacity-80 pl-0.5">Daily inquiry activity and guest reach</p>
             </div>
-            <div className="px-4 py-2 bg-[#e0f2f1] text-[#009688] rounded-xl text-[9px] font-black uppercase tracking-[0.2em] border border-[#009688]/10 shadow-sm animate-pulse">
-              Live Sync
+            <div className="px-6 py-3 bg-[#e0f2f1] text-[#009688] rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border-2 border-[#009688]/10 shadow-[0_4px_20px_rgba(0,150,136,0.1)] flex items-center gap-3">
+              <span className="w-2 h-2 rounded-full bg-[#009688] animate-ping" />
+               LIVE STREAMING
             </div>
           </div>
-          <div className="h-[420px] w-full">
+          <div className="h-[460px] w-full relative z-10">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#009688" stopOpacity={0.15}/>
+                    <stop offset="5%" stopColor="#009688" stopOpacity={0.2}/>
                     <stop offset="95%" stopColor="#009688" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
@@ -129,10 +170,10 @@ export function Dashboard({ stats, recentInquiries, topPackages }: DashboardProp
                 />
                 <Tooltip 
                   contentStyle={{ 
-                    borderRadius: '16px', 
+                    borderRadius: '24px', 
                     border: 'none',
-                    boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.1)',
-                    padding: '16px 20px',
+                    boxShadow: '0 40px 80px -12px rgb(0 150 136 / 0.15)',
+                    padding: '20px 24px',
                     fontWeight: 700,
                     textTransform: 'none',
                     fontSize: '13px',
@@ -146,56 +187,67 @@ export function Dashboard({ stats, recentInquiries, topPackages }: DashboardProp
                   type="monotone" 
                   dataKey="value" 
                   stroke="#009688" 
-                  strokeWidth={4} 
+                  strokeWidth={5} 
                   fillOpacity={1} 
                   fill="url(#colorValue)" 
-                  animationDuration={1500}
+                  animationDuration={2000}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white p-10 rounded-[32px] shadow-[0_8px_40px_rgba(0,0,0,0.02)] border-2 border-slate-50 flex flex-col h-full">
-          <div className="flex justify-between items-center mb-10">
-            <h3 className="text-2xl font-black text-slate-800 tracking-tighter uppercase font-display leading-none">Top Tours</h3>
-            <Link to="/admin/packages" className="text-[9px] font-black text-[#009688] hover:opacity-80 transition-all uppercase tracking-[0.2em] font-display">
-              BROWSE ALL
-            </Link>
+        <motion.div variants={item} className="bg-white p-10 rounded-[40px] shadow-[0_8px_40px_rgba(0,0,0,0.02)] border-2 border-slate-50 flex flex-col h-full relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16" />
+          <div className="relative z-10 flex flex-col h-full">
+            <div className="flex justify-between items-center mb-10">
+              <h3 className="text-2xl font-black text-slate-800 tracking-tighter uppercase font-display leading-none">Top Tours</h3>
+              <Link to="/admin/packages" className="text-[9px] font-black text-[#009688] hover:opacity-80 transition-all uppercase tracking-[0.2em] font-display">
+                BROWSE ALL
+              </Link>
+            </div>
+            <div className="space-y-6 flex-1">
+               {topPackages.slice(0, 5).map((pkg, idx) => (
+                 <motion.div 
+                   key={pkg.id} 
+                   initial={{ opacity: 0, x: 20 }}
+                   animate={{ opacity: 1, x: 0 }}
+                   transition={{ delay: 0.5 + (idx * 0.1) }}
+                   className="flex items-center gap-4 group/item cursor-pointer hover:translate-x-1 transition-all duration-300 border-b border-white hover:border-slate-50 pb-2"
+                 >
+                   <div className="relative w-12 h-12 rounded-2xl overflow-hidden shadow-sm">
+                     <img src={pkg.image} className="w-full h-full object-cover transition-transform group-hover/item:scale-110" alt="" />
+                   </div>
+                   <div className="flex-1 min-w-0">
+                     <p className="font-black text-slate-800 text-sm leading-tight tracking-tight truncate group-hover/item:text-[#009688] transition-colors">{pkg.name}</p>
+                     <div className="flex items-center gap-2 mt-0.5">
+                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{pkg.days} Days</span>
+                       <span className="w-1 h-1 rounded-full bg-slate-200" />
+                       <span className="text-[#E91E63] font-black text-[10px] uppercase tracking-widest">₹{pkg.price}</span>
+                     </div>
+                   </div>
+                   <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover/item:bg-[#009688]/10 group-hover/item:text-[#009688] transition-all">
+                     <ArrowRight className="w-3.5 h-3.5" strokeWidth={3} />
+                   </div>
+                 </motion.div>
+               ))}
+               {topPackages.length === 0 && (
+                 <div className="flex flex-col items-center justify-center h-full text-slate-200">
+                   <Package className="w-12 h-12 mb-4 opacity-10" />
+                   <p className="text-[9px] font-black uppercase tracking-widest">No Active Packages</p>
+                 </div>
+               )}
+            </div>
           </div>
-          <div className="space-y-6 flex-1">
-             {topPackages.slice(0, 5).map((pkg) => (
-               <div key={pkg.id} className="flex items-center gap-4 group cursor-pointer hover:translate-x-1 transition-all duration-300 border-b border-white hover:border-slate-50 pb-2">
-                 <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-sm">
-                   <img src={pkg.image} className="w-full h-full object-cover transition-transform group-hover:scale-110" alt="" />
-                 </div>
-                 <div className="flex-1 min-w-0">
-                   <p className="font-black text-slate-800 text-sm leading-tight tracking-tight truncate group-hover:text-[#009688] transition-colors">{pkg.name}</p>
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                     {pkg.days} Days • <span className="text-[#E91E63] font-black">₹{pkg.price}</span>
-                   </p>
-                 </div>
-                 <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-[#009688]/10 group-hover:text-[#009688] transition-all">
-                   <ArrowRight className="w-3.5 h-3.5" strokeWidth={3} />
-                 </div>
-               </div>
-             ))}
-             {topPackages.length === 0 && (
-               <div className="flex flex-col items-center justify-center h-full text-slate-200">
-                 <Package className="w-12 h-12 mb-4 opacity-10" />
-                 <p className="text-[9px] font-black uppercase tracking-widest">No Active Packages</p>
-               </div>
-             )}
-          </div>
-        </div>
+        </motion.div>
 
-        <div className="xl:col-span-3 border border-slate-50 bg-white p-12 rounded-[32px] shadow-[0_8px_40px_rgba(0,0,0,0.02)] border-2">
+        <motion.div variants={item} className="xl:col-span-3 border border-slate-50 bg-white p-12 rounded-[40px] shadow-[0_8px_40px_rgba(0,0,0,0.02)] border-2">
            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-10">
              <div className="space-y-1.5">
                <h3 className="text-3xl font-black text-slate-800 tracking-tighter uppercase font-display leading-none">Recent Inquiries</h3>
                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] opacity-60">The latest customer leads from the portal.</p>
              </div>
-             <Button variant="ghost" asChild className="rounded-xl border border-slate-100 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] h-11 px-8 hover:bg-slate-50 hover:text-[#009688] transition-all font-display">
+             <Button variant="ghost" asChild className="rounded-2xl border border-slate-100 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] h-12 px-8 hover:bg-slate-50 hover:text-[#009688] transition-all font-display hover:shadow-sm">
                <Link to="/admin/inquiries">VIEW ANALYTICS</Link>
              </Button>
            </div>
@@ -211,11 +263,17 @@ export function Dashboard({ stats, recentInquiries, topPackages }: DashboardProp
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentInquiries.map((inquiry) => (
-                    <TableRow key={inquiry.id} className="border-b border-slate-50/50 hover:bg-slate-50/30 transition-all group">
+                  {recentInquiries.map((inquiry, idx) => (
+                    <motion.tr 
+                      key={inquiry.id} 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 + (idx * 0.05) }}
+                      className="border-b border-slate-50/50 hover:bg-slate-50/30 transition-all group/row"
+                    >
                       <td className="px-6 py-6 font-display">
                         <div className="flex items-center gap-4">
-                           <div className="w-10 h-10 rounded-xl bg-[#e0f2f1] flex items-center justify-center text-xs font-black text-[#009688] uppercase italic">
+                           <div className="w-12 h-12 rounded-2xl bg-[#e0f2f1] flex items-center justify-center text-sm font-black text-[#009688] uppercase italic shadow-sm group-hover/row:scale-105 transition-transform">
                              {inquiry.name.charAt(0)}
                            </div>
                            <div>
@@ -232,13 +290,13 @@ export function Dashboard({ stats, recentInquiries, topPackages }: DashboardProp
                       <td className="px-6 py-6 font-display">
                          <div className="flex items-center gap-2.5">
                            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-800 transition-colors">Active</span>
+                           <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover/row:text-emerald-600 transition-colors">Active</span>
                          </div>
                       </td>
                       <td className="px-6 py-6 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest font-display">
                         {format(new Date(inquiry.createdAt), 'MMM dd, yyyy')}
                       </td>
-                    </TableRow>
+                    </motion.tr>
                   ))}
                   {recentInquiries.length === 0 && (
                     <TableRow>
@@ -247,7 +305,7 @@ export function Dashboard({ stats, recentInquiries, topPackages }: DashboardProp
                             <div className="w-24 h-24 rounded-[40px] bg-slate-50/50 flex items-center justify-center text-slate-100 group">
                               <MessageSquare className="w-10 h-10 group-hover:scale-110 transition-transform duration-500" strokeWidth={1} />
                             </div>
-                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-200 font-display">No Intelligence Records</p>
+                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-200 font-display">No Inquiry Records Yet</p>
                          </div>
                       </TableCell>
                     </TableRow>
@@ -255,8 +313,8 @@ export function Dashboard({ stats, recentInquiries, topPackages }: DashboardProp
                 </TableBody>
              </Table>
            </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

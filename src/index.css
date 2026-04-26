@@ -11,9 +11,12 @@
   --primary-foreground: #ffffff;
   --secondary: #fb923c;
   --secondary-foreground: #ffffff;
-  --accent: #6366f1;
   --muted: #f8fafc;
   --muted-foreground: #94a3b8;
+  --popover: #ffffff;
+  --popover-foreground: #020617;
+  --accent: #009688;
+  --accent-foreground: #ffffff;
   --border: #f1f5f9;
 }
 
