@@ -35,7 +35,7 @@ export function AdminSidebar() {
     <div className="w-72 bg-[#001a1a] flex flex-col h-screen sticky top-0 z-50 border-r border-white/5">
       <div className="p-10 pb-12">
         <NavLink to="/admin" className="block transform transition-all active:scale-95">
-          <Logo className="scale-[1.2] origin-left brightness-0 invert" variant="light" />
+          <Logo className="scale-[1.2] origin-left" />
         </NavLink>
       </div>
       

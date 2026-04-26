@@ -198,87 +198,75 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
         />
       </motion.div>
 
-      <motion.div variants={item} className="bg-white rounded-[40px] border border-slate-100 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b-2 border-slate-50 bg-slate-50/10 hover:bg-slate-50/10 transition-none">
-                <th className="pl-12 py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Package Image</th>
-                <th className="py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Package Details</th>
-                <th className="py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Destinations</th>
-                <th className="py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Price & Duration</th>
-                <th className="px-12 py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 text-right font-display italic">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y-2 divide-slate-50/20">
-              <AnimatePresence mode="popLayout">
-                {filteredPackages.length > 0 ? filteredPackages.map((pkg, idx) => (
-                  <motion.tr 
-                    key={pkg.id} 
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="group hover:bg-slate-50/60 transition-all duration-300 border-none"
-                  >
-                    <td className="pl-12 py-10">
-                      <div className="relative w-24 h-24 rounded-[36px] overflow-hidden shadow-2xl shadow-slate-200 group-hover:rounded-2xl transition-all duration-700 ring-8 ring-slate-50/30">
-                        <img src={pkg.image} className="w-full h-full object-cover transition-transform group-hover:scale-125 duration-1000" alt="" />
-                      </div>
-                    </td>
-                    <td className="py-10">
-                      <div className="space-y-2">
-                        <div className="font-black text-slate-800 text-2xl tracking-tighter group-hover:text-[#009688] transition-colors leading-none italic uppercase font-display">{pkg.name}</div>
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-1 px-2.5 bg-[#e0f2f1] rounded-lg">
-                            <MapPin className="w-3 h-3 text-[#009688]" strokeWidth={3} />
-                          </div>
-                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{pkg.location}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-10">
-                      <div className="flex flex-wrap gap-2.5">
-                        {pkg.destination_ids?.map(id => {
-                          const dest = destinations.find(d => d.id === id);
-                          return dest ? (
-                            <Badge key={`dest-${id}`} variant="outline" className="bg-[#e0f2f1]/50 text-[#009688] text-[9px] font-black uppercase tracking-widest py-1.5 px-4 rounded-xl border-[#009688]/10 shadow-sm">
-                              {dest.name}
-                            </Badge>
-                          ) : null;
-                        })}
-                      </div>
-                    </td>
-                    <td className="py-10">
-                      <div className="space-y-1.5">
-                        <div className="font-black text-slate-900 text-3xl tracking-tighter leading-none italic font-display">₹{pkg.price}</div>
-                        <div className="text-[10px] font-black text-[#009688] uppercase tracking-[0.3em] opacity-60">DURATION: {pkg.days}D</div>
-                      </div>
-                    </td>
-                    <td className="px-12 py-10 text-right">
-                      <div className="flex justify-end items-center gap-4 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
-                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(pkg)} className="h-12 w-12 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-[#009688]/10 hover:text-[#009688] transition-all border border-slate-50">
-                           <Edit className="w-5 h-5" strokeWidth={3} />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setDeleteConfirmId(pkg.id)} className="h-12 w-12 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-rose-50 hover:text-rose-500 transition-all border border-slate-50">
-                          <Trash2 className="w-5 h-5" strokeWidth={3} />
-                        </Button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                )) : (
-                  <tr className="border-none">
-                    <td colSpan={5} className="text-center py-20 border-none">
-                      <div className="flex flex-col items-center gap-3 text-slate-300">
-                        <Search className="w-12 h-12 opacity-20" />
-                        <p className="font-black uppercase tracking-widest text-xs">No matching packages found</p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </AnimatePresence>
-            </tbody>
-          </table>
+      <motion.div variants={item} className="space-y-4">
+        {/* Header Row */}
+        <div className="flex items-center px-10 py-4 hidden lg:flex">
+          <div className="w-[120px] text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-display italic">Package Image</div>
+          <div className="flex-1 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-display italic">Details</div>
+          <div className="w-[200px] text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-display italic">Destinations</div>
+          <div className="w-[200px] text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-display italic text-right pr-20">Price & Duration</div>
+          <div className="w-[100px] text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-display italic text-right">Actions</div>
+        </div>
+
+        <div className="space-y-4">
+          <AnimatePresence mode="popLayout">
+            {filteredPackages.length > 0 ? filteredPackages.map((pkg, idx) => (
+              <motion.div 
+                key={pkg.id} 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ delay: idx * 0.05 }}
+                className="group relative bg-white hover:bg-[#009688]/[0.02] rounded-[32px] p-6 border border-slate-100 hover:border-[#009688]/30 hover:border-l-[12px] hover:border-l-[#009688] transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.06)] flex flex-col lg:flex-row lg:items-center gap-8"
+              >
+                <div className="w-[120px] shrink-0">
+                  <div className="relative w-24 h-24 rounded-[30px] overflow-hidden shadow-xl shadow-slate-200 group-hover:rounded-2xl transition-all duration-700 ring-4 ring-white group-hover:ring-[#009688]/10">
+                    <img src={pkg.image} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-1000" alt="" />
+                  </div>
+                </div>
+
+                <div className="flex-1 space-y-3">
+                  <div className="font-black text-slate-800 text-2xl tracking-tighter group-hover:text-[#009688] transition-colors leading-none italic uppercase font-display">{pkg.name}</div>
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-1 px-2.5 bg-[#e0f2f1] rounded-lg">
+                      <MapPin className="w-3 h-3 text-[#009688]" strokeWidth={3} />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{pkg.location}</span>
+                  </div>
+                </div>
+
+                <div className="w-[200px] flex flex-wrap gap-2">
+                  {pkg.destination_ids?.map(id => {
+                    const dest = destinations.find(d => d.id === id);
+                    return dest ? (
+                      <Badge key={`dest-${id}`} variant="outline" className="bg-white/80 text-[#009688] text-[8px] font-black uppercase tracking-widest py-1 px-3 rounded-lg border-[#009688]/10 shadow-sm">
+                        {dest.name}
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+
+                <div className="w-[200px] lg:text-right pr-0 lg:pr-20 space-y-1.5">
+                  <div className="font-black text-slate-900 text-3xl tracking-tighter leading-none italic font-display">₹{pkg.price}</div>
+                  <div className="text-[10px] font-black text-[#009688] uppercase tracking-[0.3em] opacity-60">DURATION: {pkg.days}D</div>
+                </div>
+
+                <div className="w-full lg:w-[100px] flex justify-end items-center gap-3">
+                  <Button variant="ghost" size="icon" onClick={() => handleEditClick(pkg)} className="h-12 w-12 rounded-2xl bg-white shadow-lg shadow-slate-200/50 hover:bg-[#009688] hover:text-white transition-all border border-slate-50">
+                     <Edit className="w-5 h-5" strokeWidth={3} />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => setDeleteConfirmId(pkg.id)} className="h-12 w-12 rounded-2xl bg-white shadow-lg shadow-slate-200/50 hover:bg-rose-500 hover:text-white transition-all border border-slate-50">
+                    <Trash2 className="w-5 h-5" strokeWidth={3} />
+                  </Button>
+                </div>
+              </motion.div>
+            )) : (
+              <div className="bg-white rounded-[40px] py-32 text-center border-2 border-dashed border-slate-100 flex flex-col items-center gap-4">
+                <Search className="w-12 h-12 text-slate-200" strokeWidth={1.5} />
+                <p className="font-black uppercase tracking-widest text-xs text-slate-300">No matching packages found</p>
+              </div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
     </motion.div>
@@ -435,12 +423,12 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                         control={control}
                         name="image"
                         render={({ field }) => (
-                          <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm relative group overflow-hidden">
+                          <div className="h-48 w-full bg-white rounded-[32px] p-2 border border-slate-100 shadow-sm relative group overflow-hidden">
                             <ImageUpload
                               value={field.value}
                               onChange={field.onChange}
-                              label="Main Card Preview"
                               folder="packages"
+                              compact={true}
                             />
                           </div>
                         )}
@@ -454,12 +442,12 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                         control={control}
                         name="bannerImage"
                         render={({ field }) => (
-                          <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm relative group overflow-hidden">
+                          <div className="h-48 w-full bg-white rounded-[32px] p-2 border border-slate-100 shadow-sm relative group overflow-hidden">
                             <ImageUpload
                               value={field.value || ''}
                               onChange={field.onChange}
-                              label="Page Banner Image"
                               folder="packages/banners"
+                              compact={true}
                             />
                           </div>
                         )}
@@ -477,72 +465,67 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                         type="button" 
                         variant="outline" 
                         size="sm"
+                        disabled={(watch('gallery') || '').split(',').length >= 12}
                         onClick={() => {
                           const current = watch('gallery') || '';
-                          const list = current ? current.split(',').map(s => s.trim()).filter(Boolean) : [];
-                          setValue('gallery', [...list, ''].join(', '));
+                          const list = current ? current.split(',').map(s => s.trim()) : [];
+                          if (list.length < 12) {
+                            setValue('gallery', [...list, ''].join(', '));
+                          }
                         }}
-                        className="rounded-xl h-10 px-5 gap-2 border-slate-200 font-bold text-xs uppercase tracking-widest"
+                        className="rounded-xl h-10 px-5 gap-2 border-slate-200 font-bold text-xs uppercase tracking-widest hover:bg-[#009688] hover:text-white hover:border-[#009688] transition-all"
                       >
-                        <Plus className="w-4 h-4" /> Add Slot
+                        <Plus className="w-4 h-4" strokeWidth={3} /> Add Slot
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                       {(watch('gallery') || '').split(',').map((url, index) => {
                         const trimmedUrl = url.trim();
                         const allUrls = (watch('gallery') || '').split(',').map(s => s.trim());
 
                         return (
-                          <div key={index} className="relative bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm group hover:border-[#009688]/30 transition-all hover:shadow-lg">
-                            <div className="flex justify-between items-center mb-5">
-                              <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none">Slot {index + 1}</span>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-full text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
-                                onClick={() => {
-                                  const newList = [...allUrls];
-                                  newList.splice(index, 1);
-                                  setValue('gallery', newList.join(', '));
-                                }}
-                              >
-                                <X className="w-4 h-4" strokeWidth={3} />
-                              </Button>
-                            </div>
-                            <div className="h-[200px] w-full flex items-center justify-center">
-                              <ImageUpload
-                                value={trimmedUrl}
-                                onChange={(newUrl) => {
-                                  const newList = [...allUrls];
-                                  newList[index] = newUrl;
-                                  setValue('gallery', newList.join(', '));
-                                }}
-                                folder={`packages/gallery/${index}`}
-                              />
-                            </div>
+                          <div key={index} className="aspect-square relative group">
+                            <ImageUpload
+                              value={trimmedUrl}
+                              onChange={(newUrl) => {
+                                const newList = [...allUrls];
+                                newList[index] = newUrl;
+                                setValue('gallery', newList.join(', '));
+                              }}
+                              folder={`packages/gallery/${index}`}
+                              compact={true}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute -top-2 -right-2 h-7 w-7 rounded-full bg-rose-500 text-white shadow-lg hover:bg-rose-600 transition-all opacity-0 group-hover:opacity-100 z-20"
+                              onClick={() => {
+                                const newList = [...allUrls];
+                                newList.splice(index, 1);
+                                setValue('gallery', newList.join(', '));
+                              }}
+                            >
+                              <X className="w-3 h-3" strokeWidth={4} />
+                            </Button>
                           </div>
                         );
                       })}
-
+                      
                       {(!(watch('gallery') || '')) && (
-                        <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-100 rounded-[32px] bg-slate-50/50 flex flex-col items-center gap-4 transition-colors hover:border-primary/20 hover:bg-primary/[0.02]">
-                          <div className="bg-white p-4 rounded-2xl shadow-sm">
-                            <ImageIcon className="w-8 h-8 text-slate-300" strokeWidth={1.5} />
-                          </div>
-                          <div className="space-y-1">
-                            <p className="font-black text-slate-300 uppercase tracking-widest text-[10px]">No gallery images yet</p>
+                         <div className="col-span-full py-12 text-center border-2 border-dashed border-slate-100 rounded-[32px] bg-slate-50/50 flex flex-col items-center gap-3">
+                            <ImageIcon className="w-8 h-8 text-slate-200" strokeWidth={1.5} />
+                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No gallery slots yet</p>
                             <Button 
                               type="button" 
                               variant="link" 
                               onClick={() => setValue('gallery', '')}
-                              className="text-primary font-bold text-xs uppercase tracking-widest"
+                              className="text-[#009688] font-bold text-xs uppercase tracking-widest h-auto p-0"
                             >
-                              Click to start uploading
+                              Add your first slot
                             </Button>
-                          </div>
-                        </div>
+                         </div>
                       )}
                     </div>
                   </div>

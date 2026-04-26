@@ -11,12 +11,12 @@ export function AdminLayout({ onLogout }: AdminLayoutProps) {
   const location = useLocation();
 
   return (
-    <div className="flex min-h-screen bg-background font-sans selection:bg-primary/10 overflow-hidden">
+    <div className="flex min-h-screen bg-background font-sans selection:bg-primary/10">
       {/* Sidebar */}
       <AdminSidebar />
       
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto flex flex-col h-screen scrollbar-hide">
+      <main className="flex-1 flex flex-col min-w-0">
         <header className="h-24 bg-white/80 backdrop-blur-xl border-b border-slate-100 flex items-center px-16 justify-between shrink-0 sticky top-0 z-30">
           <div className="flex flex-col">
             <h2 className="text-[10px] font-black text-[#009688] uppercase tracking-[0.4em] font-display mb-1 opacity-80">Operational Registry</h2>

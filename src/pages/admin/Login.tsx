@@ -70,7 +70,7 @@ export function LoginPage() {
             transition={{ delay: 0.3 }}
             className="space-y-6"
           >
-            <Logo className="scale-[1.8] origin-left brightness-0 invert" variant="light" />
+            <Logo className="scale-[1.8] origin-left" />
             <div className="w-24 h-1.5 bg-white/20 rounded-full" />
           </motion.div>
           <div className="space-y-8">
@@ -113,14 +113,7 @@ export function LoginPage() {
             </div>
           </motion.div>
         </div>
-        <motion.div 
-          initial={{ opacity: 0, scale: 1.2 }}
-          animate={{ opacity: 0.05, scale: 1 }}
-          transition={{ duration: 1.5 }}
-          className="absolute bottom-20 left-24 text-[150px] font-black text-white pointer-events-none leading-none select-none"
-        >
-          SHASHWAT
-        </motion.div>
+
       </motion.div>
 
       {/* Right Section - Form */}

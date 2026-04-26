@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Link, Upload, Image as ImageIcon, FileUp, Trash2 } from 'lucide-react';
+import { Link, Upload, Image as ImageIcon, FileUp, Trash2, Plus } from 'lucide-react';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { Badge } from './ui/badge';
@@ -14,16 +14,12 @@ interface ImageUploadProps {
   onChange: (value: string) => void;
   label?: string;
   folder?: string;
+  compact?: boolean;
 }
 
-export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, label, compact = false }: ImageUploadProps) {
   const [url, setUrl] = useState(value);
   const [uploading, setUploading] = useState(false);
-
-  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUrl(e.target.value);
-    onChange(e.target.value);
-  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -52,6 +48,102 @@ export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
     } finally {
       setUploading(false);
     }
+  };
+
+  const [compactMode, setCompactMode] = useState<'local' | 'url'>('local');
+
+  if (compact) {
+    return (
+      <div className="w-full h-full group/compact relative overflow-hidden rounded-[24px] border border-slate-100 hover:border-[#009688]/30 transition-all bg-slate-50/50">
+        <div className="absolute top-2 right-2 z-20 flex gap-1">
+           <Button
+             type="button"
+             variant="ghost"
+             size="icon"
+             className={cn(
+               "h-7 w-7 rounded-lg transition-all",
+               compactMode === 'local' ? "bg-[#009688] text-white" : "bg-white text-slate-300 hover:text-[#009688]"
+             )}
+             onClick={(e) => { e.stopPropagation(); setCompactMode('local'); }}
+           >
+             <FileUp className="w-3.5 h-3.5" />
+           </Button>
+           <Button
+             type="button"
+             variant="ghost"
+             size="icon"
+             className={cn(
+               "h-7 w-7 rounded-lg transition-all",
+               compactMode === 'url' ? "bg-[#009688] text-white" : "bg-white text-slate-300 hover:text-[#009688]"
+             )}
+             onClick={(e) => { e.stopPropagation(); setCompactMode('url'); }}
+           >
+             <Link className="w-3.5 h-3.5" />
+           </Button>
+        </div>
+
+        {value ? (
+          <div className="w-full h-full relative group/preview">
+            <img src={value} alt="Preview" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-slate-900/0 group-hover/preview:bg-slate-900/40 transition-colors flex items-center justify-center opacity-0 group-hover/preview:opacity-100 z-10">
+              <Button 
+                type="button" 
+                variant="destructive" 
+                size="icon" 
+                className="h-10 w-10 rounded-xl"
+                onClick={() => { setUrl(''); onChange(''); }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-3 relative p-4">
+            {compactMode === 'local' ? (
+              <>
+                <input 
+                  type="file" 
+                  onChange={handleFileChange} 
+                  disabled={uploading} 
+                  accept="image/*" 
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                />
+                {uploading ? (
+                  <div className="w-8 h-8 border-4 border-[#009688]/20 border-t-[#009688] rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-slate-300 group-hover/compact:text-[#009688] group-hover/compact:scale-110 transition-all duration-300">
+                      <Plus className="w-6 h-6" strokeWidth={3} />
+                    </div>
+                    <div className="text-center">
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover/compact:text-[#009688] transition-colors">Select Asset</span>
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="w-full space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <Input 
+                  value={url} 
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                    onChange(e.target.value);
+                  }}
+                  placeholder="Paste image URL..." 
+                  className="h-10 px-4 rounded-xl border-slate-100 bg-white font-bold text-xs shadow-sm focus:ring-[#009688]/20 transition-all"
+                />
+                <p className="text-[8px] font-black uppercase tracking-widest text-slate-300 text-center">Remote Endpoint</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUrl(e.target.value);
+    onChange(e.target.value);
   };
 
   return (
@@ -140,3 +232,4 @@ export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
     </div>
   );
 }
+
