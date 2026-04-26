@@ -53,13 +53,16 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-slate-800">Car Fleet</h2>
+    <div className="space-y-8 pb-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h2 className="text-4xl font-display font-black tracking-tight text-slate-900">Vehicle Fleet</h2>
+          <p className="text-slate-500 font-medium">Manage your fleet for car rentals and tour transportation.</p>
+        </div>
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 text-white">
-              <Plus className="w-4 h-4 mr-2" /> Add Vehicle
+            <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 h-12 shadow-lg shadow-primary/20 font-bold transition-all hover:scale-105 active:scale-95">
+              <Plus className="w-5 h-5 mr-1" /> Add New Vehicle
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden bg-white border-slate-200">
@@ -112,64 +115,81 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
                 </div>
               </div>
               <div className="p-4 px-6 border-t border-slate-100 bg-slate-50 shrink-0">
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white">Save Vehicle</Button>
+                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl shadow-lg shadow-primary/20 font-bold h-12">Save Vehicle</Button>
               </div>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {cars.map((car) => (
-          <div key={car.id} className="border border-slate-200 bg-white rounded-lg overflow-hidden flex flex-col">
-            <div className="aspect-video relative overflow-hidden">
+          <div key={car.id} className="border border-slate-200/60 bg-white rounded-[2.5rem] overflow-hidden flex flex-col shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover-card group">
+            <div className="aspect-[4/3] relative overflow-hidden">
               <img 
                 src={car.image} 
                 alt={car.name} 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
-              <div className="absolute top-2 right-2 flex gap-2">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute bottom-4 right-4 flex gap-3 translate-y-10 group-hover:translate-y-0 transition-transform duration-300">
                 <Button 
-                  size="sm" 
+                  size="icon" 
                   variant="secondary" 
-                  className="bg-white/90 hover:bg-white h-8 w-8 p-0"
+                  className="bg-white/90 hover:bg-white h-10 w-10 p-0 rounded-2xl shadow-xl hover:scale-110 transition-all"
                   onClick={() => setEditingCar(car)}
                 >
-                  <Edit2 className="w-4 h-4 text-slate-700" />
+                  <Edit2 className="w-4 h-4 text-amber-600" />
                 </Button>
                 <Button 
-                  size="sm" 
+                  size="icon" 
                   variant="destructive" 
-                  className="bg-white/90 hover:bg-white h-8 w-8 p-0"
+                  className="bg-white/90 hover:bg-white h-10 w-10 p-0 rounded-2xl shadow-xl hover:scale-110 transition-all"
                   onClick={() => {
                     if (confirm('Delete this vehicle?')) onDelete(car.id);
                   }}
                 >
-                  <Trash2 className="w-4 h-4 text-red-600" />
+                  <Trash2 className="w-4 h-4 text-rose-600" />
                 </Button>
               </div>
             </div>
-            <div className="p-5 flex-1 flex flex-col">
-              <h3 className="text-md font-bold text-slate-800 mb-4">{car.name}</h3>
-              <div className="space-y-3 mb-4">
-                 <div className="flex justify-between text-sm text-slate-600">
-                    <span className="flex items-center gap-1.5"><Users className="w-4 h-4 text-slate-400" /> {car.seats} Seats</span>
-                    <span className="flex items-center gap-1.5"><Briefcase className="w-4 h-4 text-slate-400" /> {car.luggage} Bags</span>
-                 </div>
-                 <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100 mt-2">
-                    <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Rate/KM</p>
-                      <p className="text-lg font-bold text-slate-800">₹{car.pricePerKm}</p>
+            <div className="p-8 flex-1 flex flex-col">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className="bg-primary/10 text-primary border-none shadow-none uppercase text-[10px] tracking-widest px-3 py-1 font-bold">{car.type}</Badge>
+              </div>
+              <h3 className="text-2xl font-display font-bold text-slate-900 mb-6 group-hover:text-primary transition-colors">{car.name}</h3>
+              <div className="space-y-6 mt-auto">
+                 <div className="flex justify-between text-sm">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Capacity</span>
+                      <span className="flex items-center gap-1.5 font-bold text-slate-700"><Users className="w-4 h-4 text-primary" /> {car.seats} Seats</span>
                     </div>
+                    <div className="flex flex-col gap-1 text-right">
+                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Storage</span>
+                      <span className="flex items-center gap-1.5 font-bold text-slate-700 justify-end">{car.luggage} Bags <Briefcase className="w-4 h-4 text-primary" /></span>
+                    </div>
+                 </div>
+                 <div className="grid grid-cols-2 gap-6 pt-6 border-t border-slate-100">
                     <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Rate/Day</p>
-                      <p className="text-lg font-bold text-slate-800">₹{car.pricePerDay || '--'}</p>
+                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-[0.1em] mb-1">Rate / KM</p>
+                      <p className="text-xl font-display font-black text-slate-900 group-hover:text-primary transition-colors">₹{car.pricePerKm}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-[0.1em] mb-1">Local / Day</p>
+                      <p className="text-xl font-display font-black text-slate-900 group-hover:text-primary transition-colors">₹{car.pricePerDay || '--'}</p>
                     </div>
                  </div>
               </div>
             </div>
           </div>
         ))}
+        {cars.length === 0 && (
+          <div className="col-span-full py-32 text-center border-2 border-dashed border-slate-200 rounded-[3rem] bg-slate-50">
+             <CarIcon className="w-12 h-12 mx-auto mb-4 text-slate-300" />
+             <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">Your fleet is empty</p>
+             <Button onClick={() => setIsAddOpen(true)} variant="link" className="text-primary mt-2">Add your first vehicle</Button>
+          </div>
+        )}
       </div>
 
       {editingCar && (
@@ -224,7 +244,7 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
                 </div>
               </div>
               <div className="p-4 px-6 border-t border-slate-100 bg-slate-50 shrink-0">
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white">Update Vehicle</Button>
+                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl shadow-lg shadow-primary/20 font-bold h-12">Update Vehicle</Button>
               </div>
             </form>
           </DialogContent>

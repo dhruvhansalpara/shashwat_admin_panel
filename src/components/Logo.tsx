@@ -7,16 +7,14 @@ interface LogoProps {
 }
 
 export function Logo({ className, showText = true, variant = 'dark' }: LogoProps) {
-  // Placeholder URL for the logo provided by the user
-  // Please replace this with your actual logo file path (e.g., /logo.png)
-  const logoUrl = "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop"; // Placeholder
+  // Official logo from the reference website
+  const logoUrl = "https://lightpink-termite-256807.hostingersite.com/shashwat-logo-new.png"; 
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <div className="relative w-12 h-12 overflow-hidden rounded-xl bg-white shadow-sm flex items-center justify-center">
-         {/* Using an img tag for the logo */}
+      <div className="relative w-12 h-12 overflow-hidden rounded-xl bg-white p-1 flex items-center justify-center">
          <img 
-          src="/logo.png" 
+          src={logoUrl} 
           alt="Shashwat Holidays Logo" 
           className="w-full h-full object-contain"
           referrerPolicy="no-referrer"
@@ -25,14 +23,14 @@ export function Logo({ className, showText = true, variant = 'dark' }: LogoProps
       {showText && (
         <div className="flex flex-col leading-tight">
           <span className={cn(
-            "font-display font-bold text-xl tracking-tight italic",
-            variant === 'light' ? "text-white" : "text-slate-800"
+            "font-display font-extrabold text-xl tracking-tight",
+            variant === 'light' ? "text-white" : "text-slate-900"
           )}>
             शाश्वत
           </span>
           <span className={cn(
-            "text-[10px] font-bold uppercase tracking-[0.2em]",
-            variant === 'light' ? "text-white/60" : "text-slate-500"
+            "text-[10px] font-bold uppercase tracking-[0.25em] text-primary",
+            variant === 'light' ? "text-primary-foreground/80" : ""
           )}>
             Holidays
           </span>

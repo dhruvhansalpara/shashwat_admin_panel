@@ -25,7 +25,7 @@ const io = new Server(httpServer, {
   }
 });
 
-const PORT = 3000;
+const PORT = 3001;
 const JWT_SECRET = process.env.JWT_SECRET || "shashwa-holidays-secret-key-123";
 
 app.use(cors());
@@ -212,15 +212,82 @@ async function initDb() {
       )
     `);
 
-    // Safety check for description and category columns
-    const [colsDesc]: any = await p.query("SHOW COLUMNS FROM destinations LIKE 'description'");
-    if (colsDesc.length === 0) {
-      await p.query("ALTER TABLE destinations ADD COLUMN description TEXT");
+    // Safety check for destinations columns
+    const [colsDest]: any = await p.query("SHOW COLUMNS FROM destinations");
+    const destColNames = colsDest.map((c: any) => c.Field.toLowerCase());
+    const destNeededCols = [
+      { name: 'slug', type: "VARCHAR(255) DEFAULT ''" },
+      { name: 'description', type: 'TEXT' },
+      { name: 'category', type: 'VARCHAR(100)' },
+      { name: 'image', type: 'TEXT' },
+      { name: 'packageCount', type: 'INT DEFAULT 0' },
+      { name: 'updatedAt', type: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP' }
+    ];
+    for (const col of destNeededCols) {
+      if (!destColNames.includes(col.name.toLowerCase())) {
+        await p.query(`ALTER TABLE destinations ADD COLUMN ${col.name} ${col.type}`);
+      }
     }
-    const [colsCat]: any = await p.query("SHOW COLUMNS FROM destinations LIKE 'category'");
-    if (colsCat.length === 0) {
-      await p.query("ALTER TABLE destinations ADD COLUMN category VARCHAR(100)");
+
+    // Safety check for packages columns
+    const [colsPkg]: any = await p.query("SHOW COLUMNS FROM packages");
+    const pkgColNames = colsPkg.map((c: any) => c.Field.toLowerCase());
+    const pkgNeededCols = [
+      { name: 'description', type: 'TEXT' },
+      { name: 'category', type: 'VARCHAR(100)' },
+      { name: 'destination_ids', type: 'TEXT' },
+      { name: 'price', type: 'DECIMAL(10, 2) DEFAULT 0' },
+      { name: 'days', type: 'INT DEFAULT 1' },
+      { name: 'duration', type: 'VARCHAR(100)' },
+      { name: 'location', type: 'VARCHAR(255)' },
+      { name: 'image', type: 'TEXT' },
+      { name: 'bannerImage', type: 'TEXT' },
+      { name: 'gallery', type: 'TEXT' },
+      { name: 'itinerary', type: 'TEXT' },
+      { name: 'highlights', type: 'TEXT' },
+      { name: 'inclusions', type: 'TEXT' },
+      { name: 'exclusions', type: 'TEXT' },
+      { name: 'groupSize', type: 'VARCHAR(100)' },
+      { name: 'languages', type: 'VARCHAR(255)' },
+      { name: 'isFeatured', type: 'BOOLEAN DEFAULT FALSE' },
+      { name: 'updatedAt', type: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP' }
+    ];
+    for (const col of pkgNeededCols) {
+      if (!pkgColNames.includes(col.name.toLowerCase())) {
+        await p.query(`ALTER TABLE packages ADD COLUMN ${col.name} ${col.type}`);
+      }
     }
+
+    // Fix potentially broken JSON in packages
+    await p.query("UPDATE packages SET destination_ids = '[]' WHERE destination_ids IS NULL OR destination_ids = ''");
+    await p.query("UPDATE packages SET gallery = '[]' WHERE gallery IS NULL OR gallery = ''");
+    await p.query("UPDATE packages SET itinerary = '[]' WHERE itinerary IS NULL OR itinerary = ''");
+    await p.query("UPDATE packages SET inclusions = '[]' WHERE inclusions IS NULL OR inclusions = ''");
+    await p.query("UPDATE packages SET exclusions = '[]' WHERE exclusions IS NULL OR exclusions = ''");
+
+    // Safety check for cars columns
+    const [colsCars]: any = await p.query("SHOW COLUMNS FROM cars");
+    const carsColNames = colsCars.map((c: any) => c.Field.toLowerCase());
+    const carsNeededCols = [
+      { name: 'type', type: 'VARCHAR(100)' },
+      { name: 'seats', type: 'INT' },
+      { name: 'luggage', type: 'INT' },
+      { name: 'pricePerKm', type: 'DECIMAL(10, 2)' },
+      { name: 'pricePerDay', type: 'DECIMAL(10, 2) DEFAULT 0' },
+      { name: 'image', type: 'TEXT' },
+      { name: 'features', type: 'TEXT' },
+      { name: 'description', type: 'TEXT' },
+      { name: 'isAvailable', type: 'BOOLEAN DEFAULT TRUE' },
+      { name: 'updatedAt', type: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP' }
+    ];
+    for (const col of carsNeededCols) {
+      if (!carsColNames.includes(col.name.toLowerCase())) {
+        await p.query(`ALTER TABLE cars ADD COLUMN ${col.name} ${col.type}`);
+      }
+    }
+    
+    // Fix broken JSON in cars
+    await p.query("UPDATE cars SET features = '[]' WHERE features IS NULL OR features = ''");
 
     await p.query(`
       CREATE TABLE IF NOT EXISTS inquiries (

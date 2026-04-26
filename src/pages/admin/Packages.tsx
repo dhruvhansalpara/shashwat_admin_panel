@@ -146,52 +146,74 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-slate-800">Tour Packages</h2>
-        <Button onClick={() => { setEditingPackage(null); reset(); setIsFormOpen(true); }} className="bg-primary hover:bg-primary/90 text-primary-foreground">
-          <Plus className="w-4 h-4 mr-2" /> Add Package
+    <div className="space-y-8 pb-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h2 className="text-4xl font-display font-black tracking-tight text-slate-900">Tour Packages</h2>
+          <p className="text-slate-500 font-medium">Manage and organize your holiday offerings.</p>
+        </div>
+        <Button onClick={() => { setEditingPackage(null); reset(); setIsFormOpen(true); }} className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 h-12 shadow-lg shadow-primary/20 font-bold transition-all hover:scale-105 active:scale-95">
+          <Plus className="w-5 h-5 mr-1" /> Add New Package
         </Button>
       </div>
       
-      <div className="border border-slate-200 bg-white p-4 rounded-lg flex items-center gap-4">
-        <Search className="w-4 h-4 text-slate-400" />
+      <div className="border border-slate-200/60 bg-white p-2 rounded-2xl flex items-center gap-3 shadow-sm hover-card">
+        <div className="p-3 bg-slate-50 rounded-xl">
+          <Search className="w-5 h-5 text-slate-400" />
+        </div>
         <Input 
-          placeholder="Search packages..." 
-          className="border-0 focus-visible:ring-0 text-sm"
+          placeholder="Search packages by name or description..." 
+          className="border-0 focus-visible:ring-0 text-base font-medium placeholder:text-slate-400"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
-        <table className="w-full text-left text-sm text-slate-600">
-          <thead className="bg-slate-50 text-slate-500 uppercase text-xs font-semibold border-b border-slate-200">
+      <div className="border border-slate-200/60 rounded-[2rem] overflow-hidden bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover-card">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-slate-50/50 text-slate-400 uppercase text-[10px] font-bold tracking-[0.2em] border-b border-slate-100">
             <tr>
-              <th className="px-4 py-3">Image</th>
-              <th className="px-4 py-3">Package Name</th>
-              <th className="px-4 py-3">Price</th>
-              <th className="px-4 py-3">Duration</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-6 py-5">Visual</th>
+              <th className="px-6 py-5">Package Identity</th>
+              <th className="px-6 py-5">Value</th>
+              <th className="px-6 py-5">Duration</th>
+              <th className="px-6 py-5 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-50">
             {filteredPackages.length > 0 ? filteredPackages.map((pkg) => (
-              <tr key={pkg.id}>
-                <td className="px-4 py-3">
-                  <img src={pkg.image} className="w-12 h-12 rounded object-cover" alt="" />
+              <tr key={pkg.id} className="hover:bg-slate-50/30 transition-colors group">
+                <td className="px-6 py-5">
+                  <div className="relative w-16 h-12 overflow-hidden rounded-xl bg-slate-100">
+                    <img src={pkg.image} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="" />
+                  </div>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="font-semibold text-slate-800">{pkg.name}</div>
+                <td className="px-6 py-5">
+                  <div className="font-bold text-slate-900 group-hover:text-primary transition-colors">{pkg.name}</div>
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{pkg.location}</div>
                 </td>
-                <td className="px-4 py-3">${pkg.price}</td>
-                <td className="px-4 py-3">{pkg.days} Days</td>
-                <td className="px-4 py-3 text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEditClick(pkg)} className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700 h-8 w-8 p-0">
+                <td className="px-6 py-5">
+                  <span className="font-bold text-slate-900">₹{pkg.price}</span>
+                </td>
+                <td className="px-6 py-5">
+                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none group-hover:bg-primary/10 group-hover:text-primary transition-colors">{pkg.days} Days</Badge>
+                </td>
+                <td className="px-6 py-5 text-right">
+                  <div className="flex justify-end gap-3">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleEditClick(pkg)} 
+                      className="h-10 w-10 p-0 rounded-xl bg-slate-50 text-amber-600 hover:bg-amber-100 transition-all hover:scale-110 shadow-sm"
+                    >
                        <Edit className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setDeleteConfirmId(pkg.id)} className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 h-8 w-8 p-0">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setDeleteConfirmId(pkg.id)} 
+                      className="h-10 w-10 p-0 rounded-xl bg-slate-50 text-rose-600 hover:bg-rose-100 transition-all hover:scale-110 shadow-sm"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -199,7 +221,14 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
               </tr>
             )) : (
               <tr>
-                <td colSpan={5} className="text-center py-10 text-slate-400">No packages found.</td>
+                <td colSpan={5} className="text-center py-20">
+                   <div className="flex flex-col items-center gap-3">
+                      <div className="p-4 bg-slate-50 rounded-full">
+                        <ImageIcon className="w-8 h-8 text-slate-300" />
+                      </div>
+                      <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">No packages found</p>
+                   </div>
+                </td>
               </tr>
             )}
           </tbody>
@@ -219,10 +248,10 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
             <Tabs defaultValue="basic" className="flex-1 flex flex-col overflow-hidden">
               <div className="px-6 shrink-0 border-b border-slate-100 bg-slate-50">
                 <TabsList className="w-full justify-start bg-transparent h-auto p-0 gap-6">
-                  <TabsTrigger value="basic" className="rounded-none border-b-2 border-transparent data-[state=active]:border-slate-800 data-[state=active]:bg-transparent px-2 py-3 text-slate-600 data-[state=active]:text-slate-900 shadow-none">Basic Info</TabsTrigger>
-                  <TabsTrigger value="media" className="rounded-none border-b-2 border-transparent data-[state=active]:border-slate-800 data-[state=active]:bg-transparent px-2 py-3 text-slate-600 data-[state=active]:text-slate-900 shadow-none">Media</TabsTrigger>
-                  <TabsTrigger value="itinerary" className="rounded-none border-b-2 border-transparent data-[state=active]:border-slate-800 data-[state=active]:bg-transparent px-2 py-3 text-slate-600 data-[state=active]:text-slate-900 shadow-none">Itinerary</TabsTrigger>
-                  <TabsTrigger value="details" className="rounded-none border-b-2 border-transparent data-[state=active]:border-slate-800 data-[state=active]:bg-transparent px-2 py-3 text-slate-600 data-[state=active]:text-slate-900 shadow-none">Details</TabsTrigger>
+                  <TabsTrigger value="basic" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3 text-slate-600 data-[state=active]:text-slate-900 shadow-none font-bold text-xs uppercase tracking-widest transition-all">Basic Info</TabsTrigger>
+                  <TabsTrigger value="media" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3 text-slate-600 data-[state=active]:text-slate-900 shadow-none font-bold text-xs uppercase tracking-widest transition-all">Media</TabsTrigger>
+                  <TabsTrigger value="itinerary" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3 text-slate-600 data-[state=active]:text-slate-900 shadow-none font-bold text-xs uppercase tracking-widest transition-all">Itinerary</TabsTrigger>
+                  <TabsTrigger value="details" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3 text-slate-600 data-[state=active]:text-slate-900 shadow-none font-bold text-xs uppercase tracking-widest transition-all">Details</TabsTrigger>
                 </TabsList>
               </div>
 

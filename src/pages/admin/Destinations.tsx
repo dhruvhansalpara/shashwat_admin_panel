@@ -102,56 +102,92 @@ export function DestinationsPage({ destinations, onAdd, onEdit, onDelete }: Dest
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-slate-800">Destinations</h2>
-        <Button onClick={handleAddNew} className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="w-4 h-4 mr-2" /> Add Destination
+    <div className="space-y-8 pb-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h2 className="text-4xl font-display font-black tracking-tight text-slate-900">Destinations</h2>
+          <p className="text-slate-500 font-medium">Manage the regions and cities your tour packages cover.</p>
+        </div>
+        <Button onClick={handleAddNew} className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 h-12 shadow-lg shadow-primary/20 font-bold transition-all hover:scale-105 active:scale-95">
+          <Plus className="w-5 h-5 mr-1" /> Add New Destination
         </Button>
       </div>
 
-      <div className="border border-slate-200 bg-white p-4 rounded-lg flex items-center gap-4">
-        <Search className="w-4 h-4 text-slate-400" />
+      <div className="border border-slate-200/60 bg-white p-2 rounded-2xl flex items-center gap-3 shadow-sm hover-card">
+        <div className="p-3 bg-slate-50 rounded-xl">
+          <Search className="w-5 h-5 text-slate-400" />
+        </div>
         <Input 
           placeholder="Search destinations..." 
-          className="border-0 focus-visible:ring-0 text-sm"
+          className="border-0 focus-visible:ring-0 text-base font-medium placeholder:text-slate-400"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
-        <table className="w-full text-left text-sm text-slate-600">
-          <thead className="bg-slate-50 text-slate-500 uppercase text-xs font-semibold border-b border-slate-200">
+      <div className="border border-slate-200/60 rounded-[2rem] overflow-hidden bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover-card">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-slate-50/50 text-slate-400 uppercase text-[10px] font-bold tracking-[0.2em] border-b border-slate-100">
             <tr>
-              <th className="px-4 py-3">Image</th>
-              <th className="px-4 py-3">Location Details</th>
-              <th className="px-4 py-3">Category</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-6 py-5">Thumbnail</th>
+              <th className="px-6 py-5">Location Details</th>
+              <th className="px-6 py-5">Category</th>
+              <th className="px-6 py-5 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-50">
             {filteredDestinations.map((dest) => (
-              <tr key={dest.id}>
-                <td className="px-4 py-3">
-                  <img src={dest.image} alt={dest.name} className="w-12 h-12 rounded object-cover" />
+              <tr key={dest.id} className="hover:bg-slate-50/30 transition-colors group">
+                <td className="px-6 py-5">
+                  <div className="relative w-16 h-12 overflow-hidden rounded-xl bg-slate-100">
+                    <img src={dest.image} alt={dest.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                  </div>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="font-semibold text-slate-800">{dest.name}</div>
+                <td className="px-6 py-5">
+                  <div className="font-bold text-slate-900 group-hover:text-primary transition-colors">{dest.name}</div>
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 flex items-center gap-1.5">
+                    <MapPin className="w-3 h-3" /> /{dest.slug}
+                  </div>
                 </td>
-                <td className="px-4 py-3 capitalize">{dest.category}</td>
-                <td className="px-4 py-3 text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(dest)} className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700 h-8 w-8 p-0">
+                <td className="px-6 py-5 capitalize">
+                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                    {dest.category}
+                  </Badge>
+                </td>
+                <td className="px-6 py-5 text-right">
+                  <div className="flex justify-end gap-3">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleEdit(dest)} 
+                      className="h-10 w-10 p-0 rounded-xl bg-slate-50 text-amber-600 hover:bg-amber-100 transition-all hover:scale-110 shadow-sm"
+                    >
                        <Edit className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => onDelete(dest.id)} className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 h-8 w-8 p-0">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => onDelete(dest.id)} 
+                      className="h-10 w-10 p-0 rounded-xl bg-slate-50 text-rose-600 hover:bg-rose-100 transition-all hover:scale-110 shadow-sm"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </td>
               </tr>
             ))}
+            {filteredDestinations.length === 0 && (
+              <tr>
+                <td colSpan={4} className="text-center py-20">
+                   <div className="flex flex-col items-center gap-3">
+                      <div className="p-4 bg-slate-50 rounded-full">
+                        <ImageIcon className="w-8 h-8 text-slate-300" />
+                      </div>
+                      <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">No destinations found</p>
+                   </div>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
