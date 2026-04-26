@@ -8,23 +8,29 @@ import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
 import { motion } from 'motion/react';
 
-const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
-  { icon: Package, label: 'Packages', path: '/admin/packages' },
-  { icon: MapPin, label: 'Destinations', path: '/admin/destinations' },
-  { icon: CarIcon, label: 'Fleet', path: '/admin/cars' },
-  { icon: ImageIcon, label: 'Banners', path: '/admin/banners' },
-  { icon: MessageSquare, label: 'Inquiries', path: '/admin/inquiries' },
-];
-
 const superAdminItems = [
   { icon: Users, label: 'Manage Admins', path: '/admin/users' },
   { icon: Settings, label: 'Settings', path: '/admin/settings' },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ packages = [], destinations = [], cars = [], banners = [], inquiries = [] }: { 
+  packages?: any[], 
+  destinations?: any[], 
+  cars?: any[], 
+  banners?: any[], 
+  inquiries?: any[] 
+}) {
   const { logout, user } = useAdmin();
   const navigate = useNavigate();
+
+  const navItems = [
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
+    { icon: Package, label: 'Packages', path: '/admin/packages', count: packages.length },
+    { icon: MapPin, label: 'Destinations', path: '/admin/destinations', count: destinations.length },
+    { icon: CarIcon, label: 'Fleet', path: '/admin/cars', count: cars.length },
+    { icon: ImageIcon, label: 'Banners', path: '/admin/banners', count: banners.length },
+    { icon: MessageSquare, label: 'Inquiries', path: '/admin/inquiries', count: inquiries.length },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -35,7 +41,7 @@ export function AdminSidebar() {
     <div className="w-72 bg-[#001a1a] flex flex-col h-screen sticky top-0 z-50 border-r border-white/5">
       <div className="p-10 pb-12">
         <NavLink to="/admin" className="block transform transition-all active:scale-95">
-          <Logo className="scale-[1.2] origin-left" />
+          <Logo className="scale-[1.2] origin-left brightness-0 invert" variant="light" />
         </NavLink>
       </div>
       
@@ -65,6 +71,11 @@ export function AdminSidebar() {
               >
                 <item.icon className={cn("w-4 h-4 transition-all", isActive ? "scale-110 text-[#009688]" : "group-hover:scale-110")} strokeWidth={3} />
                 <span className="flex-1 leading-none">{item.label}</span>
+                {item.count !== undefined && (
+                  <Badge variant="secondary" className="px-2 py-0.5 rounded-full text-[9px] bg-white/10 text-white font-black">
+                    {item.count}
+                  </Badge>
+                )}
                 {isActive && (
                   <motion.div 
                     layoutId="active-nav"

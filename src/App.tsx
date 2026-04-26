@@ -103,6 +103,27 @@ export default function App() {
     }
   };
 
+  // Public Actions
+  const handlePublicAction = async (url: string, method: string, body: any, successMsg: string) => {
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        toast.success(successMsg);
+      } else {
+        const errorData = await res.json();
+        toast.error(errorData.error || `Failed to ${method.toLowerCase()}`);
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
@@ -132,7 +153,7 @@ export default function App() {
               banners={banners} 
               destinations={destinations} 
               packages={packages} 
-              onInquiry={(inq) => handleAuthAction('/api/inquiries', 'POST', inq, "Inquiry sent", null)}
+              onInquiry={(inq) => handlePublicAction('/api/inquiries', 'POST', inq, "Inquiry sent")}
               whatsappNumber={settings?.whatsappNumber || '919876543210'}
               defaultMessage={settings?.defaultMessage || 'Hello'}
             />
@@ -141,7 +162,7 @@ export default function App() {
           <Route path="/tours/:id" element={
             <TourDetails 
               packages={packages} 
-              onInquiry={(inq) => handleAuthAction('/api/inquiries', 'POST', inq, "Inquiry sent", null)}
+              onInquiry={(inq) => handlePublicAction('/api/inquiries', 'POST', inq, "Inquiry sent")}
               whatsappNumber={settings?.whatsappNumber || '919876543210'}
             />
           } />
@@ -158,7 +179,7 @@ export default function App() {
           {/* Protected Admin Routes */}
           <Route path="/admin" element={
             <ProtectedRoute>
-              <AdminLayout>
+              <AdminLayout packages={packages} destinations={destinations} cars={cars} banners={banners} inquiries={inquiries}>
                 <Dashboard 
                   stats={{
                     totalPackages: packages.length,
@@ -178,7 +199,7 @@ export default function App() {
               <AuthPageWrapper 
                 fetchData={fetchData} 
                 component={PackagesPage} 
-                props={{ packages, destinations }} 
+                props={{ packages, destinations, cars, banners, inquiries }} 
                 actionHandlers={{ 
                   onAdd: (pkg: any, token: string) => handleAuthAction('/api/packages', 'POST', pkg, "Package added", token),
                   onEdit: (id: string, pkg: any, token: string) => handleAuthAction(`/api/packages/${id}`, 'PUT', pkg, "Package updated", token),
@@ -234,10 +255,12 @@ export default function App() {
 
           <Route path="/admin/inquiries" element={
             <ProtectedRoute>
-              <AdminLayout>
+              <AdminLayout packages={packages} destinations={destinations} cars={cars} banners={banners} inquiries={inquiries}>
                 <InquiriesPage 
-                  inquiries={inquiries} 
-                  onDelete={(id) => handleAuthAction(`/api/inquiries/${id}`, 'DELETE', null, "Inquiry deleted", null)}
+                  inquiries={inquiries}
+                  packages={packages}
+                  onEdit={(id, data, token) => handleAuthAction(`/api/inquiries/${id}`, 'PUT', data, "Inquiry updated", token)}
+                  onDelete={(id, token) => handleAuthAction(`/api/inquiries/${id}`, 'DELETE', null, "Inquiry deleted", token)}
                 />
               </AdminLayout>
             </ProtectedRoute>
@@ -272,7 +295,7 @@ export default function App() {
 }
 
 // Global Admin Layout
-const AdminLayout = ({ children }: { children: React.ReactNode }) => (
+const AdminLayout = ({ children, packages, destinations, cars, banners, inquiries }: any) => (
   <div className="flex min-h-screen bg-[#fcfdfe] relative overflow-hidden font-display">
     {/* High-Contrast Futuristic Background */}
     <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
@@ -298,7 +321,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => (
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.02] mix-blend-overlay" />
     </div>
     
-    <AdminSidebar />
+    <AdminSidebar packages={packages} destinations={destinations} cars={cars} banners={banners} inquiries={inquiries} />
     <main className="flex-1 p-8 md:p-12 lg:p-16 overflow-y-auto relative z-10 scrollbar-hide">
       <motion.div 
         initial={{ opacity: 0, y: 30 }}
@@ -322,7 +345,7 @@ function AuthPageWrapper({ component: Component, props, actionHandlers }: any) {
   }, {});
 
   return (
-    <AdminLayout>
+    <AdminLayout packages={props.packages} destinations={props.destinations} cars={props.cars} banners={props.banners} inquiries={props.inquiries}>
       <Component {...props} {...wrappedHandlers} />
     </AdminLayout>
   );

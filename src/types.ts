@@ -69,6 +69,9 @@ export interface Banner {
   createdAt: string;
 }
 
+export type InquiryStatus = 'new' | 'contacted' | 'negotiation' | 'booked' | 'closed';
+export type InquiryPriority = 'low' | 'medium' | 'high';
+
 export interface Inquiry {
   id: string;
   name: string;
@@ -77,6 +80,8 @@ export interface Inquiry {
   message: string;
   packageId?: string;
   createdAt: string;
+  status: InquiryStatus;
+  priority: InquiryPriority;
 }
 
 export interface Settings {

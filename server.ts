@@ -40,7 +40,7 @@ const io = new Server(httpServer, {
   }
 });
 
-const PORT = 3001;
+const PORT = 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "shashwa-holidays-secret-key-123";
 
 app.use(cors());
@@ -1086,18 +1086,6 @@ async function startServer() {
           appType: "spa",
         });
         app.use(vite.middlewares);
-        
-        app.get('*', async (req, res, next) => {
-          const url = req.originalUrl;
-          try {
-            let template = fs.readFileSync(path.resolve(process.cwd(), 'index.html'), 'utf-8');
-            template = await vite.transformIndexHtml(url, template);
-            res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
-          } catch (e) {
-            vite.ssrFixStacktrace(e as Error);
-            next(e);
-          }
-        });
         console.log("[SERVER] Vite middleware attached.");
       } catch (viteErr) {
         console.error("[SERVER] Failed to initialize Vite server:", viteErr);

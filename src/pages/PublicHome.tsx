@@ -297,6 +297,9 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
                       <span className="flex items-center gap-2">
                         <Clock className="w-4 h-4 text-primary" strokeWidth={3} /> {pkg.days} Days
                       </span>
+                      <span className="flex items-center gap-2 font-black text-primary">
+                         ₹{pkg.price}
+                      </span>
                     </div>
                   </CardContent>
                   <div className="px-8 pb-10">
