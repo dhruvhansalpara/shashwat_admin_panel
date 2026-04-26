@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { cn } from '@/lib/utils';
 import { Destination } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -37,12 +38,13 @@ type DestinationFormValues = z.infer<typeof destinationSchema>;
 
 interface DestinationsPageProps {
   destinations: Destination[];
+  packages: Package[];
   onAdd: (data: any) => void;
   onEdit: (id: string, data: any) => void;
   onDelete: (id: string) => void;
 }
 
-export function DestinationsPage({ destinations, onAdd, onEdit, onDelete }: DestinationsPageProps) {
+export function DestinationsPage({ destinations, packages, onAdd, onEdit, onDelete }: DestinationsPageProps) {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isFormOpen, setIsFormOpen] = React.useState(false);
   const [editingDestination, setEditingDestination] = React.useState<Destination | null>(null);
@@ -102,159 +104,178 @@ export function DestinationsPage({ destinations, onAdd, onEdit, onDelete }: Dest
   };
 
   return (
-    <div className="space-y-8 pb-10">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="space-y-10 pb-20">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-4xl font-display font-black tracking-tight text-slate-900">Destinations</h2>
-          <p className="text-slate-500 font-medium">Manage the regions and cities your tour packages cover.</p>
+          <h2 className="text-4xl font-black tracking-tighter text-slate-900 uppercase font-display leading-none">Geographic Mapping</h2>
+          <p className="text-slate-400 mt-2 font-bold uppercase tracking-[0.3em] text-[10px] pl-1 font-display opacity-60">Defining global operational boundaries and regional classification</p>
         </div>
-        <Button onClick={handleAddNew} className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 h-12 shadow-lg shadow-primary/20 font-bold transition-all hover:scale-105 active:scale-95">
-          <Plus className="w-5 h-5 mr-1" /> Add New Destination
+        <Button 
+          onClick={handleAddNew} 
+          className="rounded-[20px] h-14 px-10 gap-3 bg-[#001f3f] hover:bg-[#002f5f] text-white shadow-sm transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-[0.2em] text-[11px] font-display"
+        >
+          <Plus className="w-5 h-5" strokeWidth={3} /> INITIALIZE MAPPING
         </Button>
       </div>
 
-      <div className="border border-slate-200/60 bg-white p-2 rounded-2xl flex items-center gap-3 shadow-sm hover-card">
-        <div className="p-3 bg-slate-50 rounded-xl">
-          <Search className="w-5 h-5 text-slate-400" />
-        </div>
-        <Input 
-          placeholder="Search destinations..." 
-          className="border-0 focus-visible:ring-0 text-base font-medium placeholder:text-slate-400"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-
-      <div className="border border-slate-200/60 rounded-[2rem] overflow-hidden bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover-card">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50/50 text-slate-400 uppercase text-[10px] font-bold tracking-[0.2em] border-b border-slate-100">
-            <tr>
-              <th className="px-6 py-5">Thumbnail</th>
-              <th className="px-6 py-5">Location Details</th>
-              <th className="px-6 py-5">Category</th>
-              <th className="px-6 py-5 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50">
-            {filteredDestinations.map((dest) => (
-              <tr key={dest.id} className="hover:bg-slate-50/30 transition-colors group">
-                <td className="px-6 py-5">
-                  <div className="relative w-16 h-12 overflow-hidden rounded-xl bg-slate-100">
-                    <img src={dest.image} alt={dest.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                  </div>
-                </td>
-                <td className="px-6 py-5">
-                  <div className="font-bold text-slate-900 group-hover:text-primary transition-colors">{dest.name}</div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 flex items-center gap-1.5">
-                    <MapPin className="w-3 h-3" /> /{dest.slug}
-                  </div>
-                </td>
-                <td className="px-6 py-5 capitalize">
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                    {dest.category}
-                  </Badge>
-                </td>
-                <td className="px-6 py-5 text-right">
-                  <div className="flex justify-end gap-3">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleEdit(dest)} 
-                      className="h-10 w-10 p-0 rounded-xl bg-slate-50 text-amber-600 hover:bg-amber-100 transition-all hover:scale-110 shadow-sm"
-                    >
-                       <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => onDelete(dest.id)} 
-                      className="h-10 w-10 p-0 rounded-xl bg-slate-50 text-rose-600 hover:bg-rose-100 transition-all hover:scale-110 shadow-sm"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </td>
+      <div className="bg-white rounded-[48px] border-2 border-slate-50 shadow-[0_8px_40px_rgba(0,0,0,0.03)] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-50 bg-slate-50/20 hover:bg-slate-50/20 transition-none">
+                <th className="pl-12 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-display">Identity Parameter</th>
+                <th className="py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-display">Classification</th>
+                <th className="py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-display">Connectivity</th>
+                <th className="py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 font-display">Logic Slug</th>
+                <th className="px-12 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-right font-display">Directives</th>
               </tr>
-            ))}
-            {filteredDestinations.length === 0 && (
-              <tr>
-                <td colSpan={4} className="text-center py-20">
-                   <div className="flex flex-col items-center gap-3">
-                      <div className="p-4 bg-slate-50 rounded-full">
-                        <ImageIcon className="w-8 h-8 text-slate-300" />
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {filteredDestinations.map((dest) => {
+                const packageCount = packages.filter(pkg => pkg.destination_ids?.includes(dest.id)).length;
+                return (
+                  <tr key={dest.id} className="group hover:bg-slate-50/30 transition-all duration-300 border-none">
+                    <td className="pl-12 py-8">
+                      <div className="flex items-center gap-6">
+                        <div className="relative w-20 h-20 rounded-[32px] overflow-hidden shadow-inner ring-4 ring-slate-50 group-hover:rounded-2xl transition-all duration-700">
+                          <img src={dest.image} alt={dest.name} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
+                        </div>
+                        <div className="space-y-1.5">
+                          <div className="font-black text-slate-900 text-xl tracking-tighter group-hover:text-primary transition-colors font-display uppercase italic">{dest.name}</div>
+                          <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.25em] leading-none font-display">Ref: {dest.id.substring(0, 12)}</div>
+                        </div>
                       </div>
-                      <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">No destinations found</p>
-                   </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                    </td>
+                    <td className="py-7">
+                      <Badge variant="secondary" className={cn(
+                        "px-4 py-1.5 rounded-xl font-black text-[9px] uppercase tracking-[0.2em] border-2",
+                        dest.category === 'international' 
+                          ? "bg-secondary/10 text-secondary border-secondary/10" 
+                          : "bg-primary/10 text-primary border-primary/10"
+                      )}>
+                        {dest.category === 'international' ? 'International Segment' : 'Domestic Core'}
+                      </Badge>
+                    </td>
+                    <td className="py-7">
+                      <div className="flex flex-col">
+                        <span className="text-lg font-black text-slate-800">{packageCount}</span>
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Active Tours</span>
+                      </div>
+                    </td>
+                    <td className="py-7">
+                      <code className="text-xs font-black text-slate-400 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100 uppercase tracking-tighter">/{dest.slug}</code>
+                    </td>
+                  <td className="px-10 py-7 text-right">
+                    <div className="flex justify-end items-center gap-3 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+                       <Button variant="ghost" size="icon" onClick={() => handleEdit(dest)} className="h-11 w-11 rounded-2xl hover:bg-primary/10 hover:text-primary transition-all">
+                          <Edit className="w-5 h-5" strokeWidth={2.5} />
+                       </Button>
+                       <Button variant="ghost" size="icon" onClick={() => onDelete(dest.id)} className="h-11 w-11 rounded-2xl hover:bg-rose-50 hover:text-rose-500 transition-all">
+                         <Trash2 className="w-5 h-5" strokeWidth={2.5} />
+                       </Button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+              {filteredDestinations.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="text-center py-20">
+                    <div className="flex flex-col items-center gap-3 text-slate-300">
+                      <MapPin className="w-12 h-12 opacity-20" />
+                      <p className="font-black uppercase tracking-widest text-xs">No destinations mapped yet</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden bg-white border-slate-200">
-          <DialogHeader className="p-6 pb-2 shrink-0 border-b border-slate-100">
-            <DialogTitle className="text-xl font-bold text-slate-800">{editingDestination ? 'Edit Destination' : 'Add New Destination'}</DialogTitle>
+        <DialogContent className="sm:max-w-[650px] w-[95vw] max-h-[95vh] flex flex-col p-0 overflow-hidden bg-[#fcfdfe] border-none shadow-2xl rounded-[40px]">
+          <DialogHeader className="p-10 pb-6 shrink-0 bg-white">
+            <DialogTitle className="text-3xl font-black tracking-tighter text-[#001f3f] uppercase">
+              {editingDestination ? 'EDIT DESTINATION' : 'NEW MAPPING'}
+            </DialogTitle>
+            <DialogDescription className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px]">
+              Defining the boundaries of adventure
+            </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-y-auto p-6 pt-2 scrollbar-hide space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-slate-700">Destination Name</Label>
-                  <Input id="name" placeholder="e.g. Rajasthan" {...register('name')} className="border-slate-200" />
-                  {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+            <div className="flex-1 overflow-y-auto p-10 pt-4 scrollbar-hide space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Display Name</Label>
+                  <Input id="name" placeholder="e.g. Rajasthan" {...register('name')} className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-base shadow-sm" />
+                  {errors.name && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1">{errors.name.message}</p>}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="slug" className="text-slate-700">Slug</Label>
-                  <Input id="slug" placeholder="e.g. rajasthan" {...register('slug')} className="border-slate-200" />
-                  {errors.slug && <p className="text-xs text-red-500">{errors.slug.message}</p>}
+                <div className="space-y-3">
+                  <Label htmlFor="slug" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">URL / Slug</Label>
+                  <Input id="slug" placeholder="e.g. rajasthan" {...register('slug')} className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-base shadow-sm text-slate-500" />
+                  {errors.slug && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1">{errors.slug.message}</p>}
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="category" className="text-slate-700">Category</Label>
+              <div className="space-y-3">
+                <Label htmlFor="category" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Market Segment</Label>
                 <Select 
                   value={categoryValue} 
                   onValueChange={(val: any) => setValue('category', val)}
                 >
-                  <SelectTrigger id="category" className="border-slate-200">
-                    <SelectValue placeholder="Select type" />
+                  <SelectTrigger id="category" className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-base shadow-sm">
+                    <SelectValue placeholder="Identify region type" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="domestic">Domestic (India)</SelectItem>
-                    <SelectItem value="international">International</SelectItem>
+                  <SelectContent className="rounded-2xl p-2 border-slate-100">
+                    <SelectItem value="domestic" className="rounded-xl py-3 font-bold">Domestic India</SelectItem>
+                    <SelectItem value="international" className="rounded-xl py-3 font-bold">International Segment</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Representative Image</Label>
                 <Controller
                   control={control}
                   name="image"
                   render={({ field }) => (
-                    <ImageUpload
-                      value={field.value}
-                      onChange={field.onChange}
-                      label="Destination Image"
-                      folder="destinations"
-                    />
+                    <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm">
+                      <ImageUpload
+                        value={field.value}
+                        onChange={field.onChange}
+                        label="Upload Thumbnail"
+                        folder="destinations"
+                      />
+                    </div>
                   )}
                 />
-                {errors.image && <p className="text-xs text-red-500">{errors.image.message}</p>}
+                {errors.image && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1">{errors.image.message}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-slate-700">Description</Label>
-                <Textarea id="description" placeholder="A brief about the destination..." className="min-h-[100px] border-slate-200" {...register('description')} />
-                {errors.description && <p className="text-xs text-red-500">{errors.description.message}</p>}
+              <div className="space-y-3">
+                <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Short Narrative</Label>
+                <Textarea id="description" placeholder="Capture the essence of this place in a few words..." className="min-h-[140px] p-6 rounded-3xl border-slate-50 bg-slate-50/50 font-medium leading-relaxed shadow-sm" {...register('description')} />
+                {errors.description && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1">{errors.description.message}</p>}
               </div>
             </div>
 
-            <DialogFooter className="p-4 px-6 border-t border-slate-100 bg-slate-50 shrink-0 gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)} className="border-slate-300 text-slate-700 hover:bg-slate-100">Cancel</Button>
-              <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[120px]">{editingDestination ? 'Update Destination' : 'Create Destination'}</Button>
+            <DialogFooter className="p-10 bg-white border-t border-slate-50 shrink-0 flex justify-between gap-4">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={() => setIsFormOpen(false)} 
+                className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[11px] text-slate-400 hover:bg-slate-100"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                className="h-14 px-12 rounded-2xl bg-[#001f3f] hover:bg-[#002f5f] text-white font-black uppercase tracking-[0.2em] text-[11px] min-w-[240px] shadow-sm transition-all"
+              >
+                {editingDestination ? 'UPDATE DESTINATION' : 'INITIALIZE DESTINATION'}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>

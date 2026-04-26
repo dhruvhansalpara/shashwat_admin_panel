@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-3 py-1 text-[10px] uppercase tracking-widest font-bold transition-all duration-200",
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {
     variants: {
       variant: {
@@ -29,7 +29,7 @@ export interface BadgeProps
   className?: string;
 }
 
-function Badge({ className, variant, ...props }: BadgeProps) {
+const Badge: React.FC<BadgeProps> = ({ className, variant, ...props }) => {
   return (
     <div className={cn(badgeVariants({ variant }), className)} {...props} />
   )

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { 
@@ -53,69 +54,85 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
   };
 
   return (
-    <div className="space-y-8 pb-10">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <h2 className="text-4xl font-display font-black tracking-tight text-slate-900">Vehicle Fleet</h2>
-          <p className="text-slate-500 font-medium">Manage your fleet for car rentals and tour transportation.</p>
+    <div className="space-y-10 pb-20">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-2">
+          <h2 className="text-4xl font-black tracking-tighter text-slate-900 uppercase font-display leading-none">Transport Fleet</h2>
+          <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px] pl-1 font-display opacity-60">Logistical asset management matrix</p>
         </div>
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 h-12 shadow-lg shadow-primary/20 font-bold transition-all hover:scale-105 active:scale-95">
-              <Plus className="w-5 h-5 mr-1" /> Add New Vehicle
+            <Button className="rounded-[20px] h-14 px-10 gap-3 bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-[0.2em] text-[11px] font-display">
+              <Plus className="w-5 h-5" strokeWidth={3} /> Register Vehicle
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden bg-white border-slate-200">
-            <DialogHeader className="p-6 pb-2 shrink-0 border-b border-slate-100">
-              <DialogTitle className="text-xl font-bold text-slate-800">Add New Vehicle</DialogTitle>
+          <DialogContent className="sm:max-w-[650px] w-[95vw] max-h-[92vh] flex flex-col p-0 overflow-hidden bg-[#fcfdfe] border-none shadow-2xl rounded-[40px]">
+            <DialogHeader className="p-10 pb-6 shrink-0 bg-white">
+              <DialogTitle className="text-3xl font-black tracking-tighter text-slate-900 uppercase">Fleet Operations</DialogTitle>
+              <DialogDescription className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px]">
+                 Onboarding new assets to your logistical infrastructure
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-              <div className="flex-1 overflow-y-auto p-6 scrollbar-hide space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="text-slate-700">Vehicle Name</Label>
-                      <Input id="name" name="name" placeholder="e.g. Toyota Innova Crysta" className="border-slate-200" required />
+              <div className="flex-1 overflow-y-auto p-10 pt-4 scrollbar-hide space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Vehicle Model</Label>
+                      <Input id="name" name="name" placeholder="e.g. Toyota Innova Crysta" className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-base shadow-sm" required />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="type" className="text-slate-700">Vehicle Type</Label>
-                      <Input id="type" name="type" placeholder="e.g. Luxury SUV" className="border-slate-200" required />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="seats" className="text-slate-700">Seats</Label>
-                      <Input id="seats" name="seats" type="number" placeholder="7" className="border-slate-200" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="luggage" className="text-slate-700">Luggage Capacity</Label>
-                      <Input id="luggage" name="luggage" type="number" placeholder="3" className="border-slate-200" required />
+                    <div className="space-y-3">
+                      <Label htmlFor="type" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Class Type</Label>
+                      <Input id="type" name="type" placeholder="e.g. Luxury SUV" className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-base shadow-sm text-primary" required />
                     </div>
                   </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="pricePerKm" className="text-slate-700">Price per KM (₹)</Label>
-                    <Input id="pricePerKm" name="pricePerKm" type="number" step="0.1" placeholder="18" className="border-slate-200" required />
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="space-y-3">
+                      <Label htmlFor="seats" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Seating</Label>
+                      <Input id="seats" name="seats" type="number" placeholder="7" className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-black text-center text-lg" required />
+                    </div>
+                    <div className="space-y-3">
+                      <Label htmlFor="luggage" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Baggage</Label>
+                      <Input id="luggage" name="luggage" type="number" placeholder="3" className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-black text-center text-lg" required />
+                    </div>
+                    <div className="space-y-3 col-span-2">
+                       <Label htmlFor="pricePerKm" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Rate / KM</Label>
+                       <div className="relative">
+                         <span className="absolute left-5 top-4.5 font-bold text-slate-300">₹</span>
+                         <Input id="pricePerKm" name="pricePerKm" type="number" step="0.1" placeholder="18" className="h-14 pl-10 pr-6 rounded-2xl border-slate-50 bg-slate-50/50 font-black text-lg" required />
+                       </div>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="pricePerDay" className="text-slate-700">Price per Day (₹)</Label>
-                    <Input id="pricePerDay" name="pricePerDay" type="number" placeholder="4500" className="border-slate-200" />
-                  </div>
+                
+                <div className="space-y-3">
+                  <Label htmlFor="image" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Asset Visualization (URL)</Label>
+                  <Input id="image" name="image" placeholder="https://cloud.storage/car-thumbnail.png" className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-medium text-sm text-slate-500" required />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="image" className="text-slate-700">Image URL</Label>
-                  <Input id="image" name="image" placeholder="https://..." className="border-slate-200" required />
+                
+                <div className="space-y-3">
+                  <Label htmlFor="features" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Amenities & Features</Label>
+                  <Input id="features" name="features" placeholder="AC, Wi-Fi, First Aid, DVD Player" className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-sm" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="features" className="text-slate-700">Features (comma separated)</Label>
-                  <Input id="features" name="features" placeholder="AC, Music System, First Aid, Luggage Carrier" className="border-slate-200" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description" className="text-slate-700">Description</Label>
-                  <Textarea id="description" name="description" placeholder="Vehicle details..." className="border-slate-200" />
+                
+                <div className="space-y-3">
+                  <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Vehicle Intelligence / Specs</Label>
+                  <Textarea id="description" name="description" placeholder="Describe the vehicle's unique value props..." className="min-h-[120px] p-6 rounded-3xl border-slate-50 bg-slate-50/50 font-medium leading-relaxed shadow-sm" />
                 </div>
               </div>
-              <div className="p-4 px-6 border-t border-slate-100 bg-slate-50 shrink-0">
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl shadow-lg shadow-primary/20 font-bold h-12">Save Vehicle</Button>
+              <div className="p-10 bg-white border-t border-slate-50 shrink-0 flex justify-between gap-4">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  onClick={() => setIsAddOpen(false)} 
+                  className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[11px] text-slate-400"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="h-14 px-12 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-[0.2em] text-[11px] min-w-[240px] shadow-xl shadow-primary/20 transition-all hover:scale-[1.02]"
+                >
+                  Confirm Asset Deployment
+                </Button>
               </div>
             </form>
           </DialogContent>
@@ -124,127 +141,165 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {cars.map((car) => (
-          <div key={car.id} className="border border-slate-200/60 bg-white rounded-[2.5rem] overflow-hidden flex flex-col shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover-card group">
-            <div className="aspect-[4/3] relative overflow-hidden">
+          <div key={car.id} className="group bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500">
+            <div className="aspect-[4/3] relative overflow-hidden bg-slate-100 border-b border-slate-50">
               <img 
                 src={car.image} 
                 alt={car.name} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="absolute bottom-4 right-4 flex gap-3 translate-y-10 group-hover:translate-y-0 transition-transform duration-300">
+              <div className="absolute top-4 right-4 flex gap-2">
                 <Button 
                   size="icon" 
-                  variant="secondary" 
-                  className="bg-white/90 hover:bg-white h-10 w-10 p-0 rounded-2xl shadow-xl hover:scale-110 transition-all"
+                  variant="ghost" 
+                  className="h-10 w-10 rounded-xl bg-white/95 backdrop-blur shadow-lg text-slate-700 hover:bg-primary hover:text-white transition-all border border-slate-100"
                   onClick={() => setEditingCar(car)}
                 >
-                  <Edit2 className="w-4 h-4 text-amber-600" />
+                  <Edit2 className="w-4 h-4" strokeWidth={2.5} />
                 </Button>
                 <Button 
                   size="icon" 
-                  variant="destructive" 
-                  className="bg-white/90 hover:bg-white h-10 w-10 p-0 rounded-2xl shadow-xl hover:scale-110 transition-all"
+                  variant="ghost" 
+                  className="h-10 w-10 rounded-xl bg-white/95 backdrop-blur shadow-lg text-rose-500 hover:bg-rose-500 hover:text-white transition-all border border-slate-100"
                   onClick={() => {
-                    if (confirm('Delete this vehicle?')) onDelete(car.id);
+                    if (confirm('Permanently remove this vehicle from fleet records?')) onDelete(car.id);
                   }}
                 >
-                  <Trash2 className="w-4 h-4 text-rose-600" />
+                  <Trash2 className="w-4 h-4" strokeWidth={2.5} />
                 </Button>
               </div>
-            </div>
-            <div className="p-8 flex-1 flex flex-col">
-              <div className="flex items-center gap-2 mb-2">
-                <Badge className="bg-primary/10 text-primary border-none shadow-none uppercase text-[10px] tracking-widest px-3 py-1 font-bold">{car.type}</Badge>
+              <div className="absolute top-4 left-4">
+                 <Badge className="bg-primary/90 backdrop-blur text-white px-3 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest">
+                   {car.type}
+                 </Badge>
               </div>
-              <h3 className="text-2xl font-display font-bold text-slate-900 mb-6 group-hover:text-primary transition-colors">{car.name}</h3>
-              <div className="space-y-6 mt-auto">
-                 <div className="flex justify-between text-sm">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Capacity</span>
-                      <span className="flex items-center gap-1.5 font-bold text-slate-700"><Users className="w-4 h-4 text-primary" /> {car.seats} Seats</span>
+            </div>
+            <div className="p-8">
+              <div className="flex justify-between items-start mb-8">
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tighter leading-none group-hover:text-primary transition-colors font-display uppercase italic">{car.name}</h3>
+                  <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.25em] font-display">Asset Serial: {car.id.substring(0, 12)}</div>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-2xl text-slate-200 group-hover:text-primary group-hover:bg-primary/5 transition-all shadow-inner">
+                  <CarIcon className="w-6 h-6" strokeWidth={3} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                 <div className="bg-slate-50/50 p-4 rounded-[20px] flex items-center gap-3 border border-slate-50 transition-colors group-hover:bg-primary/[0.03]">
+                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400">
+                      <Users className="w-4 h-4" />
                     </div>
-                    <div className="flex flex-col gap-1 text-right">
-                      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Storage</span>
-                      <span className="flex items-center gap-1.5 font-bold text-slate-700 justify-end">{car.luggage} Bags <Briefcase className="w-4 h-4 text-primary" /></span>
-                    </div>
-                 </div>
-                 <div className="grid grid-cols-2 gap-6 pt-6 border-t border-slate-100">
                     <div>
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-[0.1em] mb-1">Rate / KM</p>
-                      <p className="text-xl font-display font-black text-slate-900 group-hover:text-primary transition-colors">₹{car.pricePerKm}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] uppercase font-bold text-slate-400 tracking-[0.1em] mb-1">Local / Day</p>
-                      <p className="text-xl font-display font-black text-slate-900 group-hover:text-primary transition-colors">₹{car.pricePerDay || '--'}</p>
+                      <div className="text-[9px] font-black text-slate-300 uppercase">Seating</div>
+                      <div className="font-black text-slate-700 text-sm">{car.seats} Capacity</div>
                     </div>
                  </div>
+                 <div className="bg-slate-50/50 p-4 rounded-[20px] flex items-center gap-3 border border-slate-50 transition-colors group-hover:bg-primary/[0.03]">
+                    <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400">
+                      <Briefcase className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="text-[9px] font-black text-slate-300 uppercase">Baggage</div>
+                      <div className="font-black text-slate-700 text-sm">{car.luggage} Slots</div>
+                    </div>
+                 </div>
+              </div>
+
+              <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Starting Price</div>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-black text-slate-900">₹{car.pricePerKm}</span>
+                    <span className="text-[10px] font-black text-slate-300 uppercase">/ KM</span>
+                  </div>
+                </div>
+                {car.pricePerDay > 0 && (
+                  <div className="space-y-0.5 text-right">
+                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Daily Lease</div>
+                    <div className="font-black text-slate-700 text-base">₹{car.pricePerDay}</div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         ))}
         {cars.length === 0 && (
-          <div className="col-span-full py-32 text-center border-2 border-dashed border-slate-200 rounded-[3rem] bg-slate-50">
-             <CarIcon className="w-12 h-12 mx-auto mb-4 text-slate-300" />
-             <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">Your fleet is empty</p>
-             <Button onClick={() => setIsAddOpen(true)} variant="link" className="text-primary mt-2">Add your first vehicle</Button>
+          <div className="col-span-full py-32 text-center flex flex-col items-center gap-4 bg-slate-50/50 border-2 border-dashed border-slate-100 rounded-[40px]">
+             <CarIcon className="w-16 h-16 text-slate-200" strokeWidth={1} />
+             <p className="font-black uppercase tracking-widest text-xs text-slate-300">Fleet database is empty</p>
+             <Button variant="link" onClick={() => setIsAddOpen(true)} className="text-primary font-black uppercase tracking-widest text-[10px]">Add First Vehicle</Button>
           </div>
         )}
       </div>
 
       {editingCar && (
         <Dialog open={!!editingCar} onOpenChange={() => setEditingCar(null)}>
-          <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden bg-white border-slate-200">
-            <DialogHeader className="p-6 pb-2 shrink-0 border-b border-slate-100">
-              <DialogTitle className="text-xl font-bold text-slate-800">Edit Vehicle</DialogTitle>
+          <DialogContent className="sm:max-w-[650px] w-[95vw] max-h-[92vh] flex flex-col p-0 overflow-hidden bg-[#fcfdfe] border-none shadow-2xl rounded-[40px]">
+            <DialogHeader className="p-10 pb-6 shrink-0 bg-white">
+              <DialogTitle className="text-3xl font-black tracking-tighter text-slate-900 uppercase">Update Registry</DialogTitle>
+              <DialogDescription className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px]">
+                 Modify technical specifications for {editingCar.name}
+              </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-              <div className="flex-1 overflow-y-auto p-6 scrollbar-hide space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-name" className="text-slate-700">Vehicle Name</Label>
-                    <Input id="edit-name" name="name" defaultValue={editingCar.name} className="border-slate-200" required />
+              <div className="flex-1 overflow-y-auto p-10 pt-4 scrollbar-hide space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-3">
+                    <Label htmlFor="edit-name" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Vehicle Name</Label>
+                    <Input id="edit-name" name="name" defaultValue={editingCar.name} className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-base" required />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-type" className="text-slate-700">Vehicle Type</Label>
-                    <Input id="edit-type" name="type" defaultValue={editingCar.type} className="border-slate-200" required />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-seats" className="text-slate-700">Seats</Label>
-                    <Input id="edit-seats" name="seats" type="number" defaultValue={editingCar.seats} className="border-slate-200" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-luggage" className="text-slate-700">Luggage Capacity</Label>
-                    <Input id="edit-luggage" name="luggage" type="number" defaultValue={editingCar.luggage} className="border-slate-200" required />
+                  <div className="space-y-3">
+                    <Label htmlFor="edit-type" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Vehicle Type</Label>
+                    <Input id="edit-type" name="type" defaultValue={editingCar.type} className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-base text-primary" required />
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-pricePerKm" className="text-slate-700">Price per KM (₹)</Label>
-                    <Input id="edit-pricePerKm" name="pricePerKm" type="number" step="0.1" defaultValue={editingCar.pricePerKm} className="border-slate-200" required />
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="space-y-3">
+                    <Label htmlFor="edit-seats" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Seats</Label>
+                    <Input id="edit-seats" name="seats" type="number" defaultValue={editingCar.seats} className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-black text-center" required />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="edit-pricePerDay" className="text-slate-700">Price per Day (₹)</Label>
-                    <Input id="edit-pricePerDay" name="pricePerDay" type="number" defaultValue={editingCar.pricePerDay} className="border-slate-200" />
+                  <div className="space-y-3">
+                    <Label htmlFor="edit-luggage" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Baggage</Label>
+                    <Input id="edit-luggage" name="luggage" type="number" defaultValue={editingCar.luggage} className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-black text-center" required />
+                  </div>
+                  <div className="space-y-3 col-span-2">
+                     <Label htmlFor="edit-pricePerKm" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Price per KM (₹)</Label>
+                     <Input id="edit-pricePerKm" name="pricePerKm" type="number" step="0.1" defaultValue={editingCar.pricePerKm} className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-black text-lg" required />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-image" className="text-slate-700">Image URL</Label>
-                  <Input id="edit-image" name="image" defaultValue={editingCar.image} className="border-slate-200" required />
+                <div className="space-y-3">
+                  <Label htmlFor="edit-pricePerDay" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Price per Day (₹)</Label>
+                  <Input id="edit-pricePerDay" name="pricePerDay" type="number" defaultValue={editingCar.pricePerDay || ''} className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-black text-lg" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-features" className="text-slate-700">Features (comma separated)</Label>
-                  <Input id="edit-features" name="features" defaultValue={editingCar.features?.join(', ')} className="border-slate-200" />
+                <div className="space-y-3">
+                  <Label htmlFor="edit-image" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Image Asset URL</Label>
+                  <Input id="edit-image" name="image" defaultValue={editingCar.image} className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-medium text-slate-500" required />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-description" className="text-slate-700">Description</Label>
-                  <Textarea id="edit-description" name="description" defaultValue={editingCar.description} className="border-slate-200" />
+                <div className="space-y-3">
+                  <Label htmlFor="edit-features" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Amenities (comma list)</Label>
+                  <Input id="edit-features" name="features" defaultValue={editingCar.features?.join(', ')} className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-bold" />
+                </div>
+                <div className="space-y-3">
+                  <Label htmlFor="edit-description" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Logistical Notes</Label>
+                  <Textarea id="edit-description" name="description" defaultValue={editingCar.description} className="min-h-[120px] p-6 rounded-3xl border-slate-50 bg-slate-50/50 font-medium" />
                 </div>
               </div>
-              <div className="p-4 px-6 border-t border-slate-100 bg-slate-50 shrink-0">
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl shadow-lg shadow-primary/20 font-bold h-12">Update Vehicle</Button>
+              <div className="p-10 bg-white border-t border-slate-50 shrink-0 flex justify-between gap-4">
+                <Button 
+                   type="button"
+                   variant="ghost" 
+                   onClick={() => setEditingCar(null)} 
+                   className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[11px] text-slate-400"
+                >
+                  Discard Changes
+                </Button>
+                <Button 
+                   type="submit" 
+                   className="h-14 px-12 rounded-2xl bg-secondary hover:bg-secondary/90 text-white font-black uppercase tracking-[0.2em] text-[11px] min-w-[240px] shadow-xl shadow-secondary/20 transition-all"
+                >
+                  Apply System Update
+                </Button>
               </div>
             </form>
           </DialogContent>

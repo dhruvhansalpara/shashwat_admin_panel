@@ -25,6 +25,7 @@ import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { ImageUpload } from '@/components/ImageUpload';
@@ -39,6 +40,7 @@ const packageSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters"),
   price: z.preprocess((val) => Number(val), z.number().min(0, "Price must be positive")),
   days: z.preprocess((val) => Number(val), z.number().int().min(1, "Duration must be at least 1 day")),
+  category: z.string().min(1, "Category is required"),
   description: z.string().min(20, "Description must be at least 20 characters"),
   image: z.string().url("Please enter a valid image URL"),
   bannerImage: z.string().url("Please enter a valid banner image URL").optional().or(z.literal('')),
@@ -78,6 +80,7 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
       name: '',
       price: 0,
       days: 1,
+      category: '',
       description: '',
       image: '',
       bannerImage: '',
@@ -127,6 +130,7 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
       name: pkg.name,
       price: pkg.price,
       days: pkg.days,
+      category: pkg.category || '',
       description: pkg.description,
       image: pkg.image,
       bannerImage: pkg.bannerImage || '',
@@ -146,165 +150,220 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   return (
-    <div className="space-y-8 pb-10">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="space-y-10 pb-20">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-4xl font-display font-black tracking-tight text-slate-900">Tour Packages</h2>
-          <p className="text-slate-500 font-medium">Manage and organize your holiday offerings.</p>
+          <h2 className="text-4xl font-black tracking-tighter text-slate-900 uppercase">Experience Catalog</h2>
+          <p className="text-slate-500 mt-2 font-bold uppercase tracking-[0.2em] text-[10px]">Managing high-yield travel assets and curated journey parameters</p>
         </div>
-        <Button onClick={() => { setEditingPackage(null); reset(); setIsFormOpen(true); }} className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 h-12 shadow-lg shadow-primary/20 font-bold transition-all hover:scale-105 active:scale-95">
-          <Plus className="w-5 h-5 mr-1" /> Add New Package
+        <Button 
+          onClick={() => { setEditingPackage(null); reset(); setIsFormOpen(true); }} 
+          className="rounded-[20px] h-14 px-10 gap-3 bg-primary hover:bg-primary/90 text-white shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-widest text-[11px]"
+        >
+          <Plus className="w-5 h-5" strokeWidth={3} /> Synchronize Package
         </Button>
       </div>
       
-      <div className="border border-slate-200/60 bg-white p-2 rounded-2xl flex items-center gap-3 shadow-sm hover-card">
-        <div className="p-3 bg-slate-50 rounded-xl">
-          <Search className="w-5 h-5 text-slate-400" />
+      <div className="flex items-center gap-4 bg-white p-3 rounded-[24px] border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] focus-within:ring-4 focus-within:ring-primary/10 transition-all group overflow-hidden">
+        <div className="pl-5 text-slate-300 group-focus-within:text-primary transition-colors">
+          <Search className="w-6 h-6" strokeWidth={2.5} />
         </div>
         <Input 
-          placeholder="Search packages by name or description..." 
-          className="border-0 focus-visible:ring-0 text-base font-medium placeholder:text-slate-400"
+          placeholder="Query by asset name, location or internal parameters..." 
+          className="border-0 focus-visible:ring-0 text-lg py-7 h-14 bg-transparent placeholder:text-slate-300 font-bold tracking-tight shadow-none"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <div className="border border-slate-200/60 rounded-[2rem] overflow-hidden bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover-card">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50/50 text-slate-400 uppercase text-[10px] font-bold tracking-[0.2em] border-b border-slate-100">
-            <tr>
-              <th className="px-6 py-5">Visual</th>
-              <th className="px-6 py-5">Package Identity</th>
-              <th className="px-6 py-5">Value</th>
-              <th className="px-6 py-5">Duration</th>
-              <th className="px-6 py-5 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50">
-            {filteredPackages.length > 0 ? filteredPackages.map((pkg) => (
-              <tr key={pkg.id} className="hover:bg-slate-50/30 transition-colors group">
-                <td className="px-6 py-5">
-                  <div className="relative w-16 h-12 overflow-hidden rounded-xl bg-slate-100">
-                    <img src={pkg.image} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt="" />
-                  </div>
-                </td>
-                <td className="px-6 py-5">
-                  <div className="font-bold text-slate-900 group-hover:text-primary transition-colors">{pkg.name}</div>
-                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">{pkg.location}</div>
-                </td>
-                <td className="px-6 py-5">
-                  <span className="font-bold text-slate-900">₹{pkg.price}</span>
-                </td>
-                <td className="px-6 py-5">
-                  <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none group-hover:bg-primary/10 group-hover:text-primary transition-colors">{pkg.days} Days</Badge>
-                </td>
-                <td className="px-6 py-5 text-right">
-                  <div className="flex justify-end gap-3">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleEditClick(pkg)} 
-                      className="h-10 w-10 p-0 rounded-xl bg-slate-50 text-amber-600 hover:bg-amber-100 transition-all hover:scale-110 shadow-sm"
-                    >
-                       <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => setDeleteConfirmId(pkg.id)} 
-                      className="h-10 w-10 p-0 rounded-xl bg-slate-50 text-rose-600 hover:bg-rose-100 transition-all hover:scale-110 shadow-sm"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </td>
+      <div className="bg-white rounded-[40px] border border-slate-100 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-50 bg-slate-50/30 hover:bg-slate-50/30 transition-none">
+                <th className="pl-10 py-6 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Preview Asset</th>
+                <th className="py-6 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Package Parameters</th>
+                <th className="py-6 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Deployment</th>
+                <th className="py-6 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">Valuation</th>
+                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 text-right">Directives</th>
               </tr>
-            )) : (
-              <tr>
-                <td colSpan={5} className="text-center py-20">
-                   <div className="flex flex-col items-center gap-3">
-                      <div className="p-4 bg-slate-50 rounded-full">
-                        <ImageIcon className="w-8 h-8 text-slate-300" />
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {filteredPackages.length > 0 ? filteredPackages.map((pkg) => (
+                <tr key={pkg.id} className="group hover:bg-slate-50/50 transition-all duration-300 border-none">
+                  <td className="pl-10 py-7">
+                    <div className="relative w-20 h-20 rounded-[24px] overflow-hidden shadow-inner ring-4 ring-slate-50/50 shadow-inner group-hover:rounded-2xl transition-all duration-700">
+                      <img src={pkg.image} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" alt="" />
+                    </div>
+                  </td>
+                  <td className="py-7">
+                    <div className="space-y-1.5">
+                      <div className="font-black text-slate-900 text-xl tracking-tighter group-hover:text-primary transition-colors leading-tight">{pkg.name}</div>
+                      <div className="flex items-center gap-2 text-slate-400">
+                        <MapPin className="w-3.5 h-3.5 text-primary" strokeWidth={3} />
+                        <span className="text-[10px] font-black uppercase tracking-[0.15em]">{pkg.location}</span>
                       </div>
-                      <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">No packages found</p>
-                   </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                    </div>
+                  </td>
+                  <td className="py-7">
+                    <div className="flex flex-wrap gap-2">
+                      {pkg.destination_ids?.map(id => {
+                        const dest = destinations.find(d => d.id === id);
+                        return dest ? (
+                          <Badge key={`dest-${id}`} variant="outline" className="bg-slate-50 text-slate-500 text-[8px] font-black uppercase tracking-widest py-1 px-3 rounded-lg border-slate-100">
+                            {dest.name}
+                          </Badge>
+                        ) : null;
+                      })}
+                    </div>
+                  </td>
+                  <td className="py-7">
+                    <div className="space-y-1.5">
+                      <div className="font-black text-slate-900 text-2xl tracking-tighter leading-none">${pkg.price}</div>
+                      <div className="text-[9px] font-black text-slate-300 uppercase tracking-[0.25em]">{pkg.days}D / {pkg.days - 1}N Cycle</div>
+                    </div>
+                  </td>
+                  <td className="px-10 py-7 text-right">
+                    <div className="flex justify-end items-center gap-3 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+                      <Button variant="ghost" size="icon" onClick={() => handleEditClick(pkg)} className="h-11 w-11 rounded-2xl hover:bg-primary/10 hover:text-primary transition-all">
+                         <Edit className="w-5 h-5" strokeWidth={2.5} />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteConfirmId(pkg.id)} className="h-11 w-11 rounded-2xl hover:bg-rose-50 hover:text-rose-500 transition-all">
+                        <Trash2 className="w-5 h-5" strokeWidth={2.5} />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              )) : (
+                <tr>
+                  <td colSpan={5} className="text-center py-20">
+                    <div className="flex flex-col items-center gap-3 text-slate-300">
+                      <Search className="w-12 h-12 opacity-20" />
+                      <p className="font-black uppercase tracking-widest text-xs">No matching packages found</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[900px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden bg-white border-slate-200">
-          <DialogHeader className="p-6 pb-2 shrink-0 border-b border-slate-100">
-            <DialogTitle className="text-xl font-bold text-slate-800">{editingPackage ? 'Edit Package' : 'Add New Package'}</DialogTitle>
-            <DialogDescription className="text-slate-500">
-              Fill in the details for the tour package.
+        <DialogContent className="sm:max-w-[950px] w-[98vw] max-h-[95vh] flex flex-col p-0 overflow-hidden bg-[#fcfdfe] border-none shadow-2xl rounded-[40px]">
+          <DialogHeader className="p-8 pb-4 shrink-0 bg-white">
+            <DialogTitle className="text-3xl font-black tracking-tighter text-slate-900 uppercase">
+              {editingPackage ? 'Edit Experience' : 'New Package Entry'}
+            </DialogTitle>
+            <DialogDescription className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px]">
+              Crafting unforgettable memories for your clients
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col overflow-hidden">
             <Tabs defaultValue="basic" className="flex-1 flex flex-col overflow-hidden">
-              <div className="px-6 shrink-0 border-b border-slate-100 bg-slate-50">
-                <TabsList className="w-full justify-start bg-transparent h-auto p-0 gap-6">
-                  <TabsTrigger value="basic" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3 text-slate-600 data-[state=active]:text-slate-900 shadow-none font-bold text-xs uppercase tracking-widest transition-all">Basic Info</TabsTrigger>
-                  <TabsTrigger value="media" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3 text-slate-600 data-[state=active]:text-slate-900 shadow-none font-bold text-xs uppercase tracking-widest transition-all">Media</TabsTrigger>
-                  <TabsTrigger value="itinerary" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3 text-slate-600 data-[state=active]:text-slate-900 shadow-none font-bold text-xs uppercase tracking-widest transition-all">Itinerary</TabsTrigger>
-                  <TabsTrigger value="details" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-2 py-3 text-slate-600 data-[state=active]:text-slate-900 shadow-none font-bold text-xs uppercase tracking-widest transition-all">Details</TabsTrigger>
+              <div className="px-8 border-b border-slate-100 bg-white shrink-0">
+                <TabsList className="w-full justify-start bg-transparent h-auto p-0 gap-8">
+                  <TabsTrigger value="basic" className="rounded-none border-b-4 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-4 text-slate-400 data-[state=active]:text-primary shadow-none text-xs font-black uppercase tracking-widest transition-all">
+                    01. Essentials
+                  </TabsTrigger>
+                  <TabsTrigger value="media" className="rounded-none border-b-4 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-4 text-slate-400 data-[state=active]:text-primary shadow-none text-xs font-black uppercase tracking-widest transition-all">
+                    02. Visuals
+                  </TabsTrigger>
+                  <TabsTrigger value="itinerary" className="rounded-none border-b-4 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-4 text-slate-400 data-[state=active]:text-primary shadow-none text-xs font-black uppercase tracking-widest transition-all">
+                    03. Journey
+                  </TabsTrigger>
+                  <TabsTrigger value="details" className="rounded-none border-b-4 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-4 text-slate-400 data-[state=active]:text-primary shadow-none text-xs font-black uppercase tracking-widest transition-all">
+                    04. Inclusions
+                  </TabsTrigger>
                 </TabsList>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
-                <TabsContent value="basic" className="space-y-4 mt-0">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-slate-700">Package Name</Label>
-                    <Input id="name" placeholder="e.g. Exotic Bali Adventure" {...register('name')} className="border-slate-200" />
-                    {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="price" className="text-slate-700">Price ($)</Label>
-                      <Input id="price" type="number" {...register('price')} className="border-slate-200" />
-                      {errors.price && <p className="text-xs text-red-500">{errors.price.message}</p>}
+              <div className="flex-1 overflow-y-auto p-8 pt-6 space-y-8 scrollbar-hide">
+                <TabsContent value="basic" className="space-y-6 mt-0">
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <div className="space-y-3">
+                        <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Package Title</Label>
+                        <Input id="name" placeholder="e.g. Exotic Bali Adventure" {...register('name')} className="h-14 px-5 rounded-2xl border-slate-100 bg-slate-50/50 shadow-sm focus:ring-primary/20 text-base font-bold placeholder:font-medium placeholder:text-slate-300" />
+                        {errors.name && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1">{errors.name.message}</p>}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label htmlFor="price" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Display Price ($)</Label>
+                          <Input id="price" type="number" {...register('price')} className="h-14 px-5 rounded-2xl border-slate-100 bg-slate-50/50 shadow-sm text-base font-bold" />
+                          {errors.price && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1">{errors.price.message}</p>}
+                        </div>
+                        <div className="space-y-3">
+                          <Label htmlFor="days" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Duration (Days)</Label>
+                          <Input id="days" type="number" {...register('days')} className="h-14 px-5 rounded-2xl border-slate-100 bg-slate-50/50 shadow-sm text-base font-bold" />
+                          {errors.days && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1">{errors.days.message}</p>}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="category" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Classification</Label>
+                        <Controller
+                          control={control}
+                          name="category"
+                          render={({ field }) => (
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <SelectTrigger id="category" className="h-14 px-5 rounded-2xl border-slate-100 bg-slate-50/50 shadow-sm text-base font-bold">
+                                <SelectValue placeholder="Select Category" />
+                              </SelectTrigger>
+                              <SelectContent className="rounded-2xl border-slate-100 p-2">
+                                <SelectItem value="HERITAGE" className="rounded-xl py-3 font-bold">HERITAGE</SelectItem>
+                                <SelectItem value="HILL STATION" className="rounded-xl py-3 font-bold">HILL STATION</SelectItem>
+                                <SelectItem value="SPIRITUAL" className="rounded-xl py-3 font-bold">SPIRITUAL</SelectItem>
+                                <SelectItem value="BEACH & LEISURE" className="rounded-xl py-3 font-bold">BEACH & LEISURE</SelectItem>
+                                <SelectItem value="WILDLIFE & DESERT" className="rounded-xl py-3 font-bold">WILDLIFE & DESERT</SelectItem>
+                                <SelectItem value="ADVENTURE" className="rounded-xl py-3 font-bold">ADVENTURE</SelectItem>
+                                <SelectItem value="HOLIDAY" className="rounded-xl py-3 font-bold">HOLIDAY</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                        {errors.category && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1">{errors.category.message}</p>}
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label htmlFor="location" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Primary Location</Label>
+                        <div className="relative">
+                          <MapPin className="absolute left-5 top-5 w-4 h-4 text-slate-300" />
+                          <Input id="location" className="h-14 pl-12 pr-5 rounded-2xl border-slate-100 bg-slate-50/50 shadow-sm text-base font-bold" placeholder="e.g. Bali, Indonesia" {...register('location')} />
+                        </div>
+                        {errors.location && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1">{errors.location.message}</p>}
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="days" className="text-slate-700">Duration (Days)</Label>
-                      <Input id="days" type="number" {...register('days')} className="border-slate-200" />
-                      {errors.days && <p className="text-xs text-red-500">{errors.days.message}</p>}
+
+                    <div className="space-y-6">
+                      <div className="space-y-3">
+                        <Label htmlFor="description" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tagline & Summary</Label>
+                        <Textarea id="description" placeholder="Craft a compelling summary..." className="min-h-[168px] p-5 rounded-2xl border-slate-100 bg-slate-50/50 shadow-sm text-base font-medium leading-relaxed placeholder:text-slate-300" {...register('description')} />
+                        {errors.description && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1">{errors.description.message}</p>}
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label htmlFor="groupSize" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Group Capacity</Label>
+                          <Input id="groupSize" placeholder="e.g. Up to 12" {...register('groupSize')} className="h-14 px-5 rounded-2xl border-slate-100 bg-slate-50/50 shadow-sm text-base font-bold" />
+                        </div>
+                        <div className="space-y-3">
+                          <Label htmlFor="languages" className="text-[10px] font-black uppercase tracking-widest text-slate-400">Supported Languages</Label>
+                          <Input id="languages" placeholder="e.g. EN, FR" {...register('languages')} className="h-14 px-5 rounded-2xl border-slate-100 bg-slate-50/50 shadow-sm text-base font-bold" />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location" className="text-slate-700">Location</Label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
-                      <Input id="location" className="pl-9 border-slate-200" placeholder="e.g. Bali, Indonesia" {...register('location')} />
-                    </div>
-                    {errors.location && <p className="text-xs text-red-500">{errors.location.message}</p>}
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="groupSize" className="text-slate-700">Group Size</Label>
-                      <Input id="groupSize" placeholder="e.g. 10+ People" {...register('groupSize')} className="border-slate-200" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="languages" className="text-slate-700">Languages</Label>
-                      <Input id="languages" placeholder="e.g. English, Hindi" {...register('languages')} className="border-slate-200" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description" className="text-slate-700">Short Description</Label>
-                    <Textarea id="description" placeholder="Describe the overview of the tour..." className="min-h-[100px] border-slate-200" {...register('description')} />
-                    {errors.description && <p className="text-xs text-red-500">{errors.description.message}</p>}
                   </div>
 
-                  <div className="space-y-3">
-                    <Label className="flex items-center gap-2 text-slate-700">
-                       <MapIcon className="w-4 h-4 text-primary" /> Multi-Select Destinations
+                  <div className="space-y-4 pt-4">
+                    <Label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-800">
+                       <MapIcon className="w-5 h-5 text-primary" /> Multi-Select Destinations
                     </Label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 border rounded-lg bg-slate-50 border-slate-200">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 p-6 border rounded-[32px] bg-slate-50/50 border-slate-100 shadow-inner">
                       {destinations.map((dest) => (
-                        <div key={dest.id} className="flex items-center space-x-2">
+                        <div key={dest.id} className="flex items-center space-x-3 p-1">
                           <Controller
                             control={control}
                             name="destination_ids"
@@ -320,58 +379,66 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                                     field.onChange(current.filter(id => id !== dest.id));
                                   }
                                 }}
+                                className="w-5 h-5 rounded-md border-slate-200 data-[state=checked]:bg-primary"
                               />
                             )}
                           />
-                          <Label htmlFor={`dest-${dest.id}`} className="text-sm font-normal cursor-pointer truncate text-slate-600">
+                          <Label htmlFor={`dest-${dest.id}`} className="text-xs font-bold uppercase tracking-tight cursor-pointer truncate text-slate-600 transition-colors hover:text-slate-900">
                             {dest.name}
                           </Label>
                         </div>
                       ))}
-                      {destinations.length === 0 && (
-                        <p className="col-span-full text-xs text-slate-400 italic">
-                           No destinations created yet.
-                        </p>
-                      )}
                     </div>
-                    {errors.destination_ids && <p className="text-xs text-red-500">{errors.destination_ids.message}</p>}
+                    {errors.destination_ids && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1">{errors.destination_ids.message}</p>}
                   </div>
                 </TabsContent>
 
-                <TabsContent value="media" className="space-y-4 mt-0">
-                  <div className="space-y-2">
-                    <Controller
-                      control={control}
-                      name="image"
-                      render={({ field }) => (
-                        <ImageUpload
-                          value={field.value}
-                          onChange={field.onChange}
-                          label="Card Image"
-                          folder="packages"
-                        />
-                      )}
-                    />
-                    {errors.image && <p className="text-xs text-red-500">{errors.image.message}</p>}
+                <TabsContent value="media" className="space-y-8 mt-0">
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Primary Thumbnail</Label>
+                      <Controller
+                        control={control}
+                        name="image"
+                        render={({ field }) => (
+                          <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm relative group overflow-hidden">
+                            <ImageUpload
+                              value={field.value}
+                              onChange={field.onChange}
+                              label="Main Card Preview"
+                              folder="packages"
+                            />
+                          </div>
+                        )}
+                      />
+                      {errors.image && <p className="text-[10px] font-bold text-rose-500 uppercase tracking-wide px-1 pt-2">{errors.image.message}</p>}
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 pl-1">Header Background</Label>
+                      <Controller
+                        control={control}
+                        name="bannerImage"
+                        render={({ field }) => (
+                          <div className="bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm relative group overflow-hidden">
+                            <ImageUpload
+                              value={field.value || ''}
+                              onChange={field.onChange}
+                              label="Page Banner Image"
+                              folder="packages/banners"
+                            />
+                          </div>
+                        )}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Controller
-                      control={control}
-                      name="bannerImage"
-                      render={({ field }) => (
-                        <ImageUpload
-                          value={field.value || ''}
-                          onChange={field.onChange}
-                          label="Header Banner Image"
-                          folder="packages/banners"
-                        />
-                      )}
-                    />
-                    {errors.bannerImage && <p className="text-xs text-red-500">{errors.bannerImage.message}</p>}
-                  </div>
-                  <div className="space-y-4">
+
+                  <div className="space-y-6 pt-4">
                     <div className="flex items-center justify-between">
-                      <Label className="text-base font-semibold text-slate-800">Gallery Images</Label>
+                      <div className="space-y-1">
+                        <Label className="text-xl font-black tracking-tight text-slate-900 uppercase">Gallery Slots</Label>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Add up to 12 supplementary images</p>
+                      </div>
                       <Button 
                         type="button" 
                         variant="outline" 
@@ -381,33 +448,33 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                           const list = current ? current.split(',').map(s => s.trim()).filter(Boolean) : [];
                           setValue('gallery', [...list, ''].join(', '));
                         }}
-                        className="border-slate-300"
+                        className="rounded-xl h-10 px-5 gap-2 border-slate-200 font-bold text-xs uppercase tracking-widest"
                       >
-                        Add Image Slot
+                        <Plus className="w-4 h-4" /> Add Slot
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                       {(watch('gallery') || '').split(',').map((url, index) => {
                         const trimmedUrl = url.trim();
                         const allUrls = (watch('gallery') || '').split(',').map(s => s.trim());
 
                         return (
-                          <div key={index} className="relative group border border-slate-200 rounded-lg p-3 bg-slate-50">
-                            <div className="flex justify-between items-center mb-2">
-                              <span className="text-xs font-medium text-slate-500">Image {index + 1}</span>
+                          <div key={index} className="relative bg-white rounded-[24px] p-4 border border-slate-100 shadow-sm group hover:border-primary/20 transition-all hover:shadow-md">
+                            <div className="flex justify-between items-center mb-3">
+                              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Image {index + 1}</span>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-slate-400 hover:text-red-500"
+                                className="h-7 w-7 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
                                 onClick={() => {
                                   const newList = [...allUrls];
                                   newList.splice(index, 1);
                                   setValue('gallery', newList.join(', '));
                                 }}
                               >
-                                <X className="w-3 h-3" />
+                                <X className="w-3.5 h-3.5" strokeWidth={3} />
                               </Button>
                             </div>
                             <ImageUpload
@@ -423,109 +490,173 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                         );
                       })}
 
-                      {!(watch('gallery') || '') && (
-                        <div className="col-span-full py-8 text-center border-2 border-dashed border-slate-200 rounded-lg bg-slate-50 text-slate-400">
-                          <p className="text-sm">No gallery images added yet.</p>
-                          <Button 
-                            type="button" 
-                            variant="link" 
-                            onClick={() => setValue('gallery', '')}
-                            className="mt-2 text-primary"
-                          >
-                            Add your first image
-                          </Button>
+                      {(!(watch('gallery') || '')) && (
+                        <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-100 rounded-[32px] bg-slate-50/50 flex flex-col items-center gap-4 transition-colors hover:border-primary/20 hover:bg-primary/[0.02]">
+                          <div className="bg-white p-4 rounded-2xl shadow-sm">
+                            <ImageIcon className="w-8 h-8 text-slate-300" strokeWidth={1.5} />
+                          </div>
+                          <div className="space-y-1">
+                            <p className="font-black text-slate-300 uppercase tracking-widest text-[10px]">No gallery images yet</p>
+                            <Button 
+                              type="button" 
+                              variant="link" 
+                              onClick={() => setValue('gallery', '')}
+                              className="text-primary font-bold text-xs uppercase tracking-widest"
+                            >
+                              Click to start uploading
+                            </Button>
+                          </div>
                         </div>
                       )}
                     </div>
                   </div>
                 </TabsContent>
 
-                <TabsContent value="itinerary" className="mt-0 space-y-4">
+                <TabsContent value="itinerary" className="mt-0 space-y-6">
                   <div className="flex items-center justify-between">
-                    <Label className="text-slate-800 font-semibold">Tour Itinerary</Label>
-                    <Button type="button" variant="outline" size="sm" onClick={() => append({ day: fields.length + 1, title: '', description: '' })} className="gap-2 border-slate-300">
-                      <PlusCircle className="w-4 h-4" /> Add Day
+                    <div className="space-y-1">
+                      <Label className="text-xl font-black tracking-tight text-slate-900 uppercase">Day-by-Day Journey</Label>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Map out the full experience</p>
+                    </div>
+                    <Button type="button" variant="outline" size="sm" onClick={() => append({ day: fields.length + 1, title: '', description: '' })} className="rounded-xl h-10 px-5 gap-2 border-slate-200 font-bold text-xs uppercase tracking-widest">
+                      <PlusCircle className="w-4 h-4" /> Next Day
                     </Button>
                   </div>
                   
-                  <div className="space-y-4">
+                  <div className="grid gap-6">
                     {fields.map((field, index) => (
-                      <div key={field.id} className="p-4 border border-slate-200 rounded-lg bg-slate-50 relative space-y-3">
+                      <div key={field.id} className="p-8 rounded-[32px] bg-white border border-slate-100 shadow-sm relative group hover:shadow-md transition-all">
                         <Button 
                           type="button" 
                           variant="ghost" 
                           size="icon" 
-                          className="absolute top-2 right-2 h-7 w-7 text-slate-400 hover:text-red-500"
+                          className="absolute top-6 right-6 h-10 w-10 rounded-xl text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all opacity-0 group-hover:opacity-100"
                           onClick={() => remove(index)}
                         >
-                          <Trash className="w-4 h-4" />
+                          <Trash className="w-4 h-4" strokeWidth={2.5} />
                         </Button>
-                        <div className="grid grid-cols-6 gap-3">
-                          <div className="col-span-1">
-                            <Label className="text-[10px] uppercase text-slate-500">Day</Label>
-                            <Input type="number" {...register(`itinerary.${index}.day` as const)} className="border-slate-200" />
+                        
+                        <div className="flex gap-8">
+                          <div className="flex flex-col items-center">
+                            <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-black text-xl mb-2">
+                              {watch(`itinerary.${index}.day` as const) || index + 1}
+                            </div>
+                            <div className="w-0.5 flex-1 bg-slate-50 group-last:hidden" />
                           </div>
-                          <div className="col-span-5">
-                            <Label className="text-[10px] uppercase text-slate-500">Title</Label>
-                            <Input placeholder="Day Title..." {...register(`itinerary.${index}.title` as const)} className="border-slate-200" />
+                          
+                          <div className="flex-1 space-y-6">
+                            <div className="space-y-3">
+                              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 pl-1">Primary Activity / Theme</Label>
+                              <Input placeholder="Theme of the day..." {...register(`itinerary.${index}.title` as const)} className="h-14 px-6 rounded-2xl border-slate-50 bg-slate-50/50 font-bold text-base shadow-sm" />
+                            </div>
+                            <div className="space-y-3">
+                              <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 pl-1">Detailed Itinerary Description</Label>
+                              <Textarea placeholder="Morning exploration, afternoon relaxation, evening dining experience..." {...register(`itinerary.${index}.description` as const)} className="min-h-[120px] p-6 rounded-2xl border-slate-50 bg-slate-50/50 font-medium leading-relaxed shadow-sm" />
+                            </div>
                           </div>
-                        </div>
-                        <div>
-                          <Label className="text-[10px] uppercase text-slate-500">Activities</Label>
-                          <Textarea placeholder="What will happen on this day?" {...register(`itinerary.${index}.description` as const)} className="border-slate-200 min-h-[80px]" />
                         </div>
                       </div>
                     ))}
+                    
                     {fields.length === 0 && (
-                      <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-lg bg-slate-50">
-                        <ListPlus className="w-8 h-8 mx-auto mb-2 text-slate-400" />
-                        <p className="text-sm text-slate-500">No itinerary items yet.</p>
-                        <Button type="button" variant="link" onClick={() => append({ day: 1, title: '', description: '' })} className="text-primary">Add Day 1</Button>
+                      <div className="py-24 text-center border-2 border-dashed border-slate-100 rounded-[40px] bg-slate-50/50 flex flex-col items-center gap-4">
+                        <div className="bg-white p-5 rounded-[24px] shadow-sm">
+                          <MapIcon className="w-10 h-10 text-slate-300" strokeWidth={1.5} />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="font-black text-slate-300 uppercase tracking-[0.2em] text-xs">Journey is currently empty</p>
+                          <Button type="button" variant="link" onClick={() => append({ day: 1, title: '', description: '' })} className="text-primary font-bold text-sm uppercase tracking-widest">Start with Day 1</Button>
+                        </div>
                       </div>
                     )}
                   </div>
                 </TabsContent>
 
-                <TabsContent value="details" className="mt-0 space-y-6">
-                  <div className="space-y-3">
-                    <Label htmlFor="inclusions" className="flex items-center gap-2 text-slate-800 font-semibold">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Inclusions (One per line)
-                    </Label>
-                    <Textarea id="inclusions" placeholder="Hotel accommodation&#10;Daily breakfast..." className="min-h-[120px] border-slate-200" {...register('inclusions')} />
-                  </div>
-                  
-                  <Separator className="bg-slate-100" />
+                <TabsContent value="details" className="mt-0 space-y-12 pb-8">
+                  <div className="grid md:grid-cols-2 gap-12">
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                          <CheckCircle2 className="w-6 h-6" strokeWidth={2.5} />
+                        </div>
+                        <div className="space-y-0.5">
+                          <Label className="text-xl font-black tracking-tight text-slate-900 uppercase">Inclusions</Label>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">What's covered in the price</p>
+                        </div>
+                      </div>
+                      <Textarea id="inclusions" placeholder="Hotel accommodation&#10;Daily breakfast&#10;Private transfers..." className="min-h-[300px] p-6 rounded-[32px] border-slate-100 bg-slate-50/50 shadow-inner font-medium leading-loose placeholder:text-slate-300" {...register('inclusions')} />
+                      <p className="text-[9px] font-black text-slate-300 uppercase px-2 tracking-[0.2em]">TIP: Use one point per line for optimal display</p>
+                    </div>
 
-                  <div className="space-y-3">
-                    <Label htmlFor="exclusions" className="flex items-center gap-2 text-slate-800 font-semibold">
-                      <XCircle className="w-4 h-4 text-rose-600" /> Exclusions (One per line)
-                    </Label>
-                    <Textarea id="exclusions" placeholder="Flight tickets&#10;Personal expenses..." className="min-h-[120px] border-slate-200" {...register('exclusions')} />
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center">
+                          <XCircle className="w-6 h-6" strokeWidth={2.5} />
+                        </div>
+                        <div className="space-y-0.5">
+                          <Label className="text-xl font-black tracking-tight text-slate-900 uppercase">Exclusions</Label>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Items at guest's expense</p>
+                        </div>
+                      </div>
+                      <Textarea id="exclusions" placeholder="International flights&#10;Travel insurance&#10;Personal tips..." className="min-h-[300px] p-6 rounded-[32px] border-slate-100 bg-slate-50/50 shadow-inner font-medium leading-loose placeholder:text-slate-300" {...register('exclusions')} />
+                      <p className="text-[9px] font-black text-slate-300 uppercase px-2 tracking-[0.2em]">TIP: Clarity here builds long-term trust</p>
+                    </div>
                   </div>
                 </TabsContent>
               </div>
             </Tabs>
 
-            <DialogFooter className="p-4 px-6 bg-slate-50 border-t shrink-0">
-              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)} className="border-slate-300">Cancel</Button>
-              <Button type="submit" className="bg-primary hover:bg-primary/90 text-white min-w-[150px]">{editingPackage ? 'Update Package' : 'Create Package'}</Button>
+            <DialogFooter className="p-8 bg-white border-t border-slate-50 shrink-0 flex justify-between gap-4">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={() => setIsFormOpen(false)} 
+                className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[11px] text-slate-400 hover:bg-slate-50"
+              >
+                Cancel & Exit
+              </Button>
+              <Button 
+                type="submit" 
+                className="h-14 px-12 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-[0.2em] text-[11px] min-w-[240px] shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                {editingPackage ? 'Update Experience' : 'Deploy Package'}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
-        <DialogContent className="sm:max-w-md bg-white border-slate-200">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-800">Are you absolutely sure?</DialogTitle>
-            <DialogDescription className="text-slate-500">
-              This action cannot be undone. This will permanently delete the package and remove it from your website.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="sm:justify-end gap-2">
-            <Button variant="outline" onClick={() => setDeleteConfirmId(null)} className="border-slate-300">Cancel</Button>
-            <Button variant="destructive" onClick={() => { if (deleteConfirmId) onDelete(deleteConfirmId); setDeleteConfirmId(null); }} className="bg-red-600 hover:bg-red-700">Delete</Button>
-          </DialogFooter>
+        <DialogContent className="sm:max-w-md bg-white border-none rounded-[40px] p-0 overflow-hidden shadow-2xl">
+          <div className="p-10 space-y-8">
+            <div className="w-20 h-20 rounded-[32px] bg-rose-50 text-rose-500 flex items-center justify-center mx-auto ring-8 ring-rose-50/50">
+              <Trash2 className="w-10 h-10" strokeWidth={2.5} />
+            </div>
+            <div className="text-center space-y-2">
+              <DialogTitle className="text-3xl font-black tracking-tighter text-slate-900 uppercase">Warning</DialogTitle>
+              <DialogDescription className="text-slate-400 font-bold uppercase tracking-widest text-[10px] leading-relaxed">
+                This package will be permanently erased. <br />
+                This action is irreversible.
+              </DialogDescription>
+            </div>
+            
+            <div className="flex flex-col gap-3">
+              <Button 
+                variant="destructive" 
+                onClick={() => { if (deleteConfirmId) onDelete(deleteConfirmId); setDeleteConfirmId(null); }} 
+                className="h-14 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-black uppercase tracking-[0.2em] text-[11px]"
+              >
+                Confirm Deletion
+              </Button>
+              <Button 
+                variant="ghost" 
+                onClick={() => setDeleteConfirmId(null)} 
+                className="h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] text-slate-400"
+              >
+                Nevermind, keep it
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

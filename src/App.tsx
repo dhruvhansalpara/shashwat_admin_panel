@@ -76,10 +76,16 @@ export default function App() {
 
   // Admin Wrapper
   const AdminLayout = ({ children }: { children: React.ReactNode }) => (
-    <div className="flex min-h-screen bg-muted/20">
+    <div className="flex min-h-screen bg-[#f8fafc] relative overflow-hidden">
+      {/* Decorative background blobs - matching website aesthetics */}
+      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+      
       <AdminSidebar />
-      <main className="flex-1 p-8 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">
+      <main className="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto relative z-10 scrollbar-hide">
+        <div className="max-w-7xl mx-auto">
           {children}
         </div>
       </main>
@@ -116,10 +122,15 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Initializing Portal...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative">
+            <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-2 h-2 bg-secondary rounded-full animate-ping" />
+            </div>
+          </div>
+          <p className="text-sm font-black uppercase tracking-[0.3em] text-slate-400 animate-pulse">Shashwat Holidays</p>
         </div>
       </div>
     );
@@ -132,7 +143,7 @@ export default function App() {
           {/* Launch directly to Admin Login */}
           <Route path="/" element={<Navigate to="/admin/login" replace />} />
           
-          {/* Public Routes - kept as alternative paths if needed */}
+          {/* Public Routes */}
           <Route path="/home" element={
             <PublicHome 
               banners={banners} 
@@ -213,7 +224,7 @@ export default function App() {
               <AuthPageWrapper 
                 fetchData={fetchData} 
                 component={DestinationsAdminPage} 
-                props={{ destinations }} 
+                props={{ destinations, packages }} 
                 actionHandlers={{ 
                   onAdd: (dest: any, token: string) => handleAuthAction('/api/destinations', 'POST', dest, "Destination added", token),
                   onEdit: (id: string, dest: any, token: string) => handleAuthAction(`/api/destinations/${id}`, 'PUT', dest, "Destination updated", token),
@@ -278,7 +289,7 @@ export default function App() {
 }
 
 // Helper to pass token to action handlers
-function AuthPageWrapper({ component: Component, props, actionHandlers, fetchData }: any) {
+function AuthPageWrapper({ component: Component, props, actionHandlers }: any) {
   const { token } = useAdmin();
   
   const wrappedHandlers = Object.keys(actionHandlers).reduce((acc: any, key: string) => {
@@ -287,10 +298,16 @@ function AuthPageWrapper({ component: Component, props, actionHandlers, fetchDat
   }, {});
 
   return (
-    <div className="flex min-h-screen bg-muted/20">
+    <div className="flex min-h-screen bg-[#f8fafc] relative overflow-hidden">
+      {/* Decorative background blobs */}
+      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }} />
+      </div>
+      
       <AdminSidebar />
-      <main className="flex-1 p-8 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">
+      <main className="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto relative z-10 scrollbar-hide">
+        <div className="max-w-7xl mx-auto">
           <Component {...props} {...wrappedHandlers} />
         </div>
       </main>

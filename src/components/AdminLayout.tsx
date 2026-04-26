@@ -1,5 +1,6 @@
 import { AdminSidebar } from './AdminSidebar';
 import { Outlet } from 'react-router-dom';
+import { ThemeToggle } from './ThemeToggle';
 
 interface AdminLayoutProps {
   onLogout: () => void;

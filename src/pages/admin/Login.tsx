@@ -1,14 +1,12 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ShieldCheck, Lock, Info } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAdmin } from '@/context/AdminContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Logo } from '@/components/Logo';
 
 export function LoginPage() {
@@ -53,100 +51,127 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background font-sans selection:bg-teal-50">
-      {/* Left Decoration Area */}
-      <div className="hidden lg:flex flex-1 items-center justify-center bg-slate-50/50 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-teal-100/30 rounded-full blur-3xl -mr-32 -mt-32" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-50/30 rounded-full blur-3xl -ml-48 -mb-48" />
-        
-        <div className="relative z-10 text-center space-y-6 max-w-sm">
-          <Logo className="scale-150 justify-center mb-8" />
-          <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Shashwat Admin</h2>
-          <p className="text-slate-500 leading-relaxed">Most powerful & comprehensive travel management dashboard for Shashwat Holidays.</p>
+    <div className="min-h-screen flex font-display bg-[#fcfdfe]">
+      {/* Left Section - Aesthetic Visual */}
+      <div className="hidden lg:flex w-[50%] bg-[#009688] relative overflow-hidden items-center justify-center p-24">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] bg-[radial-gradient(circle,rgba(255,255,255,0.2)_1px,transparent_1px)] bg-[size:40px_40px]" />
+        </div>
+        <div className="relative z-10 space-y-12 max-w-xl text-white">
+          <div className="space-y-6">
+            <Logo className="scale-[1.8] origin-left brightness-0 invert" variant="light" />
+            <div className="w-24 h-1.5 bg-white/20 rounded-full" />
+          </div>
+          <div className="space-y-8">
+            <h1 className="text-7xl font-black tracking-tighter leading-[0.9] uppercase italic">
+              Central <br /> Command <br /> System
+            </h1>
+            <p className="text-xl font-medium text-white/70 max-w-md leading-relaxed">
+              Managing the high-altitude intelligence and logistics for Shashwat Holidays.
+            </p>
+          </div>
+          <div className="flex items-center gap-10 pt-10 border-t border-white/10">
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">System State</p>
+              <p className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+                Operational
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Security Protocols</p>
+              <p className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                Verified
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="absolute bottom-20 left-24 text-[150px] font-black text-white/5 pointer-events-none leading-none select-none">
+          SHASHWAT
         </div>
       </div>
 
-      {/* Right Login Section */}
-      <div className="flex-1 flex items-center justify-center p-6 md:p-12 bg-white">
-        <div className="w-full max-w-[450px] space-y-8">
+      {/* Right Section - Form */}
+      <div className="flex-1 flex items-center justify-center p-12 bg-white">
+        <div className="w-full max-w-[440px] space-y-12 animate-in fade-in slide-in-from-right-10 duration-700">
           <div className="space-y-4">
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-slate-800">Welcome to Shashwat! 👋🏻</h1>
-              <p className="text-slate-500 text-sm">Please sign-in to your account and start the adventure</p>
+            <div className="lg:hidden mb-12">
+               <Logo className="scale-125 origin-left" variant="dark" />
             </div>
+            <h2 className="text-4xl font-black text-slate-800 tracking-tighter uppercase italic leading-none">Initialize <br /> Dashboard Access</h2>
+            <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.25em] pl-1">Input your administrative security credentials</p>
           </div>
 
-          <div className="bg-teal-50/50 border border-teal-100 rounded-lg p-3.5 mb-6">
-            <p className="text-teal-600 text-[13px] leading-relaxed">
-              Email: <span className="font-semibold">info.shashwatholiday@gmail.com</span> / Pass: <span className="font-semibold">kard@2026</span>
-            </p>
-          </div>
+          <form onSubmit={handleLogin} className="space-y-8">
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-[#009688] pl-1">Identity Terminal (Email)</Label>
+                <div className="relative group">
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="agent@shashwa.in"
+                    required 
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="h-16 w-full rounded-2xl bg-slate-50 border-2 border-transparent focus:border-[#009688]/20 focus:bg-white px-6 font-bold text-slate-800 placeholder:text-slate-300 transition-all text-lg shadow-sm"
+                  />
+                </div>
+              </div>
 
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div className="space-y-4">
-              <div className="space-y-1.5 relative">
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="admin@shashwat.in" 
-                  required 
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="h-[52px] rounded-lg border-slate-200 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 pt-5 peer"
-                />
-                <Label 
-                  htmlFor="email" 
-                  className="absolute left-3 top-1.5 text-[10px] uppercase tracking-widest font-bold text-teal-500 scale-90 transition-all pointer-events-none"
-                >
-                  Email
-                </Label>
+              <div className="space-y-3">
+                <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-[#009688] pl-1">Access Passkey</Label>
+                <div className="relative group">
+                  <Input 
+                    id="password" 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••" 
+                    required 
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    className="h-16 w-full rounded-2xl bg-slate-50 border-2 border-transparent focus:border-[#009688]/20 focus:bg-white px-6 font-bold text-slate-800 placeholder:text-slate-300 transition-all text-lg shadow-sm"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 hover:text-[#009688] transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-6 h-6" /> : <Eye className="w-6 h-6" />}
+                  </button>
+                </div>
               </div>
-              
-              <div className="space-y-1.5 relative">
-                <Input 
-                  id="password" 
-                  type={showPassword ? "text" : "password"} 
-                  placeholder="••••••••" 
-                  required 
-                  value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="h-[52px] rounded-lg border-slate-200 focus:border-teal-500 focus:ring-1 focus:ring-teal-500/20 pt-5"
-                />
-                <Label 
-                  htmlFor="password" 
-                  className="absolute left-3 top-1.5 text-[10px] uppercase tracking-widest font-bold text-teal-500 scale-90 transition-all pointer-events-none"
-                >
-                  Password
-                </Label>
-                <button 
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 mt-1.5 text-slate-400 hover:text-teal-500 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="remember" className="rounded border-slate-300 data-[state=checked]:bg-teal-600 data-[state=checked]:border-teal-600" />
-                <label htmlFor="remember" className="text-sm font-medium text-slate-600 cursor-pointer">Remember me</label>
-              </div>
-              <button type="button" className="text-sm font-medium text-teal-600 hover:text-teal-700">Forgot password?</button>
             </div>
 
             <Button 
               type="submit" 
-              className="w-full h-12 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-[13px] uppercase tracking-widest shadow-lg shadow-teal-100 transition-all" 
+              className="w-full h-16 rounded-2xl bg-[#009688] hover:bg-[#00796b] text-white font-black text-sm uppercase tracking-[0.25em] shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50" 
               disabled={isLoading}
             >
               {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin mx-auto text-white" />
+                <div className="flex items-center gap-3">
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                  <span>SYNCING...</span>
+                </div>
               ) : (
-                "Log In"
+                <div className="flex items-center gap-3">
+                  <Lock className="w-5 h-5" />
+                  <span>Authorize Access</span>
+                </div>
               )}
             </Button>
+
+            <div className="pt-8 border-t border-slate-50">
+              <div className="p-6 rounded-2xl bg-slate-50/50 border-2 border-slate-50 flex items-center gap-4">
+                 <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#009688] shadow-sm">
+                   <Info className="w-5 h-5" />
+                 </div>
+                 <div className="space-y-0.5">
+                   <p className="text-[9px] font-black uppercase tracking-widest text-[#009688]">System Default Port</p>
+                   <p className="text-[10px] font-bold text-slate-400">Dhansalpara13@gmail.com / super@2026</p>
+                 </div>
+              </div>
+            </div>
           </form>
         </div>
       </div>

@@ -25,7 +25,7 @@ const io = new Server(httpServer, {
   }
 });
 
-const PORT = 3001;
+const PORT = 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "shashwa-holidays-secret-key-123";
 
 app.use(cors());
@@ -170,6 +170,19 @@ async function initDb() {
       )
     `);
 
+    // Safety check for destination_ids column in packages table
+    const [colsPkg]: any = await p.query("SHOW COLUMNS FROM packages");
+    const pkgColNames = colsPkg.map((c: any) => c.Field);
+    if (!pkgColNames.includes('destination_ids')) {
+      await p.query("ALTER TABLE packages ADD COLUMN destination_ids TEXT AFTER category");
+    }
+    if (!pkgColNames.includes('location')) {
+      await p.query("ALTER TABLE packages ADD COLUMN location VARCHAR(255) AFTER duration");
+    }
+    if (!pkgColNames.includes('bannerImage')) {
+      await p.query("ALTER TABLE packages ADD COLUMN bannerImage TEXT AFTER image");
+    }
+
     await p.query(`
       CREATE TABLE IF NOT EXISTS cars (
         id VARCHAR(255) PRIMARY KEY,
@@ -208,86 +221,26 @@ async function initDb() {
         category VARCHAR(100),
         image TEXT,
         packageCount INT DEFAULT 0,
-        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `);
 
-    // Safety check for destinations columns
+    // Safety check for destinations table
     const [colsDest]: any = await p.query("SHOW COLUMNS FROM destinations");
-    const destColNames = colsDest.map((c: any) => c.Field.toLowerCase());
-    const destNeededCols = [
-      { name: 'slug', type: "VARCHAR(255) DEFAULT ''" },
-      { name: 'description', type: 'TEXT' },
-      { name: 'category', type: 'VARCHAR(100)' },
-      { name: 'image', type: 'TEXT' },
-      { name: 'packageCount', type: 'INT DEFAULT 0' },
-      { name: 'updatedAt', type: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP' }
-    ];
-    for (const col of destNeededCols) {
-      if (!destColNames.includes(col.name.toLowerCase())) {
-        await p.query(`ALTER TABLE destinations ADD COLUMN ${col.name} ${col.type}`);
-      }
+    const destColNames = colsDest.map((c: any) => c.Field);
+    if (!destColNames.includes('description')) {
+      await p.query("ALTER TABLE destinations ADD COLUMN description TEXT");
     }
-
-    // Safety check for packages columns
-    const [colsPkg]: any = await p.query("SHOW COLUMNS FROM packages");
-    const pkgColNames = colsPkg.map((c: any) => c.Field.toLowerCase());
-    const pkgNeededCols = [
-      { name: 'description', type: 'TEXT' },
-      { name: 'category', type: 'VARCHAR(100)' },
-      { name: 'destination_ids', type: 'TEXT' },
-      { name: 'price', type: 'DECIMAL(10, 2) DEFAULT 0' },
-      { name: 'days', type: 'INT DEFAULT 1' },
-      { name: 'duration', type: 'VARCHAR(100)' },
-      { name: 'location', type: 'VARCHAR(255)' },
-      { name: 'image', type: 'TEXT' },
-      { name: 'bannerImage', type: 'TEXT' },
-      { name: 'gallery', type: 'TEXT' },
-      { name: 'itinerary', type: 'TEXT' },
-      { name: 'highlights', type: 'TEXT' },
-      { name: 'inclusions', type: 'TEXT' },
-      { name: 'exclusions', type: 'TEXT' },
-      { name: 'groupSize', type: 'VARCHAR(100)' },
-      { name: 'languages', type: 'VARCHAR(255)' },
-      { name: 'isFeatured', type: 'BOOLEAN DEFAULT FALSE' },
-      { name: 'updatedAt', type: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP' }
-    ];
-    for (const col of pkgNeededCols) {
-      if (!pkgColNames.includes(col.name.toLowerCase())) {
-        await p.query(`ALTER TABLE packages ADD COLUMN ${col.name} ${col.type}`);
-      }
+    if (!destColNames.includes('category')) {
+      await p.query("ALTER TABLE destinations ADD COLUMN category VARCHAR(100)");
     }
-
-    // Fix potentially broken JSON in packages
-    await p.query("UPDATE packages SET destination_ids = '[]' WHERE destination_ids IS NULL OR destination_ids = ''");
-    await p.query("UPDATE packages SET gallery = '[]' WHERE gallery IS NULL OR gallery = ''");
-    await p.query("UPDATE packages SET itinerary = '[]' WHERE itinerary IS NULL OR itinerary = ''");
-    await p.query("UPDATE packages SET inclusions = '[]' WHERE inclusions IS NULL OR inclusions = ''");
-    await p.query("UPDATE packages SET exclusions = '[]' WHERE exclusions IS NULL OR exclusions = ''");
-
-    // Safety check for cars columns
-    const [colsCars]: any = await p.query("SHOW COLUMNS FROM cars");
-    const carsColNames = colsCars.map((c: any) => c.Field.toLowerCase());
-    const carsNeededCols = [
-      { name: 'type', type: 'VARCHAR(100)' },
-      { name: 'seats', type: 'INT' },
-      { name: 'luggage', type: 'INT' },
-      { name: 'pricePerKm', type: 'DECIMAL(10, 2)' },
-      { name: 'pricePerDay', type: 'DECIMAL(10, 2) DEFAULT 0' },
-      { name: 'image', type: 'TEXT' },
-      { name: 'features', type: 'TEXT' },
-      { name: 'description', type: 'TEXT' },
-      { name: 'isAvailable', type: 'BOOLEAN DEFAULT TRUE' },
-      { name: 'updatedAt', type: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP' }
-    ];
-    for (const col of carsNeededCols) {
-      if (!carsColNames.includes(col.name.toLowerCase())) {
-        await p.query(`ALTER TABLE cars ADD COLUMN ${col.name} ${col.type}`);
-      }
+    if (!destColNames.includes('packageCount')) {
+      await p.query("ALTER TABLE destinations ADD COLUMN packageCount INT DEFAULT 0");
     }
-    
-    // Fix broken JSON in cars
-    await p.query("UPDATE cars SET features = '[]' WHERE features IS NULL OR features = ''");
+    if (!destColNames.includes('updatedAt')) {
+      await p.query("ALTER TABLE destinations ADD COLUMN updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
+    }
 
     await p.query(`
       CREATE TABLE IF NOT EXISTS inquiries (
@@ -635,7 +588,7 @@ app.get("/api/packages", async (req, res) => {
     if (destination) {
       const [destRows]: any = await p.query("SELECT id FROM destinations WHERE LOWER(slug) = LOWER(?) OR LOWER(name) = LOWER(?)", [destination, destination]);
       if (destRows.length > 0) {
-        query += " WHERE JSON_CONTAINS(destination_ids, ?)";
+        query += " WHERE JSON_CONTAINS(CAST(destination_ids AS JSON), ?)";
         params.push(JSON.stringify(destRows[0].id));
       }
     }
@@ -767,6 +720,7 @@ app.post("/api/packages", authenticateToken, isAdmin, async (req, res) => {
       ]
     );
     notifyClients("package_added", { id });
+    await syncPackageCounts();
     res.json({ success: true, id });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -804,6 +758,7 @@ app.put("/api/packages/:id", authenticateToken, isAdmin, async (req, res) => {
       ]
     );
     notifyClients("package_updated", { id });
+    await syncPackageCounts();
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -817,11 +772,34 @@ app.delete("/api/packages/:id", authenticateToken, isAdmin, async (req, res) => 
     const { id } = req.params;
     await p.query("DELETE FROM packages WHERE id=?", [id]);
     notifyClients("package_deleted", { id });
+    await syncPackageCounts();
     res.json({ success: true });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
+
+async function syncPackageCounts() {
+  const p = await getPool();
+  if (!p) return;
+  try {
+    const [destinations]: any = await p.query("SELECT id FROM destinations");
+    const [packages]: any = await p.query("SELECT destination_ids FROM packages");
+    
+    for (const dest of destinations) {
+      let count = 0;
+      for (const pkg of packages) {
+        const destIds = JSON.parse(pkg.destination_ids || '[]');
+        if (destIds.includes(dest.id)) {
+          count++;
+        }
+      }
+      await p.query("UPDATE destinations SET packageCount = ? WHERE id = ?", [count, dest.id]);
+    }
+  } catch (err) {
+    console.error("[DB] Error syncing package counts:", err);
+  }
+}
 
 // Banners API
 app.get("/api/banners", async (req, res) => {

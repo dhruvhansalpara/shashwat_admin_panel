@@ -20,7 +20,7 @@ interface HomePageProps {
 }
 
 export function PublicHome({ packages, banners, destinations, onInquiry, whatsappNumber, defaultMessage }: HomePageProps) {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = (searchParams.get('search') || searchParams.get('destination'))?.toLowerCase() || '';
   const [selectedPkg, setSelectedPkg] = useState<Package | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -38,6 +38,7 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
     const isSearchMatch = 
       (pkg.name?.toLowerCase() || '').includes(searchQuery) ||
       (pkg.location?.toLowerCase() || '').includes(searchQuery) ||
+      (pkg.category?.toLowerCase() || '').includes(searchQuery) ||
       (pkg.description?.toLowerCase() || '').includes(searchQuery);
 
     const linkedDestinations = destinations.filter(d => pkg.destination_ids?.includes(d.id));
@@ -181,81 +182,128 @@ export function PublicHome({ packages, banners, destinations, onInquiry, whatsap
       </section>
 
       {/* Featured Tours */}
-      <section id="featured" className="py-24 bg-muted/30">
+      <section id="featured" className="py-24 bg-muted/10">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20 space-y-4">
-            <span className="text-primary font-bold uppercase tracking-widest text-xs">Curated For You</span>
-            <h3 className="text-4xl md:text-6xl font-display font-bold tracking-tight">Handpicked Tours</h3>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Our most popular journeys designed for maximum comfort and discovery.
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-8">
+            <div className="space-y-4">
+              <h3 className="text-6xl md:text-8xl font-display font-black tracking-tighter text-emerald-900/10 absolute -top-10 left-0 pointer-events-none select-none">TOURS</h3>
+              <div className="relative">
+                <span className="text-primary font-bold uppercase tracking-widest text-xs">Curated For You</span>
+                <h3 className="text-5xl md:text-7xl font-display font-bold tracking-tight leading-none text-[#004D40]">All Tour <br /> <span className="text-primary italic">Packages</span></h3>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3 md:justify-center bg-white/50 p-2 rounded-[2rem] border border-white/50 backdrop-blur-sm self-center">
+              {['ALL', 'HERITAGE', 'HILL STATION', 'SPIRITUAL', 'BEACH & LEISURE', 'WILDLIFE & DESERT', 'ADVENTURE'].map((cat) => (
+                <Button
+                  key={cat}
+                  variant={searchQuery.toUpperCase() === cat ? "default" : "ghost"}
+                  onClick={() => {
+                    if (cat === 'ALL') {
+                      searchParams.delete('search');
+                      searchParams.delete('destination');
+                    } else {
+                      searchParams.set('search', cat);
+                    }
+                    setSearchParams(searchParams);
+                  }}
+                  className={cn(
+                    "rounded-full px-6 h-11 text-[10px] font-black uppercase tracking-widest transition-all",
+                    searchQuery.toUpperCase() === cat 
+                      ? "bg-[#E91E63] text-white hover:bg-[#D81B60] shadow-lg shadow-pink-500/20" 
+                      : "text-slate-400 hover:text-slate-600"
+                  )}
+                >
+                  {cat}
+                </Button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-3 self-end md:self-auto text-slate-400 bg-white/80 px-6 h-14 rounded-2xl border border-slate-100 shadow-sm">
+              <span className="text-xs font-bold uppercase tracking-widest">Sort By:</span>
+              <span className="text-xs font-black text-slate-800 uppercase tracking-widest">Recommended</span>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between mb-10 border-b border-slate-100 pb-8">
+            <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[11px]">
+              Showing <span className="text-slate-900">{filteredPackages.length}</span> tours
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {displayPackages.map((pkg) => (
+            {filteredPackages.map((pkg) => (
               <motion.div
                 key={pkg.id}
                 initial={{ y: 20, opacity: 0 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
               >
-                <Card className="overflow-hidden border-none shadow-2xl hover:shadow-primary/5 transition-all duration-500 bg-card rounded-[2.5rem] group">
-                  <Link to={`/tour/${pkg.id}`} className="block relative aspect-[16/11] overflow-hidden">
+                <Card className="overflow-hidden border-none shadow-[0_20px_60px_rgba(0,0,0,0.05)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] transition-all duration-500 bg-white rounded-[2.5rem] group border border-slate-50">
+                  <Link to={`/tour/${pkg.id}`} className="block relative aspect-[1.4] overflow-hidden">
                     <img 
                       src={pkg.image} 
                       alt={pkg.name} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
                     />
-                    <div className="absolute top-6 right-6 backdrop-blur-md bg-white/20 border border-white/30 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg">
-                      From ₹{pkg.price}
+                    
+                    {/* Top Right Tag - Category (from screenshot) */}
+                    <div className="absolute top-6 right-6 backdrop-blur-md bg-white text-slate-900 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-black/20">
+                      {pkg.category || 'HOLIDAY'}
+                    </div>
+
+                    {/* Top Left Tag - Popular (as requested in text) */}
+                    {pkg.isFeatured && (
+                      <div className="absolute top-6 left-6 backdrop-blur-md bg-primary text-white px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/30">
+                        POPULAR
+                      </div>
+                    )}
+
+                    <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-8">
+                       <div className="flex items-center justify-center w-24 h-24 rounded-full border border-white/20 backdrop-blur-md bg-white/10 mx-auto text-center transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                          <span className="text-white text-[10px] font-black leading-tight uppercase tracking-tighter">Enjoy Exciting<br/>Escapes In<br/><span className="text-xs text-primary">Gorgeous Gujarat</span></span>
+                       </div>
                     </div>
                   </Link>
                   <CardHeader className="p-8 pb-4">
-                    <div className="flex items-center gap-2 mb-4">
-                       <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
-                         {pkg.category || 'Tour Package'}
-                       </span>
-                    </div>
                     <Link to={`/tour/${pkg.id}`} className="hover:text-primary transition-colors">
-                      <CardTitle className="text-2xl font-display font-bold leading-tight">{pkg.name}</CardTitle>
+                      <CardTitle className="text-3xl font-display font-black leading-tight tracking-tight text-slate-800">{pkg.name}</CardTitle>
                     </Link>
                   </CardHeader>
                   <CardContent className="px-8 pb-6">
-                    <div className="flex items-center gap-6 text-muted-foreground font-semibold text-sm mb-6">
+                    <div className="flex items-center gap-6 text-slate-400 font-bold text-xs mb-6 uppercase tracking-widest">
                       <span className="flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-primary" /> {pkg.duration}
+                        <MapPin className="w-4 h-4 text-primary" strokeWidth={3} /> {pkg.location}
                       </span>
-                      {pkg.location && (
-                        <span className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-primary" /> {pkg.location}
-                        </span>
-                      )}
+                      <span className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-primary" strokeWidth={3} /> {pkg.days} Days
+                      </span>
                     </div>
-                    <p className="text-muted-foreground/80 line-clamp-2 text-base leading-relaxed font-light italic">
-                      "{pkg.description}"
-                    </p>
                   </CardContent>
-                  <CardFooter className="px-8 pb-10 flex gap-3">
-                    <Button 
-                      variant="outline"
-                      className="flex-1 rounded-2xl text-xs font-bold uppercase tracking-widest h-12 border-muted-foreground/20" 
-                      onClick={() => {
-                        setSelectedPkg(pkg);
-                        setIsFormOpen(true);
-                      }}
-                    >
-                      Inquiry
-                    </Button>
-                    <Button 
-                      variant="secondary"
-                      asChild
-                      className="flex-1 rounded-2xl text-xs font-bold uppercase tracking-widest h-12 bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20"
-                    >
-                      <a href={getWhatsAppLink(pkg.name)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
-                        <MessageCircle className="w-4 h-4" /> WhatsApp
-                      </a>
-                    </Button>
-                  </CardFooter>
+                  <div className="px-8 pb-10">
+                    <div className="h-px bg-slate-100 mb-8" />
+                    <div className="flex gap-4">
+                      <Button 
+                        variant="ghost"
+                        className="flex-1 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] h-14 border-2 border-slate-100 hover:bg-slate-50 transition-all" 
+                        onClick={() => {
+                          setSelectedPkg(pkg);
+                          setIsFormOpen(true);
+                        }}
+                      >
+                        Inquiry Now
+                      </Button>
+                      <Button 
+                        variant="secondary"
+                        asChild
+                        className="flex-1 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] h-14 bg-emerald-500 text-white hover:bg-emerald-600 shadow-xl shadow-emerald-500/20 transition-all hover:scale-[1.02]"
+                      >
+                        <a href={getWhatsAppLink(pkg.name)} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3">
+                          <MessageCircle className="w-4 h-4" strokeWidth={3} /> WhatsApp
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
                 </Card>
               </motion.div>
             ))}

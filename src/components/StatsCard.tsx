@@ -13,36 +13,52 @@ interface StatsCardProps {
     isPositive: boolean;
   };
   className?: string;
+  variant?: 'default' | 'primary' | 'secondary' | 'accent';
 }
 
-export function StatsCard({ title, value, description, icon: Icon, trend, className }: StatsCardProps) {
+export function StatsCard({ title, value, description, icon: Icon, trend, className, variant = 'default' }: StatsCardProps) {
+  const variantStyles = {
+    default: "border-slate-50",
+    primary: "border-slate-50",
+    secondary: "border-slate-50",
+    accent: "border-slate-50",
+  };
+
+  const iconStyles = {
+    default: "bg-slate-50 text-slate-400",
+    primary: "bg-[#e0f2f1] text-[#009688]",
+    secondary: "bg-[#e0f2f1] text-[#009688]",
+    accent: "bg-[#e0f2f1] text-[#009688]",
+  };
+
   return (
     <div className={cn(
-      "relative overflow-hidden border border-slate-200/60 bg-white p-6 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover-card group",
+      "relative border-2 bg-white p-8 rounded-[32px] transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.04)] group overflow-hidden", 
+      variantStyles[variant],
       className
     )}>
-      <div className="flex items-center justify-between">
-        <div className="space-y-1.5 relative z-10">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">{title}</p>
-          <h3 className="text-3xl font-display font-extrabold text-slate-900 leading-none">{value}</h3>
+      <div className="flex items-start justify-between relative z-10 mb-10">
+        <div className="space-y-4">
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] font-display leading-none mb-1 group-hover:text-slate-500 transition-colors opacity-80">{title}</p>
+          <h3 className="text-5xl font-black text-slate-900 tracking-tighter leading-none font-display">{value}</h3>
         </div>
-        <div className="p-4 bg-primary/10 rounded-2xl group-hover:bg-primary group-hover:text-white transition-colors duration-300">
-          <Icon className="w-6 h-6 text-primary group-hover:text-white transition-colors" />
+        <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:rotate-6", iconStyles[variant])}>
+          <Icon className="w-6 h-6" strokeWidth={2.5} />
         </div>
       </div>
-      <div className="mt-6 flex items-center gap-3 relative z-10">
+      
+      <div className="flex items-center justify-between relative z-10">
+        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.1em] font-display opacity-80">{description}</p>
         {trend && (
-          <div className={cn(
-            "flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold uppercase",
-            trend.isPositive ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
+          <span className={cn(
+            "text-[9px] font-black px-2.5 py-1 rounded-lg border-2 font-display flex items-center gap-1",
+            trend.isPositive ? "bg-emerald-50 text-emerald-600 border-emerald-500/5 shadow-sm shadow-emerald-500/10" : "bg-rose-50 text-rose-600 border-rose-500/5 shadow-sm shadow-rose-500/10"
           )}>
-            {trend.isPositive ? "+" : "-"}{trend.value}%
-          </div>
+            <span className="text-[8px]">{trend.isPositive ? "+" : "-"}</span>{trend.value}%
+            <span className="text-[8px] opacity-40 font-bold ml-1">{trend.isPositive ? "Past 30 days" : "Decrease"}</span>
+          </span>
         )}
-        <p className="text-[11px] text-slate-500 font-semibold">{description}</p>
       </div>
-      {/* Subtle background flair */}
-      <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors" />
     </div>
   );
 }

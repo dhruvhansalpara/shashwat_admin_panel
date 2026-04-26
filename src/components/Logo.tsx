@@ -7,12 +7,11 @@ interface LogoProps {
 }
 
 export function Logo({ className, showText = true, variant = 'dark' }: LogoProps) {
-  // Official logo from the reference website
-  const logoUrl = "https://lightpink-termite-256807.hostingersite.com/shashwat-logo-new.png"; 
+  const logoUrl = "https://shashwatholidays.com/wp-content/uploads/2023/12/Shashwat-Logo-1.png";
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
-      <div className="relative w-12 h-12 overflow-hidden rounded-xl bg-white p-1 flex items-center justify-center">
+    <div className={cn("flex items-center gap-4", className)}>
+      <div className="relative w-14 h-14 flex items-center justify-center">
          <img 
           src={logoUrl} 
           alt="Shashwat Holidays Logo" 
@@ -21,18 +20,18 @@ export function Logo({ className, showText = true, variant = 'dark' }: LogoProps
          />
       </div>
       {showText && (
-        <div className="flex flex-col leading-tight">
+        <div className="flex flex-col items-start leading-[0.8] pt-1">
           <span className={cn(
-            "font-display font-extrabold text-xl tracking-tight",
-            variant === 'light' ? "text-white" : "text-slate-900"
+            "font-display font-black text-2xl tracking-tighter italic uppercase",
+            variant === 'light' ? "text-white" : "text-slate-800"
           )}>
             शाश्वत
           </span>
           <span className={cn(
-            "text-[10px] font-bold uppercase tracking-[0.25em] text-primary",
-            variant === 'light' ? "text-primary-foreground/80" : ""
+            "text-[10px] font-black uppercase tracking-[0.4em] mt-1.5",
+            variant === 'light' ? "text-white/80" : "text-primary"
           )}>
-            Holidays
+            HOLIDAYS
           </span>
         </div>
       )}
