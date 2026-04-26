@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { UserPlus, UserCog, UserMinus, Shield, ShieldCheck, Mail, User } from 'lucide-react';
+import { UserPlus, UserCog, UserMinus, Shield, ShieldCheck, Mail, User, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AdminUser {
@@ -27,6 +27,16 @@ export default function AdminManagement() {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  const filteredAdmins = React.useMemo(() => {
+    if (!searchTerm.trim()) return admins;
+    const term = searchTerm.toLowerCase();
+    return admins.filter(adm => 
+      adm.name.toLowerCase().includes(term) || 
+      adm.email.toLowerCase().includes(term)
+    );
+  }, [admins, searchTerm]);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -138,15 +148,27 @@ export default function AdminManagement() {
     <div className="space-y-12 pb-20 font-display">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
         <div>
-          <h2 className="text-5xl font-black tracking-tighter text-slate-800 uppercase font-display leading-none italic">Admin Users</h2>
-          <p className="text-[#009688] mt-2 font-black uppercase tracking-[0.4em] text-[10px] pl-0.5 opacity-100">Add or remove team members who can manage the website content</p>
+          <h2 className="text-xl font-bold tracking-tight text-slate-800 uppercase font-display leading-none">Admin Users</h2>
+          <p className="text-[#009688] mt-1.5 font-bold uppercase tracking-widest text-[9px] pl-0.5 opacity-80">Add or remove team members who can manage the website content</p>
         </div>
         <Button 
           onClick={() => setIsAddOpen(true)} 
-          className="rounded-2xl h-16 px-10 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-[0.25em] text-[11px]"
+          className="rounded-2xl h-12 px-8 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-bold uppercase tracking-widest text-[10px]"
         >
-          <UserPlus className="w-5 h-5" strokeWidth={3} /> Add New Admin
+          <UserPlus className="w-4 h-4" strokeWidth={3} /> Add New Admin
         </Button>
+      </div>
+
+      <div className="relative max-w-xl group">
+        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#009688]">
+          <Search className="w-5 h-5" strokeWidth={3} />
+        </div>
+        <Input 
+          placeholder="Search admin users by name or email..." 
+          className="h-14 pl-14 pr-8 rounded-[24px] border-2 border-[#009688]/20 bg-white shadow-xl shadow-[#009688]/10 text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-[#009688]/5 focus:border-[#009688] transition-all font-display"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       <div className="bg-white rounded-[32px] border-2 border-slate-50 shadow-[0_8px_40px_rgba(0,0,0,0.02)] overflow-hidden">
@@ -154,15 +176,15 @@ export default function AdminManagement() {
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow className="hover:bg-transparent border-b border-slate-100/50">
-                <TableHead className="pl-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">User Details</TableHead>
-                <TableHead className="py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Access Role</TableHead>
-                <TableHead className="py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Status</TableHead>
-                <TableHead className="py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Joined Date</TableHead>
-                <TableHead className="text-right pr-10 py-6 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Actions</TableHead>
+                <TableHead className="pl-10 py-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">User Details</TableHead>
+                <TableHead className="py-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">Access Role</TableHead>
+                <TableHead className="py-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</TableHead>
+                <TableHead className="py-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">Joined Date</TableHead>
+                <TableHead className="text-right pr-10 py-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {admins.map((adm) => (
+              {filteredAdmins.map((adm) => (
                 <TableRow key={adm.id} className="group hover:bg-slate-50/30 transition-all duration-300 border-b border-slate-50/50 last:border-none">
                   <TableCell className="pl-10 py-8">
                     <div className="flex items-center gap-5">
@@ -173,8 +195,8 @@ export default function AdminManagement() {
                         <User className="w-6 h-6" strokeWidth={3} />
                       </div>
                       <div className="space-y-0.5">
-                        <p className="font-black text-slate-800 text-lg tracking-tight group-hover:text-[#009688] transition-colors italic uppercase leading-none">{adm.name}</p>
-                        <p className="text-[10px] font-bold text-slate-400 flex items-center gap-2 uppercase tracking-wide">
+                        <p className="font-bold text-slate-800 text-sm tracking-tight group-hover:text-[#009688] transition-colors uppercase leading-none">{adm.name}</p>
+                        <p className="text-[10px] font-bold text-slate-400 flex items-center gap-2 uppercase tracking-tight">
                           {adm.email}
                         </p>
                       </div>

@@ -76,9 +76,9 @@ export function Dashboard({ stats, recentInquiries, topPackages }: DashboardProp
               <Sparkles className="w-7 h-7 animate-pulse" strokeWidth={2.5} />
             </div>
             <div className="space-y-0.5">
-               <h2 className="text-5xl font-black tracking-tight text-slate-800 uppercase font-display leading-none italic">Admin Dashboard</h2>
-               <div className="flex items-center gap-3">
-                 <p className="text-[#009688] text-[10px] font-black uppercase tracking-[0.3em] opacity-100 pl-0.5">Shashwat Holidays Overview</p>
+               <h2 className="text-xl font-bold tracking-tight text-slate-800 uppercase font-display leading-none">Admin Dashboard</h2>
+               <div className="flex items-center gap-2">
+                 <p className="text-[#009688] text-[9px] font-bold uppercase tracking-widest pl-0.5">Shashwat Holidays Overview</p>
                  {dbStatus === 'connected' && (
                    <span className="flex items-center gap-1.5 px-3 py-0.5 bg-emerald-500/10 text-emerald-600 rounded-full text-[8px] font-black uppercase tracking-tighter ring-1 ring-emerald-500/20 shadow-[0_2px_10px_rgba(16,185,129,0.1)]">
                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
@@ -135,9 +135,9 @@ export function Dashboard({ stats, recentInquiries, topPackages }: DashboardProp
              <div className="absolute inset-0 bg-[radial-gradient(circle,#009688_1px,transparent_1px)] bg-[size:32px_32px]" />
           </div>
           <div className="flex justify-between items-start mb-16 relative z-10">
-            <div className="space-y-2">
-              <h3 className="text-4xl font-black text-slate-800 tracking-tighter uppercase font-display leading-none italic">Inquiry Trends</h3>
-              <p className="text-[10px] font-black text-[#009688] uppercase tracking-[0.4em] opacity-80 pl-0.5">Daily inquiry activity and guest reach</p>
+            <div className="space-y-1">
+              <h3 className="text-sm font-bold text-slate-800 tracking-tight uppercase font-display leading-none">Inquiry Trends</h3>
+              <p className="text-[9px] font-bold text-[#009688] uppercase tracking-widest opacity-80 pl-0.5">Daily inquiry activity and guest reach</p>
             </div>
             <div className="px-6 py-3 bg-[#e0f2f1] text-[#009688] rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] border-2 border-[#009688]/10 shadow-[0_4px_20px_rgba(0,150,136,0.1)] flex items-center gap-3">
               <span className="w-2 h-2 rounded-full bg-[#009688] animate-ping" />
@@ -243,9 +243,9 @@ export function Dashboard({ stats, recentInquiries, topPackages }: DashboardProp
 
         <motion.div variants={item} className="xl:col-span-3 border border-slate-50 bg-white p-12 rounded-[40px] shadow-[0_8px_40px_rgba(0,0,0,0.02)] border-2">
            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-10">
-             <div className="space-y-1.5">
-               <h3 className="text-3xl font-black text-slate-800 tracking-tighter uppercase font-display leading-none">Recent Inquiries</h3>
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] opacity-60">The latest customer leads from the portal.</p>
+             <div className="space-y-1">
+               <h3 className="text-sm font-bold text-slate-800 tracking-tight uppercase font-display leading-none">Recent Inquiries</h3>
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest opacity-60">The latest customer leads from the portal.</p>
              </div>
              <Button variant="ghost" asChild className="rounded-2xl border border-slate-100 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] h-12 px-8 hover:bg-slate-50 hover:text-[#009688] transition-all font-display hover:shadow-sm">
                <Link to="/admin/inquiries">VIEW ANALYTICS</Link>

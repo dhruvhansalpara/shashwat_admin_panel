@@ -15,14 +15,6 @@ export function Logo({ className, showText = true, variant = 'dark' }: LogoProps
       whileHover={{ scale: 1.05 }}
       className={cn("flex items-center gap-4 cursor-pointer", className)}
     >
-      <div className="relative w-14 h-14 flex items-center justify-center">
-         <img 
-          src={logoUrl} 
-          alt="Shashwat Holidays Logo" 
-          className="w-full h-full object-contain"
-          referrerPolicy="no-referrer"
-         />
-      </div>
       {showText && (
         <div className="flex flex-col items-start leading-[0.8] pt-1">
           <span className={cn(

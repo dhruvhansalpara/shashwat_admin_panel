@@ -11,9 +11,9 @@ export function AdminLayout({ onLogout }: AdminLayoutProps) {
   const location = useLocation();
 
   return (
-    <div className="flex min-h-screen bg-background font-sans selection:bg-primary/10 overflow-hidden">
-      {/* Sidebar */}
-      <AdminSidebar />
+    <div className="flex h-screen bg-background font-sans selection:bg-primary/10 overflow-hidden">
+      {/* Sidebar - Fixed and Non-Scrollable */}
+      <AdminSidebar className="shrink-0" />
       
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto flex flex-col h-screen scrollbar-hide">

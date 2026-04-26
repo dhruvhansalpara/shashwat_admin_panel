@@ -51,14 +51,14 @@ export function BannersPage({ banners, onAdd, onDelete }: BannersPageProps) {
     >
       <motion.div variants={item} className="flex flex-col md:flex-row md:items-center justify-between gap-8">
         <div>
-          <h2 className="text-5xl font-black tracking-tighter text-slate-800 uppercase font-display leading-none italic">Home Banners</h2>
-          <p className="text-[#009688] mt-2 font-black uppercase tracking-[0.4em] text-[10px] pl-0.5 opacity-100">Manage the large rotating images on your homepage</p>
+          <h2 className="text-xl font-bold tracking-tight text-slate-800 uppercase font-display leading-none">Home Banners</h2>
+          <p className="text-[#009688] mt-1.5 font-bold uppercase tracking-widest text-[9px] pl-0.5 opacity-80">Manage the large rotating images on your homepage</p>
         </div>
         <Button 
           onClick={() => setIsAddOpen(true)} 
-          className="rounded-2xl h-16 px-10 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-[0.25em] text-[11px]"
+          className="rounded-2xl h-12 px-8 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-bold uppercase tracking-widest text-[10px]"
         >
-          <Plus className="w-5 h-5" strokeWidth={3} /> Add New Banner
+          <Plus className="w-4 h-4" strokeWidth={3} /> Add New Banner
         </Button>
       </motion.div>
 
@@ -92,7 +92,7 @@ export function BannersPage({ banners, onAdd, onDelete }: BannersPageProps) {
               <div className="p-10">
                 <div className="flex justify-between items-center gap-6">
                   <div className="space-y-2 flex-1 min-w-0">
-                    <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter truncate font-display italic leading-none group-hover:text-[#009688] transition-colors">
+                    <h3 className="text-sm font-bold text-slate-800 uppercase tracking-tight truncate font-display group-hover:text-[#009688] transition-colors leading-none">
                       {banner.title || "Banner Title"}
                     </h3>
                     <div className="flex items-center gap-2.5">

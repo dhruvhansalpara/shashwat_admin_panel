@@ -129,101 +129,106 @@ export function DestinationsPage({ destinations, packages, onAdd, onEdit, onDele
     >
       <motion.div variants={item} className="flex flex-col md:flex-row md:items-center justify-between gap-8">
         <div>
-          <h2 className="text-5xl font-black tracking-tighter text-slate-800 uppercase font-display leading-none italic">Destinations</h2>
-          <p className="text-[#009688] mt-2 font-black uppercase tracking-[0.4em] text-[10px] pl-0.5 opacity-100">Manage the destinations where you offer tour packages</p>
+          <h2 className="text-xl font-bold tracking-tight text-slate-800 uppercase font-display leading-none">Destinations</h2>
+          <p className="text-[#009688] mt-1.5 font-bold uppercase tracking-widest text-[9px] pl-0.5 opacity-80">Manage the destinations where you offer tour packages</p>
         </div>
         <Button 
           onClick={handleAddNew} 
-          className="rounded-2xl h-16 px-10 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-[0.25em] text-[11px]"
+          className="rounded-2xl h-12 px-8 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-bold uppercase tracking-widest text-[10px]"
         >
-          <Plus className="w-5 h-5" strokeWidth={3} /> Add New Destination
+          <Plus className="w-4 h-4" strokeWidth={3} /> Add New Destination
         </Button>
       </motion.div>
 
-      <motion.div variants={item} className="bg-white rounded-[48px] border-2 border-slate-50 shadow-[0_8px_40px_rgba(0,0,0,0.03)] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b-2 border-slate-50 bg-slate-50/10 hover:bg-slate-50/10 transition-none">
-                <th className="pl-12 py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Destination Info</th>
-                <th className="py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Classification</th>
-                <th className="py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Tours Count</th>
-                <th className="py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">URL Path</th>
-                <th className="px-12 py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 text-right font-display italic">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y-2 divide-slate-50/20">
-              <AnimatePresence mode="popLayout">
-                {filteredDestinations.map((dest, idx) => {
-                  const packageCount = packages.filter(pkg => pkg.destination_ids?.includes(dest.id)).length;
-                  return (
-                    <motion.tr 
-                      key={dest.id} 
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ delay: idx * 0.05 }}
-                      className="group hover:bg-slate-50/60 transition-all duration-300 border-none"
-                    >
-                      <td className="pl-12 py-10">
-                        <div className="flex items-center gap-8">
-                          <div className="relative w-24 h-24 rounded-[36px] overflow-hidden shadow-2xl shadow-slate-200 group-hover:rounded-2xl transition-all duration-700 ring-8 ring-slate-50/30">
-                            <img src={dest.image} alt={dest.name} className="w-full h-full object-cover transition-transform group-hover:scale-125 duration-1000" />
-                          </div>
-                          <div className="space-y-2">
-                            <div className="font-black text-slate-800 text-2xl tracking-tighter group-hover:text-[#009688] transition-colors font-display uppercase italic leading-none">{dest.name}</div>
-                            <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.25em] leading-none font-display">REG-ID: {dest.id.substring(0, 8)}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-10">
-                        <Badge variant="secondary" className={cn(
-                          "px-5 py-2 rounded-xl font-black text-[10px] uppercase tracking-[0.25em] border-2 shadow-sm",
-                          dest.category === 'international' 
-                            ? "bg-rose-500/5 text-rose-500 border-rose-500/10" 
-                            : "bg-[#009688]/5 text-[#009688] border-[#009688]/10"
-                        )}>
-                          {dest.category === 'international' ? 'International' : 'Domestic'}
-                        </Badge>
-                      </td>
-                      <td className="py-10">
-                        <div className="flex flex-col">
-                          <span className="text-2xl font-black text-slate-800 font-display italic leading-none truncate">{packageCount}</span>
-                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Modules</span>
-                        </div>
-                      </td>
-                      <td className="py-10">
-                        <div className="px-4 py-2 bg-slate-50 rounded-xl border border-slate-100 w-fit">
-                          <code className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">/{dest.slug}</code>
-                        </div>
-                      </td>
-                    <td className="px-12 py-10 text-right">
-                      <div className="flex justify-end items-center gap-4 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
-                         <Button variant="ghost" size="icon" onClick={() => handleEdit(dest)} className="h-12 w-12 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-[#009688]/10 hover:text-[#009688] transition-all border border-slate-50">
-                            <Edit className="w-5 h-5" strokeWidth={3} />
-                         </Button>
-                         <Button variant="ghost" size="icon" onClick={() => { if(confirm("Terminate territory link?")) onDelete(dest.id) }} className="h-12 w-12 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-rose-50 hover:text-rose-500 transition-all border border-slate-50">
-                           <Trash2 className="w-5 h-5" strokeWidth={3} />
-                         </Button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                );
-              })}
-              </AnimatePresence>
-              {filteredDestinations.length === 0 && (
-                <tr className="border-none">
-                  <td colSpan={5} className="text-center py-20 border-none">
-                    <div className="flex flex-col items-center gap-3 text-slate-300">
-                      <MapPin className="w-12 h-12 opacity-20" />
-                      <p className="font-black uppercase tracking-widest text-xs">No destinations mapped yet</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      <motion.div variants={item} className="relative mb-12 max-w-xl group">
+        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#009688]">
+          <Search className="w-5 h-5" strokeWidth={3} />
         </div>
+        <Input 
+          placeholder="Search destinations by name or description..." 
+          className="h-14 pl-14 pr-8 rounded-[24px] border-2 border-[#009688]/20 bg-white shadow-xl shadow-[#009688]/10 text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-[#009688]/5 focus:border-[#009688] transition-all font-display"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </motion.div>
+
+      <motion.div variants={item} className="space-y-6">
+        <AnimatePresence mode="popLayout">
+          {filteredDestinations.map((dest, idx) => {
+            const packageCount = packages.filter(pkg => pkg.destination_ids?.includes(dest.id)).length;
+            return (
+              <motion.div 
+                key={dest.id} 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ delay: idx * 0.05 }}
+                className={cn(
+                  "group transition-all duration-500 relative flex items-center p-6 gap-8 border-2",
+                  "rounded-[40px] select-none",
+                  "bg-white border-transparent shadow-[0_8px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:bg-[#009688]/5 hover:border-[#009688]/30 hover:scale-[1.01]"
+                )}
+              >
+                <div className="flex-shrink-0">
+                  <div className="relative w-20 h-20 rounded-[28px] overflow-hidden shadow-lg ring-4 ring-slate-50/50 group-hover:ring-[#009688]/10 transition-all duration-500">
+                    <img src={dest.image} alt={dest.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                  </div>
+                </div>
+
+                <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-4 gap-8 items-center">
+                  <div className="space-y-1.5">
+                    <div className="font-bold text-slate-800 text-base tracking-tight group-hover:text-[#009688] transition-colors font-display uppercase leading-none">{dest.name}</div>
+                    <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest leading-none">REG-ID: {dest.id.substring(0, 8)}</div>
+                  </div>
+
+                  <div>
+                    <Badge variant="secondary" className={cn(
+                      "px-4 py-1.5 rounded-xl font-bold text-[10px] uppercase tracking-widest border-2",
+                      dest.category === 'international' 
+                        ? "bg-rose-500/5 text-rose-500 border-rose-500/10" 
+                        : "bg-[#009688]/5 text-[#009688] border-[#009688]/10"
+                    )}>
+                      {dest.category === 'international' ? 'International' : 'Domestic'}
+                    </Badge>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="bg-[#e0f2f1] p-3 rounded-2xl text-[#009688] group-hover:bg-[#009688] group-hover:text-white transition-all shadow-inner">
+                      <Globe className="w-5 h-5" strokeWidth={3} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-lg font-bold text-slate-800 font-display leading-none">{packageCount}</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Modules</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between md:justify-end gap-6">
+                    <div className="px-4 py-2 bg-slate-50 rounded-xl border border-slate-100 group-hover:bg-white group-hover:border-[#009688]/20 transition-all">
+                      <code className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">/{dest.slug}</code>
+                    </div>
+
+                    <div className="flex items-center gap-3 transition-all duration-500">
+                       <Button variant="ghost" size="icon" onClick={() => handleEdit(dest)} className="h-10 w-10 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-[#009688] hover:text-white transition-all border border-slate-50">
+                          <Edit className="w-4 h-4" strokeWidth={3} />
+                       </Button>
+                       <Button variant="ghost" size="icon" onClick={() => { if(confirm("Terminate territory link?")) onDelete(dest.id) }} className="h-10 w-10 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-rose-500 hover:text-white transition-all border border-slate-50">
+                         <Trash2 className="w-4 h-4" strokeWidth={3} />
+                       </Button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+        {filteredDestinations.length === 0 && (
+          <div className="text-center py-20">
+            <div className="flex flex-col items-center gap-3 text-slate-300">
+              <MapPin className="w-12 h-12 opacity-20" />
+              <p className="font-black uppercase tracking-widest text-xs">No destinations mapped yet</p>
+            </div>
+          </div>
+        )}
       </motion.div>
     </motion.div>
 

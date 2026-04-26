@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { Package, Destination } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -69,6 +70,7 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState<Package | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const filteredPackages = packages.filter(pkg => 
     pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -175,111 +177,140 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
     >
       <motion.div variants={item} className="flex flex-col md:flex-row md:items-center justify-between gap-8">
         <div>
-          <h2 className="text-5xl font-black tracking-tighter text-slate-800 uppercase font-display leading-none italic">Tour Packages</h2>
-          <p className="text-[#009688] mt-2 font-black uppercase tracking-[0.4em] text-[10px] pl-0.5 opacity-100">Managing travel packages and guest experiences</p>
+          <h2 className="text-xl font-bold tracking-tight text-slate-800 uppercase font-display leading-none">Tour Packages</h2>
+          <p className="text-[#009688] mt-1.5 font-bold uppercase tracking-widest text-[9px] pl-0.5 opacity-80">Managing travel packages and guest experiences</p>
         </div>
         <Button 
           onClick={() => { setEditingPackage(null); reset(); setIsFormOpen(true); }} 
-          className="rounded-2xl h-16 px-10 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-[0.25em] text-[11px]"
+          className="rounded-2xl h-12 px-10 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-[0.25em] text-[11px]"
         >
           <Plus className="w-5 h-5" strokeWidth={3} /> Add New Package
         </Button>
       </motion.div>
       
-      <motion.div variants={item} className="flex items-center gap-5 bg-white p-4 rounded-[32px] border-2 border-slate-50 shadow-[0_8px_32px_rgba(0,0,0,0.02)] focus-within:ring-4 focus-within:ring-[#009688]/5 transition-all group overflow-hidden">
-        <div className="pl-6 text-slate-300 group-focus-within:text-[#009688] transition-colors">
-          <Search className="w-6 h-6" strokeWidth={3} />
-        </div>
-        <Input 
-          placeholder="Search packages by name, location or details..." 
-          className="border-0 focus-visible:ring-0 text-lg py-7 h-16 bg-transparent placeholder:text-slate-300 font-bold tracking-tight shadow-none"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </motion.div>
+      <motion.div variants={item} className="relative mb-12 max-w-xl group">
+          <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#009688]">
+            <Search className="w-5 h-5" strokeWidth={3} />
+          </div>
+          <Input 
+            placeholder="Search packages by name or location..." 
+            className="h-14 pl-14 pr-8 rounded-[24px] border-2 border-[#009688]/20 bg-white shadow-xl shadow-[#009688]/10 text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-[#009688]/5 focus:border-[#009688] transition-all font-display"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </motion.div>
 
-      <motion.div variants={item} className="bg-white rounded-[40px] border border-slate-100 shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b-2 border-slate-50 bg-slate-50/10 hover:bg-slate-50/10 transition-none">
-                <th className="pl-12 py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Package Image</th>
-                <th className="py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Package Details</th>
-                <th className="py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Destinations</th>
-                <th className="py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 font-display italic">Price & Duration</th>
-                <th className="px-12 py-8 text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 text-right font-display italic">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y-2 divide-slate-50/20">
-              <AnimatePresence mode="popLayout">
-                {filteredPackages.length > 0 ? filteredPackages.map((pkg, idx) => (
-                  <motion.tr 
-                    key={pkg.id} 
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="group hover:bg-slate-50/60 transition-all duration-300 border-none"
-                  >
-                    <td className="pl-12 py-10">
-                      <div className="relative w-24 h-24 rounded-[36px] overflow-hidden shadow-2xl shadow-slate-200 group-hover:rounded-2xl transition-all duration-700 ring-8 ring-slate-50/30">
-                        <img src={pkg.image} className="w-full h-full object-cover transition-transform group-hover:scale-125 duration-1000" alt="" />
-                      </div>
-                    </td>
-                    <td className="py-10">
-                      <div className="space-y-2">
-                        <div className="font-black text-slate-800 text-2xl tracking-tighter group-hover:text-[#009688] transition-colors leading-none italic uppercase font-display">{pkg.name}</div>
-                        <div className="flex items-center gap-2.5">
-                          <div className="p-1 px-2.5 bg-[#e0f2f1] rounded-lg">
-                            <MapPin className="w-3 h-3 text-[#009688]" strokeWidth={3} />
-                          </div>
-                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{pkg.location}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-10">
-                      <div className="flex flex-wrap gap-2.5">
-                        {pkg.destination_ids?.map(id => {
-                          const dest = destinations.find(d => d.id === id);
-                          return dest ? (
-                            <Badge key={`dest-${id}`} variant="outline" className="bg-[#e0f2f1]/50 text-[#009688] text-[9px] font-black uppercase tracking-widest py-1.5 px-4 rounded-xl border-[#009688]/10 shadow-sm">
-                              {dest.name}
-                            </Badge>
-                          ) : null;
-                        })}
-                      </div>
-                    </td>
-                    <td className="py-10">
-                      <div className="space-y-1.5">
-                        <div className="font-black text-slate-900 text-3xl tracking-tighter leading-none italic font-display">₹{pkg.price}</div>
-                        <div className="text-[10px] font-black text-[#009688] uppercase tracking-[0.3em] opacity-60">DURATION: {pkg.days}D</div>
-                      </div>
-                    </td>
-                    <td className="px-12 py-10 text-right">
-                      <div className="flex justify-end items-center gap-4 translate-x-4 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500">
-                        <Button variant="ghost" size="icon" onClick={() => handleEditClick(pkg)} className="h-12 w-12 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-[#009688]/10 hover:text-[#009688] transition-all border border-slate-50">
-                           <Edit className="w-5 h-5" strokeWidth={3} />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setDeleteConfirmId(pkg.id)} className="h-12 w-12 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-rose-50 hover:text-rose-500 transition-all border border-slate-50">
-                          <Trash2 className="w-5 h-5" strokeWidth={3} />
-                        </Button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                )) : (
-                  <tr className="border-none">
-                    <td colSpan={5} className="text-center py-20 border-none">
-                      <div className="flex flex-col items-center gap-3 text-slate-300">
-                        <Search className="w-12 h-12 opacity-20" />
-                        <p className="font-black uppercase tracking-widest text-xs">No matching packages found</p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </AnimatePresence>
-            </tbody>
-          </table>
-        </div>
+      <motion.div variants={item} className="space-y-6">
+        <AnimatePresence mode="popLayout">
+          {filteredPackages.length > 0 ? filteredPackages.map((pkg, idx) => (
+            <motion.div 
+              key={pkg.id} 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ delay: idx * 0.05 }}
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest('button')) return;
+                setSelectedId(selectedId === pkg.id ? null : pkg.id);
+              }}
+              className={cn(
+                "group cursor-pointer transition-all duration-500 relative flex items-center p-6 gap-8 border-2",
+                "rounded-[40px] select-none",
+                selectedId === pkg.id 
+                  ? "bg-[#009688]/5 border-[#009688]/30 shadow-[0_20px_50px_rgba(0,150,136,0.1)] scale-[1.01]" 
+                  : "bg-white border-transparent shadow-[0_8px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:bg-[#009688]/5 hover:border-[#009688]/30 hover:scale-[1.01]"
+              )}
+            >
+              <div className="flex-shrink-0">
+                <div className={cn(
+                  "relative w-24 h-24 rounded-[32px] overflow-hidden transition-all duration-700 ring-8",
+                  selectedId === pkg.id ? "ring-[#009688]/10 shadow-lg" : "ring-slate-50/50 shadow-md shadow-slate-200/20"
+                )}>
+                  <img src={pkg.image} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-1000" alt="" />
+                </div>
+              </div>
+
+              <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                <div className="space-y-1.5">
+                  <div className={cn(
+                    "font-bold text-base tracking-tight transition-all uppercase font-display",
+                    selectedId === pkg.id ? "text-[#001a1a]" : "text-slate-800 group-hover:text-[#009688]"
+                  )}>{pkg.name}</div>
+                  <div className="flex items-center gap-2">
+                    <div className={cn(
+                      "p-1.5 rounded-xl transition-colors",
+                      selectedId === pkg.id ? "bg-[#009688] text-white" : "bg-[#e0f2f1] text-[#009688]"
+                    )}>
+                      <MapPin className="w-3 h-3" strokeWidth={3} />
+                    </div>
+                    <span className={cn(
+                      "text-[10px] font-bold uppercase tracking-widest transition-colors opacity-70",
+                      selectedId === pkg.id ? "text-[#009688]" : "text-slate-400"
+                    )}>{pkg.location}</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {pkg.destination_ids?.map(id => {
+                    const dest = destinations.find(d => d.id === id);
+                    return dest ? (
+                      <Badge 
+                        key={`dest-${id}`} 
+                        variant="outline" 
+                        className={cn(
+                          "text-[10px] font-bold uppercase tracking-widest py-1 px-3 rounded-xl border-none shadow-sm transition-all",
+                          selectedId === pkg.id 
+                            ? "bg-[#009688]/10 text-[#009688]" 
+                            : "bg-[#e0f2f1]/50 text-[#009688]"
+                        )}
+                      >
+                        {dest.name}
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+
+                <div className="flex items-center justify-between md:justify-start gap-8">
+                  <div className="space-y-0.5">
+                    <div className={cn(
+                      "font-bold text-lg tracking-tight leading-none font-display transition-colors",
+                      selectedId === pkg.id ? "text-[#001a1a]" : "text-slate-900"
+                    )}>₹{pkg.price}</div>
+                    <div className="text-[10px] font-bold text-[#009688] uppercase tracking-widest opacity-80">DURATION: {pkg.days}D</div>
+                  </div>
+                  
+                  <div className="ml-auto flex items-center gap-3 transition-all duration-500">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => handleEditClick(pkg)} 
+                      className="h-10 w-10 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-[#009688] hover:text-white transition-all border border-slate-50"
+                    >
+                       <Edit className="w-4 h-4" strokeWidth={3} />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => setDeleteConfirmId(pkg.id)} 
+                      className="h-10 w-10 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-rose-500 hover:text-white transition-all border border-slate-50"
+                    >
+                      <Trash2 className="w-4 h-4" strokeWidth={3} />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )) : (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="py-20 text-center flex flex-col items-center gap-3 text-slate-300"
+            >
+              <Search className="w-12 h-12 opacity-20" />
+              <p className="font-black uppercase tracking-widest text-xs">No matching packages found</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </motion.div>
 
@@ -468,7 +499,7 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                   </div>
 
                   <div className="space-y-6 pt-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="space-y-1">
                         <Label className="text-xl font-black tracking-tight text-slate-900 uppercase">Gallery Slots</Label>
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Add up to 12 supplementary images</p>
@@ -479,10 +510,10 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                         size="sm"
                         onClick={() => {
                           const current = watch('gallery') || '';
-                          const list = current ? current.split(',').map(s => s.trim()).filter(Boolean) : [];
-                          setValue('gallery', [...list, ''].join(', '));
+                          const list = current.split(',').map(s => s.trim()).filter(Boolean);
+                          setValue('gallery', [...list, ' '].join(', '));
                         }}
-                        className="rounded-xl h-10 px-5 gap-2 border-slate-200 font-bold text-xs uppercase tracking-widest"
+                        className="rounded-xl h-10 px-5 gap-2 border-slate-200 font-bold text-xs uppercase tracking-widest hover:bg-[#009688] hover:text-white hover:border-[#009688] transition-all"
                       >
                         <Plus className="w-4 h-4" /> Add Slot
                       </Button>
@@ -494,34 +525,33 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                         const allUrls = (watch('gallery') || '').split(',').map(s => s.trim());
 
                         return (
-                          <div key={index} className="relative bg-white rounded-[32px] p-6 border border-slate-100 shadow-sm group hover:border-[#009688]/30 transition-all hover:shadow-lg">
-                            <div className="flex justify-between items-center mb-5">
-                              <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none">Slot {index + 1}</span>
+                          <div key={index} className="relative bg-slate-50/30 rounded-[32px] p-4 border border-slate-100 group transition-all">
+                            <div className="flex justify-between items-center mb-4 px-2">
+                              <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none">SLOT_{String(index + 1).padStart(2, '0')}</span>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 rounded-full text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
+                                className="h-6 w-6 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
                                 onClick={() => {
                                   const newList = [...allUrls];
                                   newList.splice(index, 1);
                                   setValue('gallery', newList.join(', '));
                                 }}
                               >
-                                <X className="w-4 h-4" strokeWidth={3} />
+                                <X className="w-3.5 h-3.5" strokeWidth={3} />
                               </Button>
                             </div>
-                            <div className="h-[200px] w-full flex items-center justify-center">
-                              <ImageUpload
-                                value={trimmedUrl}
-                                onChange={(newUrl) => {
-                                  const newList = [...allUrls];
-                                  newList[index] = newUrl;
-                                  setValue('gallery', newList.join(', '));
-                                }}
-                                folder={`packages/gallery/${index}`}
-                              />
-                            </div>
+                            <ImageUpload
+                              value={trimmedUrl}
+                              onChange={(newUrl) => {
+                                const newList = [...allUrls];
+                                newList[index] = newUrl;
+                                setValue('gallery', newList.join(', '));
+                              }}
+                              folder={`packages/gallery/${index}`}
+                              variant="minimal"
+                            />
                           </div>
                         );
                       })}
@@ -554,7 +584,13 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
                       <Label className="text-xl font-black tracking-tight text-slate-900 uppercase">Day-by-Day Journey</Label>
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Map out the full experience</p>
                     </div>
-                    <Button type="button" variant="outline" size="sm" onClick={() => append({ day: fields.length + 1, title: '', description: '' })} className="rounded-xl h-10 px-5 gap-2 border-slate-200 font-bold text-xs uppercase tracking-widest">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => append({ day: fields.length + 1, title: '', description: '' })} 
+                      className="rounded-xl h-10 px-5 gap-2 border-slate-200 font-bold text-xs uppercase tracking-widest hover:bg-[#009688] hover:text-white hover:border-[#009688] transition-all"
+                    >
                       <PlusCircle className="w-4 h-4" /> Next Day
                     </Button>
                   </div>
@@ -679,7 +715,13 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
             <div className="flex flex-col gap-3">
               <Button 
                 variant="destructive" 
-                onClick={() => { if (deleteConfirmId) onDelete(deleteConfirmId); setDeleteConfirmId(null); }} 
+                onClick={() => { 
+                  if (deleteConfirmId) {
+                    onDelete(deleteConfirmId);
+                    if (selectedId === deleteConfirmId) setSelectedId(null);
+                  } 
+                  setDeleteConfirmId(null); 
+                }} 
                 className="h-14 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white font-black uppercase tracking-[0.2em] text-[11px]"
               >
                 Confirm Deletion

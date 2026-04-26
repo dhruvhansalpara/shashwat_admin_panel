@@ -13,11 +13,12 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from '@/components/ui/dialog';
-import { Plus, Trash2, Edit2, Car as CarIcon, Users, Briefcase, Check, MoreHorizontal } from 'lucide-react';
+import { Plus, Trash2, Edit2, Car as CarIcon, Users, Briefcase, Check, MoreHorizontal, Search, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Car } from '../../types';
 import { toast } from 'sonner';
 import { ImageUpload } from '@/components/ImageUpload';
+import { cn } from '@/lib/utils';
 
 interface CarsPageProps {
   cars: Car[];
@@ -30,6 +31,17 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
   const [imageUrl, setImageUrl] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredCars = React.useMemo(() => {
+    if (!searchTerm.trim()) return cars;
+    const term = searchTerm.toLowerCase();
+    return cars.filter(car => 
+      car.name.toLowerCase().includes(term) || 
+      car.type.toLowerCase().includes(term) ||
+      car.description.toLowerCase().includes(term)
+    );
+  }, [cars, searchTerm]);
 
   React.useEffect(() => {
     if (editingCar) {
@@ -88,13 +100,13 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
     >
       <motion.div variants={item} className="flex flex-col md:flex-row md:items-center justify-between gap-8">
         <div>
-          <h2 className="text-5xl font-black tracking-tighter text-slate-800 uppercase font-display leading-none italic">Car Rental Fleet</h2>
-          <p className="text-[#009688] mt-2 font-black uppercase tracking-[0.4em] text-[10px] pl-0.5 opacity-100">Manage your rental vehicles and transport services</p>
+          <h2 className="text-xl font-bold tracking-tight text-slate-800 uppercase font-display leading-none">Car Rental Fleet</h2>
+          <p className="text-[#009688] mt-1.5 font-bold uppercase tracking-widest text-[9px] pl-0.5 opacity-80">Manage your rental vehicles and transport services</p>
         </div>
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
           <DialogTrigger asChild>
-            <Button className="rounded-2xl h-16 px-10 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-black uppercase tracking-[0.25em] text-[11px]">
-              <Plus className="w-5 h-5" strokeWidth={3} /> Add New Vehicle
+            <Button className="rounded-2xl h-12 px-8 gap-3 bg-[#009688] hover:bg-[#00796b] text-white shadow-2xl shadow-[#009688]/20 transition-all hover:scale-[1.02] active:scale-95 font-bold uppercase tracking-widest text-[10px]">
+              <Plus className="w-4 h-4" strokeWidth={3} /> Add New Vehicle
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[700px] w-[95vw] max-h-[95vh] flex flex-col p-0 overflow-hidden bg-[#fcfdfe] border-none shadow-2xl rounded-[48px] font-display">
@@ -176,97 +188,91 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
           </DialogContent>
         </Dialog>
       </motion.div>
+      <motion.div variants={item} className="relative mb-12 max-w-xl group">
+        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#009688]">
+          <Search className="w-5 h-5" strokeWidth={3} />
+        </div>
+        <Input 
+          placeholder="Search fleet by vehicle name, type or features..." 
+          className="h-14 pl-14 pr-8 rounded-[24px] border-2 border-[#009688]/20 bg-white shadow-xl shadow-[#009688]/10 text-sm font-bold text-slate-800 placeholder:text-slate-400 focus:ring-4 focus:ring-[#009688]/5 focus:border-[#009688] transition-all font-display"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+      <div className="flex flex-col gap-6">
         <AnimatePresence mode="popLayout">
-          {cars.map((car) => (
+          {filteredCars.map((car, idx) => (
             <motion.div 
               key={car.id} 
-              variants={item}
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="group bg-white rounded-[48px] border-2 border-slate-50 shadow-[0_16px_48px_rgba(0,0,0,0.03)] overflow-hidden hover:shadow-2xl hover:shadow-[#009688]/10 hover:border-[#009688]/10 transition-all duration-500"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ delay: idx * 0.05 }}
+              className={cn(
+                "group transition-all duration-500 relative flex items-center p-6 gap-8 border-2",
+                "rounded-[40px] select-none",
+                "bg-white border-transparent shadow-[0_8px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:bg-[#009688]/5 hover:border-[#009688]/30 hover:scale-[1.01]"
+              )}
             >
-              <div className="aspect-[4/3] relative overflow-hidden bg-slate-50 border-b-2 border-slate-50">
-                <img 
-                  src={car.image} 
-                  alt={car.name} 
-                  className="w-full h-full object-cover transition-transform group-hover:scale-125 duration-1000"
-                />
-                <div className="absolute top-6 right-6 flex gap-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="h-12 w-12 rounded-2xl bg-white/95 backdrop-blur shadow-2xl text-slate-700 hover:bg-[#009688] hover:text-white transition-all border border-slate-50"
-                    onClick={() => setEditingCar(car)}
-                  >
-                    <Edit2 className="w-5 h-5" strokeWidth={3} />
-                  </Button>
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="h-12 w-12 rounded-2xl bg-white/95 backdrop-blur shadow-2xl text-rose-500 hover:bg-rose-500 hover:text-white transition-all border border-slate-50"
-                    onClick={() => {
-                      if (confirm('Permanently remove this vehicle from fleet records?')) onDelete(car.id);
-                    }}
-                  >
-                    <Trash2 className="w-5 h-5" strokeWidth={3} />
-                  </Button>
-                </div>
-                <div className="absolute top-6 left-6">
-                   <Badge className="bg-[#009688] text-white px-5 py-2 rounded-xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl shadow-[#009688]/20 border-none">
-                     {car.type}
-                   </Badge>
+              <div className="flex-shrink-0">
+                <div className="relative w-24 h-24 rounded-[32px] overflow-hidden shadow-lg ring-8 ring-slate-50/50 group-hover:ring-[#009688]/10 transition-all duration-500">
+                  <img src={car.image} alt={car.name} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-1000" />
                 </div>
               </div>
-              <div className="p-10">
-                <div className="flex justify-between items-start mb-8">
-                  <div className="space-y-3">
-                    <h3 className="text-3xl font-black text-slate-800 tracking-tighter leading-none group-hover:text-[#009688] transition-colors font-display uppercase italic">{car.name}</h3>
-                    <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] font-display opacity-60 italic">ASSET-SERIAL: {car.id.substring(0, 8)}</div>
-                  </div>
-                  <div className="bg-[#e0f2f1] p-5 rounded-[28px] text-[#009688] group-hover:bg-[#009688] group-hover:text-white transition-all shadow-inner relative overflow-hidden group/icon">
-                    <CarIcon className="w-7 h-7 relative z-10" strokeWidth={3} />
-                  </div>
+
+              <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-4 gap-8 items-center">
+                <div className="space-y-1.5">
+                  <div className="font-bold text-slate-800 text-base tracking-tight group-hover:text-[#009688] transition-colors font-display uppercase leading-none">{car.name}</div>
+                  <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest leading-none">SERIAL: {car.id.substring(0, 8)}</div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                   <div className="bg-slate-50/50 p-4 rounded-[20px] flex items-center gap-3 border border-slate-50 transition-colors group-hover:bg-primary/[0.03]">
-                      <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400">
-                        <Users className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="text-[9px] font-black text-slate-300 uppercase">Seating</div>
-                        <div className="font-black text-slate-700 text-sm">{car.seats} Capacity</div>
+                <div className="flex items-center gap-6">
+                   <div className="flex flex-col">
+                      <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Capacity</span>
+                      <div className="flex items-center gap-2">
+                        <Users className="w-3.5 h-3.5 text-[#009688]" strokeWidth={3} />
+                        <span className="text-sm font-bold text-slate-700">{car.seats} Seats</span>
                       </div>
                    </div>
-                   <div className="bg-slate-50/50 p-4 rounded-[20px] flex items-center gap-3 border border-slate-50 transition-colors group-hover:bg-primary/[0.03]">
-                      <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-slate-400">
-                        <Briefcase className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <div className="text-[9px] font-black text-slate-300 uppercase">Baggage</div>
-                        <div className="font-black text-slate-700 text-sm">{car.luggage} Slots</div>
+                   <div className="flex flex-col border-l border-slate-100 pl-6">
+                      <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Baggage</span>
+                      <div className="flex items-center gap-2">
+                        <Package className="w-3.5 h-3.5 text-[#009688]" strokeWidth={3} />
+                        <span className="text-sm font-bold text-slate-700">{car.luggage} Slots</span>
                       </div>
                    </div>
                 </div>
 
-                <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Starting Price</div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-black text-slate-900">₹{car.pricePerKm}</span>
-                      <span className="text-[10px] font-black text-slate-300 uppercase">/ KM</span>
-                    </div>
-                  </div>
-                  {car.pricePerDay > 0 && (
-                    <div className="space-y-0.5 text-right">
-                      <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Daily Lease</div>
-                      <div className="font-black text-slate-700 text-base">₹{car.pricePerDay}</div>
-                    </div>
-                  )}
+                <div className="space-y-1">
+                  <div className="text-[10px] font-black text-[#009688] uppercase tracking-widest opacity-60">STARTING PRICE</div>
+                  <div className="text-lg font-bold text-slate-900 leading-none font-display">₹{car.pricePerKm} <span className="text-[10px] text-slate-400">/ KM</span></div>
+                </div>
+
+                <div className="flex items-center justify-between md:justify-end gap-5">
+                   <Badge className="bg-[#e0f2f1] text-[#009688] px-3 py-1.5 rounded-xl font-black text-[9px] uppercase tracking-widest border-2 border-[#009688]/10 shadow-sm hidden lg:block">
+                     {car.type}
+                   </Badge>
+                   <div className="flex items-center gap-3">
+                     <Button 
+                       size="icon" 
+                       variant="ghost" 
+                       className="h-10 w-10 rounded-2xl bg-white shadow-xl shadow-slate-200/50 text-slate-700 hover:bg-[#009688] hover:text-white transition-all border border-slate-50"
+                       onClick={() => setEditingCar(car)}
+                     >
+                       <Edit2 className="w-4 h-4" strokeWidth={3} />
+                     </Button>
+                     <Button 
+                       size="icon" 
+                       variant="ghost" 
+                       className="h-10 w-10 rounded-2xl bg-white shadow-xl shadow-slate-200/50 text-rose-500 hover:bg-rose-500 hover:text-white transition-all border border-slate-50"
+                       onClick={() => {
+                         if (confirm('Permanently remove this vehicle?')) onDelete(car.id);
+                       }}
+                     >
+                       <Trash2 className="w-4 h-4" strokeWidth={3} />
+                     </Button>
+                   </div>
                 </div>
               </div>
             </motion.div>
@@ -355,7 +361,7 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
                 </Button>
                 <Button 
                    type="submit" 
-                   className="h-14 px-12 rounded-2xl bg-secondary hover:bg-secondary/90 text-white font-black uppercase tracking-[0.2em] text-[11px] min-w-[240px] shadow-xl shadow-secondary/20 transition-all"
+                   className="h-14 px-12 rounded-2xl bg-[#009688] hover:bg-[#00796b] text-white font-black uppercase tracking-[0.2em] text-[11px] min-w-[240px] shadow-xl shadow-[#009688]/20 transition-all active:scale-95"
                 >
                   Apply System Update
                 </Button>

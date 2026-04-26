@@ -13,7 +13,8 @@ const superAdminItems = [
   { icon: Settings, label: 'Settings', path: '/admin/settings' },
 ];
 
-export function AdminSidebar({ packages = [], destinations = [], cars = [], banners = [], inquiries = [] }: { 
+export function AdminSidebar({ className, packages = [], destinations = [], cars = [], banners = [], inquiries = [] }: { 
+  className?: string,
   packages?: any[], 
   destinations?: any[], 
   cars?: any[], 
@@ -38,7 +39,7 @@ export function AdminSidebar({ packages = [], destinations = [], cars = [], bann
   };
 
   return (
-    <div className="w-72 bg-[#001a1a] flex flex-col h-screen sticky top-0 z-50 border-r border-white/5">
+    <div className={cn("w-72 bg-[#001a1a] flex flex-col h-screen sticky top-0 z-50 border-r border-white/5", className)}>
       <div className="p-10 pb-12">
         <NavLink to="/admin" className="block transform transition-all active:scale-95">
           <Logo className="scale-[1.2] origin-left brightness-0 invert" variant="light" />
