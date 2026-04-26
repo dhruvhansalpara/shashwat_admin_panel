@@ -40,14 +40,21 @@ export default function App() {
 
   const fetchData = async () => {
     try {
-      const [pkgs, bnrs, dests, crs, inqs, sets] = await Promise.all([
-        fetch('/api/packages').then(r => r.json()),
-        fetch('/api/banners').then(r => r.json()),
-        fetch('/api/destinations').then(r => r.json()),
-        fetch('/api/cars').then(r => r.json()),
-        fetch('/api/inquiries').then(r => r.json()),
-        fetch('/api/settings').then(r => r.json())
+      const responses = await Promise.all([
+        fetch('/api/packages'),
+        fetch('/api/banners'),
+        fetch('/api/destinations'),
+        fetch('/api/cars'),
+        fetch('/api/inquiries'),
+        fetch('/api/settings')
       ]);
+
+      const [pkgs, bnrs, dests, crs, inqs, sets] = await Promise.all(
+        responses.map(async (r) => {
+          if (!r.ok) throw new Error(`Failed to fetch: ${r.statusText}`);
+          return r.json();
+        })
+      );
 
       setPackages(pkgs);
       setBanners(bnrs);
@@ -165,7 +172,7 @@ export default function App() {
                     totalInquiries: inquiries.length,
                     totalDestinations: destinations.length
                   }}
-                  recentInquiries={inquiries.slice(0, 5)}
+                  recentInquiries={Array.isArray(inquiries) ? inquiries.slice(0, 5) : []}
                   topPackages={packages.slice(0, 4)}
                 />
               </AdminLayout>

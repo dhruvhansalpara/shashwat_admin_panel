@@ -14,109 +14,43 @@ interface InquiriesPageProps {
 
 export function InquiriesPage({ inquiries, onDelete }: InquiriesPageProps) {
   // Sort by latest
-  const sortedInquiries = [...inquiries].sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
+  const sortedInquiries = Array.isArray(inquiries) 
+    ? [...inquiries].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    : [];
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Customer Inquiries</h2>
-        <p className="text-muted-foreground">Review and manage interest from potential travelers.</p>
-      </div>
+      <h2 className="text-xl font-bold text-slate-800">Customer Inquiries</h2>
 
-      <div className="border rounded-xl bg-card overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Customer</TableHead>
-              <TableHead>Contact Info</TableHead>
-              <TableHead>Reference</TableHead>
-              <TableHead>Date Received</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedInquiries.length > 0 ? sortedInquiries.map((inquiry) => (
-              <TableRow key={inquiry.id}>
-                <TableCell className="font-medium">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs">
-                      {inquiry.name.charAt(0).toUpperCase()}
-                    </div>
-                    {inquiry.name}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="text-sm flex items-center gap-2 text-muted-foreground">
-                    <Phone className="w-3 h-3" /> {inquiry.phone}
-                  </div>
-                  {inquiry.email && (
-                    <div className="text-xs flex items-center gap-2 text-muted-foreground">
-                      <Mail className="w-3 h-3" /> {inquiry.email}
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell>
-                   <Badge variant="secondary">{inquiry.packageId || "General Inquiry"}</Badge>
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                   {format(new Date(inquiry.createdAt), 'MMM dd, yyyy HH:mm')}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="ghost" size="icon"><ExternalLink className="w-4 h-4" /></Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[500px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden">
-                        <DialogHeader className="p-6 pb-2 shrink-0">
-                          <DialogTitle>Inquiry Details</DialogTitle>
-                          <DialogDescription>
-                            Received on {format(new Date(inquiry.createdAt), 'PPPP p')}
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="flex-1 overflow-y-auto p-6 pt-4 scrollbar-hide space-y-6">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1">
-                                <User className="w-3 h-3" /> Customer
-                              </p>
-                              <p className="font-semibold">{inquiry.name}</p>
-                            </div>
-                            <div className="space-y-1">
-                              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1">
-                                <Phone className="w-3 h-3" /> Phone
-                              </p>
-                              <p className="font-semibold">{inquiry.phone}</p>
-                            </div>
-                          </div>
-                          <div className="space-y-1">
-                             <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider flex items-center gap-1">
-                               <MessageSquare className="w-3 h-3" /> Message
-                             </p>
-                             <div className="bg-muted/50 p-4 rounded-xl text-sm leading-relaxed whitespace-pre-wrap border">
-                               {inquiry.message}
-                             </div>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => onDelete(inquiry.id)}>
+      <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <table className="w-full text-left text-sm text-slate-600">
+          <thead className="bg-slate-50 text-slate-500 uppercase text-xs font-semibold border-b border-slate-200">
+            <tr>
+              <th className="px-4 py-3">Customer</th>
+              <th className="px-4 py-3">Contact</th>
+              <th className="px-4 py-3">Reference</th>
+              <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {sortedInquiries.map((inquiry) => (
+              <tr key={inquiry.id}>
+                <td className="px-4 py-3 font-semibold text-slate-800">{inquiry.name}</td>
+                <td className="px-4 py-3 text-xs">
+                  {inquiry.phone}<br/>{inquiry.email}
+                </td>
+                <td className="px-4 py-3">{inquiry.packageId || "General"}</td>
+                <td className="px-4 py-3 text-slate-500">{format(new Date(inquiry.createdAt), 'MMM dd, yyyy')}</td>
+                <td className="px-4 py-3 text-right">
+                    <Button variant="ghost" size="sm" onClick={() => onDelete(inquiry.id)} className="text-red-500 h-8 w-8">
                       <Trash2 className="w-4 h-4" />
                     </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )) : (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-20 text-muted-foreground">
-                  No inquiries received yet.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

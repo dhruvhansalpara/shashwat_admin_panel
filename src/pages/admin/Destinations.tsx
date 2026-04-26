@@ -103,120 +103,87 @@ export function DestinationsPage({ destinations, onAdd, onEdit, onDelete }: Dest
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-display font-bold tracking-tight">Destinations</h2>
-          <p className="text-muted-foreground">Manage travel locations and categories.</p>
-        </div>
-        <Button onClick={handleAddNew} className="gap-2 shrink-0">
-          <Plus className="w-4 h-4" /> Add Destination
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold text-slate-800">Destinations</h2>
+        <Button onClick={handleAddNew} className="bg-blue-600 hover:bg-blue-700">
+          <Plus className="w-4 h-4 mr-2" /> Add Destination
         </Button>
       </div>
 
-      <div className="flex items-center gap-2 bg-card p-4 rounded-xl shadow-sm border">
-        <Search className="w-5 h-5 text-muted-foreground" />
+      <div className="border border-slate-200 bg-white p-4 rounded-lg flex items-center gap-4">
+        <Search className="w-4 h-4 text-slate-400" />
         <Input 
           placeholder="Search destinations..." 
-          className="border-none focus-visible:ring-0"
+          className="border-0 focus-visible:ring-0 text-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              <TableHead className="w-[100px]">Image</TableHead>
-              <TableHead>Location Details</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+      <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
+        <table className="w-full text-left text-sm text-slate-600">
+          <thead className="bg-slate-50 text-slate-500 uppercase text-xs font-semibold border-b border-slate-200">
+            <tr>
+              <th className="px-4 py-3">Image</th>
+              <th className="px-4 py-3">Location Details</th>
+              <th className="px-4 py-3">Category</th>
+              <th className="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
             {filteredDestinations.map((dest) => (
-              <TableRow key={dest.id} className="hover:bg-muted/30 transition-colors">
-                <TableCell>
-                  <div className="w-12 h-12 rounded-lg overflow-hidden border shadow-sm">
-                    <img src={dest.image} alt={dest.name} className="w-full h-full object-cover" />
+              <tr key={dest.id}>
+                <td className="px-4 py-3">
+                  <img src={dest.image} alt={dest.name} className="w-12 h-12 rounded object-cover" />
+                </td>
+                <td className="px-4 py-3">
+                  <div className="font-semibold text-slate-800">{dest.name}</div>
+                </td>
+                <td className="px-4 py-3 capitalize">{dest.category}</td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(dest)} className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700 h-8 w-8 p-0">
+                       <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => onDelete(dest.id)} className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 h-8 w-8 p-0">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
-                </TableCell>
-                <TableCell>
-                  <div className="font-bold">{dest.name}</div>
-                  <div className="text-xs text-muted-foreground line-clamp-1 max-w-xs">{dest.description}</div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={dest.category === 'domestic' ? 'outline' : 'secondary'} className="capitalize gap-1">
-                    {dest.category === 'domestic' ? <MapPin className="w-3 h-3" /> : <Globe className="w-3 h-3" />}
-                    {dest.category}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0 border">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-40">
-                      <DropdownMenuLabel>Options</DropdownMenuLabel>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => handleEdit(dest)} className="gap-2">
-                        <Edit className="w-4 h-4" /> Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => onDelete(dest.id)}
-                        className="text-destructive gap-2 focus:bg-destructive/10 focus:text-destructive"
-                      >
-                        <Trash2 className="w-4 h-4" /> Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ))}
-            {filteredDestinations.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center text-muted-foreground">
-                  No destinations found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0">
-          <DialogHeader className="p-6 pb-2 shrink-0">
-            <DialogTitle>{editingDestination ? 'Edit Destination' : 'Add New Destination'}</DialogTitle>
-            <DialogDescription>
-              Provide information about this travel location.
-            </DialogDescription>
+        <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden bg-white border-slate-200">
+          <DialogHeader className="p-6 pb-2 shrink-0 border-b border-slate-100">
+            <DialogTitle className="text-xl font-bold text-slate-800">{editingDestination ? 'Edit Destination' : 'Add New Destination'}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-y-auto p-6 pt-2 scrollbar-hide space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Destination Name</Label>
-                  <Input id="name" placeholder="e.g. Rajasthan" {...register('name')} />
-                  {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+                  <Label htmlFor="name" className="text-slate-700">Destination Name</Label>
+                  <Input id="name" placeholder="e.g. Rajasthan" {...register('name')} className="border-slate-200" />
+                  {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="slug">Slug</Label>
-                  <Input id="slug" placeholder="e.g. rajasthan" {...register('slug')} />
-                  {errors.slug && <p className="text-xs text-destructive">{errors.slug.message}</p>}
+                  <Label htmlFor="slug" className="text-slate-700">Slug</Label>
+                  <Input id="slug" placeholder="e.g. rajasthan" {...register('slug')} className="border-slate-200" />
+                  {errors.slug && <p className="text-xs text-red-500">{errors.slug.message}</p>}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
+                <Label htmlFor="category" className="text-slate-700">Category</Label>
                 <Select 
                   value={categoryValue} 
                   onValueChange={(val: any) => setValue('category', val)}
                 >
-                  <SelectTrigger id="category">
+                  <SelectTrigger id="category" className="border-slate-200">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -239,19 +206,19 @@ export function DestinationsPage({ destinations, onAdd, onEdit, onDelete }: Dest
                     />
                   )}
                 />
-                {errors.image && <p className="text-xs text-destructive">{errors.image.message}</p>}
+                {errors.image && <p className="text-xs text-red-500">{errors.image.message}</p>}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea id="description" placeholder="A brief about the destination..." className="min-h-[100px]" {...register('description')} />
-                {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
+                <Label htmlFor="description" className="text-slate-700">Description</Label>
+                <Textarea id="description" placeholder="A brief about the destination..." className="min-h-[100px] border-slate-200" {...register('description')} />
+                {errors.description && <p className="text-xs text-red-500">{errors.description.message}</p>}
               </div>
             </div>
 
-            <DialogFooter className="p-4 px-6 border-t bg-muted/30 shrink-0">
-              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)} className="mr-auto">Cancel</Button>
-              <Button type="submit" className="min-w-[120px]">{editingDestination ? 'Update' : 'Create'}</Button>
+            <DialogFooter className="p-4 px-6 border-t border-slate-100 bg-slate-50 shrink-0 gap-2">
+              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)} className="border-slate-300 text-slate-700 hover:bg-slate-100">Cancel</Button>
+              <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground min-w-[120px]">{editingDestination ? 'Update Destination' : 'Create Destination'}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

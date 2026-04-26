@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useAdmin } from '@/context/AdminContext';
 import { Logo } from './Logo';
+import { ThemeToggle } from './ThemeToggle';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
@@ -29,16 +30,16 @@ export function AdminSidebar() {
   };
 
   return (
-    <div className="w-64 border-r bg-card/50 backdrop-blur-xl flex flex-col h-screen sticky top-0">
-      <div className="p-8 pb-4">
+    <div className="w-64 border-r border-slate-800 bg-slate-900 text-slate-200 flex flex-col h-screen sticky top-0">
+      <div className="p-6 flex items-center justify-between border-b border-slate-800">
         <NavLink to="/admin" className="block transform transition-transform hover:scale-[1.02]">
-          <Logo className="scale-110 origin-left" />
+          <Logo className="scale-90 origin-left" />
         </NavLink>
       </div>
       
-      <nav className="flex-1 px-4 space-y-2 overflow-y-auto">
-        <div className="px-4 mb-2">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">Operations</p>
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <div className="px-3 mb-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Operations</p>
         </div>
         {navItems.map((item) => (
           <NavLink
@@ -47,26 +48,22 @@ export function AdminSidebar() {
             end={item.path === '/admin'}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative",
+                "flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm font-medium",
                 isActive 
-                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  ? "bg-primary text-white" 
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
               )
             }
           >
-            <item.icon className="w-5 h-5 transition-transform group-hover:scale-110" />
-            <span className="font-medium text-sm flex-1">{item.label}</span>
-            <ChevronRight className={cn(
-              "w-4 h-4 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1",
-              "group-[.bg-primary]:opacity-100 group-[.bg-primary]:translate-x-0"
-            )} />
+            <item.icon className="w-4 h-4" />
+            <span className="flex-1">{item.label}</span>
           </NavLink>
         ))}
 
         {user?.role === 'super_admin' && (
           <div className="pt-4 pb-2">
-            <div className="px-4 mb-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60">System</p>
+            <div className="px-3 mb-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">System</p>
             </div>
             {superAdminItems.map((item) => (
               <NavLink
@@ -74,39 +71,35 @@ export function AdminSidebar() {
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative",
+                    "flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-sm font-medium",
                     isActive 
-                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" 
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                      ? "bg-primary text-white" 
+                      : "text-slate-400 hover:bg-slate-800 hover:text-white"
                   )
                 }
               >
-                <item.icon className="w-5 h-5 transition-transform group-hover:scale-110" />
-                <span className="font-medium text-sm flex-1">{item.label}</span>
-                <ChevronRight className={cn(
-                  "w-4 h-4 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1",
-                  "group-[.bg-primary]:opacity-100 group-[.bg-primary]:translate-x-0"
-                )} />
+                <item.icon className="w-4 h-4" />
+                <span className="flex-1">{item.label}</span>
               </NavLink>
             ))}
           </div>
         )}
       </nav>
 
-      <div className="p-6 mt-auto">
-        <div className="bg-muted/30 rounded-2xl p-4 mb-6">
-          <p className="text-xs font-bold truncate">{user?.name || 'Admin User'}</p>
-          <p className="text-[10px] text-muted-foreground/60 mt-1 uppercase tracking-widest font-bold">
+      <div className="p-4 mt-auto border-t border-slate-800">
+        <div className="px-3 py-2">
+          <p className="text-xs font-semibold truncate text-white">{user?.name || 'Admin User'}</p>
+          <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wide">
             {user?.role === 'super_admin' ? 'Super Admin' : 'Administrator'}
           </p>
         </div>
         <Button 
           variant="ghost" 
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-xl transition-colors h-11"
+          className="w-full justify-start gap-3 text-slate-400 hover:text-red-400 hover:bg-red-900/20 text-sm mt-1"
           onClick={handleLogout}
         >
-          <LogOut className="w-5 h-5" />
-          <span className="text-sm font-medium">Log out</span>
+          <LogOut className="w-4 h-4" />
+          <span>Log out</span>
         </Button>
       </div>
     </div>

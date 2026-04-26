@@ -16,7 +16,7 @@ export function Logo({ className, showText = true, variant = 'dark' }: LogoProps
       <div className="relative w-12 h-12 overflow-hidden rounded-xl bg-white shadow-sm flex items-center justify-center">
          {/* Using an img tag for the logo */}
          <img 
-          src="https://img.freepik.com/premium-vector/travel-logo-design-template-vector_18099-232.jpg" 
+          src="/logo.png" 
           alt="Shashwat Holidays Logo" 
           className="w-full h-full object-contain"
           referrerPolicy="no-referrer"

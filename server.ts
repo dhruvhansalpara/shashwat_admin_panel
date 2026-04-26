@@ -9,10 +9,14 @@ import http from "http";
 import { Server } from "socket.io";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import multer from "multer";
+
+const upload = multer({ dest: 'uploads/' });
 
 dotenv.config();
 
 const app = express();
+app.use('/uploads', express.static('uploads'));
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -200,11 +204,23 @@ async function initDb() {
         id VARCHAR(255) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         slug VARCHAR(255) NOT NULL UNIQUE,
+        description TEXT,
+        category VARCHAR(100),
         image TEXT,
         packageCount INT DEFAULT 0,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Safety check for description and category columns
+    const [colsDesc]: any = await p.query("SHOW COLUMNS FROM destinations LIKE 'description'");
+    if (colsDesc.length === 0) {
+      await p.query("ALTER TABLE destinations ADD COLUMN description TEXT");
+    }
+    const [colsCat]: any = await p.query("SHOW COLUMNS FROM destinations LIKE 'category'");
+    if (colsCat.length === 0) {
+      await p.query("ALTER TABLE destinations ADD COLUMN category VARCHAR(100)");
+    }
 
     await p.query(`
       CREATE TABLE IF NOT EXISTS inquiries (
@@ -245,14 +261,29 @@ async function initDb() {
 
     // Ensure default settings exist
     const [rows]: any = await p.query("SELECT * FROM settings WHERE id = 'global'");
+    
+    // Safety check for allow_login column
+    const [colsLogin]: any = await p.query("SHOW COLUMNS FROM settings LIKE 'allow_login'");
+    if (colsLogin.length === 0) {
+      console.log("[DB] Adding missing allow_login column to settings table");
+      await p.query("ALTER TABLE settings ADD COLUMN allow_login BOOLEAN DEFAULT TRUE");
+    }
+
+    // Safety check for allowed_emails column
+    const [colsEmails]: any = await p.query("SHOW COLUMNS FROM settings LIKE 'allowed_emails'");
+    if (colsEmails.length === 0) {
+      console.log("[DB] Adding missing allowed_emails column to settings table");
+      await p.query("ALTER TABLE settings ADD COLUMN allowed_emails TEXT");
+    }
+
     if (rows.length === 0) {
       await p.query(
         "INSERT INTO settings (id, whatsappNumber, defaultMessage, allow_login, allowed_emails, site_name) VALUES ('global', '919876543210', 'Hello Shashwat Holidays,', 1, 'info.shashwatholiday@gmail.com', 'Shashwat Holidays')"
       );
     } else {
       await p.query(
-        "UPDATE settings SET allow_login = 1, allowed_emails = ? WHERE id = 'global'",
-        ['info.shashwatholiday@gmail.com']
+        "UPDATE settings SET allow_login = ?, allowed_emails = ? WHERE id = 'global'",
+        [1, 'info.shashwatholiday@gmail.com']
       );
     }
 
@@ -278,12 +309,53 @@ async function initDb() {
     }
 
     console.log("MySQL Database initialized successfully.");
+    return true;
   } catch (err) {
     console.error("Error initializing MySQL tables:", err);
+    return false;
   }
 }
 
 // API Routes
+app.post("/api/upload", upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+  res.json({ url: `/uploads/${req.file.filename}` });
+});
+
+async function getPoolWithRetry() {
+  if (pool) return pool;
+  
+  // Create pool
+  const savedConfig = getSavedDbConfig();
+  const config = {
+    host: savedConfig?.host || process.env.DB_HOST || "",
+    user: savedConfig?.user || process.env.DB_USER || "",
+    password: savedConfig?.password || process.env.DB_PASSWORD || "",
+    database: savedConfig?.database || process.env.DB_NAME || "",
+    port: parseInt(savedConfig?.port || process.env.DB_PORT || "3306"),
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    connectTimeout: 5000 
+  };
+
+  if (!config.host || !config.user || !config.database) {
+    return null;
+  }
+
+  try {
+    const p = mysql.createPool(config);
+    // Test connection
+    await p.query('SELECT 1');
+    pool = p;
+    await initDb();
+    return pool;
+  } catch (err) {
+    console.error("[DB] Connection/Initialization failed, falling back to JSON DB:", err);
+    return null;
+  }
+}
+
 const authenticateToken = (req: any, res: any, next: any) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -752,8 +824,8 @@ app.post("/api/destinations", authenticateToken, isAdmin, async (req, res) => {
     const id = dest.id || `dest_${Date.now()}`;
     const slug = dest.slug || dest.name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     await p.query(
-      "INSERT INTO destinations (id, name, slug, image, packageCount) VALUES (?, ?, ?, ?, ?)",
-      [id, dest.name, slug, dest.image, dest.packageCount || 0]
+      "INSERT INTO destinations (id, name, slug, description, category, image, packageCount) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [id, dest.name, slug, dest.description, dest.category, dest.image, dest.packageCount || 0]
     );
     notifyClients("destination_added", { id });
     res.json({ success: true, id });
@@ -770,8 +842,8 @@ app.put("/api/destinations/:id", authenticateToken, isAdmin, async (req, res) =>
     const dest = req.body;
     const slug = dest.slug || dest.name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     await p.query(
-      "UPDATE destinations SET name=?, slug=?, image=?, packageCount=? WHERE id=?",
-      [dest.name, slug, dest.image, dest.packageCount || 0, id]
+      "UPDATE destinations SET name=?, slug=?, description=?, category=?, image=?, packageCount=? WHERE id=?",
+      [dest.name, slug, dest.description, dest.category, dest.image, dest.packageCount || 0, id]
     );
     notifyClients("destination_updated", { id });
     res.json({ success: true });

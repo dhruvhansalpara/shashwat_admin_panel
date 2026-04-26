@@ -55,71 +55,64 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Car Fleet</h2>
-          <p className="text-muted-foreground">Manage your vehicle inventory and rental rates.</p>
-        </div>
-        
+        <h2 className="text-xl font-bold text-slate-800">Car Fleet</h2>
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" /> Add Vehicle
+            <Button className="bg-primary hover:bg-primary/90 text-white">
+              <Plus className="w-4 h-4 mr-2" /> Add Vehicle
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden">
-            <DialogHeader className="p-6 pb-2 shrink-0">
-              <DialogTitle>Add New Vehicle</DialogTitle>
-              <DialogDescription>
-                Add a new car or traveller to your fleet.
-              </DialogDescription>
+          <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden bg-white border-slate-200">
+            <DialogHeader className="p-6 pb-2 shrink-0 border-b border-slate-100">
+              <DialogTitle className="text-xl font-bold text-slate-800">Add New Vehicle</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
               <div className="flex-1 overflow-y-auto p-6 scrollbar-hide space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="text-slate-700">Vehicle Name</Label>
+                      <Input id="name" name="name" placeholder="e.g. Toyota Innova Crysta" className="border-slate-200" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="type" className="text-slate-700">Vehicle Type</Label>
+                      <Input id="type" name="type" placeholder="e.g. Luxury SUV" className="border-slate-200" required />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="seats" className="text-slate-700">Seats</Label>
+                      <Input id="seats" name="seats" type="number" placeholder="7" className="border-slate-200" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="luggage" className="text-slate-700">Luggage Capacity</Label>
+                      <Input id="luggage" name="luggage" type="number" placeholder="3" className="border-slate-200" required />
+                    </div>
+                  </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Vehicle Name</Label>
-                    <Input id="name" name="name" placeholder="e.g. Toyota Innova Crysta" required />
+                    <Label htmlFor="pricePerKm" className="text-slate-700">Price per KM (₹)</Label>
+                    <Input id="pricePerKm" name="pricePerKm" type="number" step="0.1" placeholder="18" className="border-slate-200" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="type">Vehicle Type</Label>
-                    <Input id="type" name="type" placeholder="e.g. Luxury SUV" required />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="seats">Seats</Label>
-                    <Input id="seats" name="seats" type="number" placeholder="7" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="luggage">Luggage Capacity</Label>
-                    <Input id="luggage" name="luggage" type="number" placeholder="3" required />
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="pricePerKm">Price per KM (₹)</Label>
-                    <Input id="pricePerKm" name="pricePerKm" type="number" step="0.1" placeholder="18" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="pricePerDay">Price per Day (₹)</Label>
-                    <Input id="pricePerDay" name="pricePerDay" type="number" placeholder="4500" />
+                    <Label htmlFor="pricePerDay" className="text-slate-700">Price per Day (₹)</Label>
+                    <Input id="pricePerDay" name="pricePerDay" type="number" placeholder="4500" className="border-slate-200" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="image">Image URL</Label>
-                  <Input id="image" name="image" placeholder="https://..." required />
+                  <Label htmlFor="image" className="text-slate-700">Image URL</Label>
+                  <Input id="image" name="image" placeholder="https://..." className="border-slate-200" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="features">Features (comma separated)</Label>
-                  <Input id="features" name="features" placeholder="AC, Music System, First Aid, Luggage Carrier" />
+                  <Label htmlFor="features" className="text-slate-700">Features (comma separated)</Label>
+                  <Input id="features" name="features" placeholder="AC, Music System, First Aid, Luggage Carrier" className="border-slate-200" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" name="description" placeholder="Vehicle details..." />
+                  <Label htmlFor="description" className="text-slate-700">Description</Label>
+                  <Textarea id="description" name="description" placeholder="Vehicle details..." className="border-slate-200" />
                 </div>
               </div>
-              <div className="p-4 px-6 border-t bg-muted/30 shrink-0">
-                <Button type="submit" className="w-full">Save Vehicle</Button>
+              <div className="p-4 px-6 border-t border-slate-100 bg-slate-50 shrink-0">
+                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white">Save Vehicle</Button>
               </div>
             </form>
           </DialogContent>
@@ -128,130 +121,110 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {cars.map((car) => (
-          <Card key={car.id} className="overflow-hidden group">
+          <div key={car.id} className="border border-slate-200 bg-white rounded-lg overflow-hidden flex flex-col">
             <div className="aspect-video relative overflow-hidden">
               <img 
                 src={car.image} 
                 alt={car.name} 
-                className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                className="w-full h-full object-cover"
               />
               <div className="absolute top-2 right-2 flex gap-2">
                 <Button 
-                  size="icon" 
+                  size="sm" 
                   variant="secondary" 
-                  className="h-8 w-8"
+                  className="bg-white/90 hover:bg-white h-8 w-8 p-0"
                   onClick={() => setEditingCar(car)}
                 >
-                  <Edit2 className="w-4 h-4" />
+                  <Edit2 className="w-4 h-4 text-slate-700" />
                 </Button>
                 <Button 
-                  size="icon" 
+                  size="sm" 
                   variant="destructive" 
-                  className="h-8 w-8"
+                  className="bg-white/90 hover:bg-white h-8 w-8 p-0"
                   onClick={() => {
                     if (confirm('Delete this vehicle?')) onDelete(car.id);
                   }}
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Trash2 className="w-4 h-4 text-red-600" />
                 </Button>
               </div>
-              <div className="absolute bottom-2 left-2 flex gap-2">
-                <span className="bg-black/60 backdrop-blur-md text-white text-[10px] uppercase tracking-widest font-bold px-2 py-1 rounded">
-                  {car.type}
-                </span>
+            </div>
+            <div className="p-5 flex-1 flex flex-col">
+              <h3 className="text-md font-bold text-slate-800 mb-4">{car.name}</h3>
+              <div className="space-y-3 mb-4">
+                 <div className="flex justify-between text-sm text-slate-600">
+                    <span className="flex items-center gap-1.5"><Users className="w-4 h-4 text-slate-400" /> {car.seats} Seats</span>
+                    <span className="flex items-center gap-1.5"><Briefcase className="w-4 h-4 text-slate-400" /> {car.luggage} Bags</span>
+                 </div>
+                 <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100 mt-2">
+                    <div>
+                      <p className="text-[10px] uppercase font-bold text-slate-400">Rate/KM</p>
+                      <p className="text-lg font-bold text-slate-800">₹{car.pricePerKm}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase font-bold text-slate-400">Rate/Day</p>
+                      <p className="text-lg font-bold text-slate-800">₹{car.pricePerDay || '--'}</p>
+                    </div>
+                 </div>
               </div>
             </div>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl">{car.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between text-sm text-muted-foreground border-b pb-2">
-                <div className="flex items-center gap-1.5 font-medium">
-                  <Users className="w-4 h-4 text-primary" /> {car.seats} Seats
-                </div>
-                <div className="flex items-center gap-1.5 font-medium">
-                  <Briefcase className="w-4 h-4 text-primary" /> {car.luggage} Bags
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                <div>
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Rate/KM</p>
-                  <p className="text-lg font-bold">₹{car.pricePerKm}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Rate/Day</p>
-                  <p className="text-lg font-bold">₹{car.pricePerDay || '--'}</p>
-                </div>
-              </div>
-
-              {car.features && car.features.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 pt-2">
-                  {car.features.map((feature, i) => (
-                    <span key={i} className="text-[10px] bg-muted px-2 py-0.5 rounded flex items-center gap-1">
-                      <Check className="w-2 h-2 text-primary" /> {feature}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          </div>
         ))}
       </div>
 
       {editingCar && (
         <Dialog open={!!editingCar} onOpenChange={() => setEditingCar(null)}>
-          <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden">
-            <DialogHeader className="p-6 pb-2 shrink-0">
-              <DialogTitle>Edit Vehicle</DialogTitle>
+          <DialogContent className="sm:max-w-[550px] w-[95vw] max-h-[90vh] flex flex-col p-0 overflow-hidden bg-white border-slate-200">
+            <DialogHeader className="p-6 pb-2 shrink-0 border-b border-slate-100">
+              <DialogTitle className="text-xl font-bold text-slate-800">Edit Vehicle</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
               <div className="flex-1 overflow-y-auto p-6 scrollbar-hide space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-name">Vehicle Name</Label>
-                    <Input id="edit-name" name="name" defaultValue={editingCar.name} required />
+                    <Label htmlFor="edit-name" className="text-slate-700">Vehicle Name</Label>
+                    <Input id="edit-name" name="name" defaultValue={editingCar.name} className="border-slate-200" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-type">Vehicle Type</Label>
-                    <Input id="edit-type" name="type" defaultValue={editingCar.type} required />
+                    <Label htmlFor="edit-type" className="text-slate-700">Vehicle Type</Label>
+                    <Input id="edit-type" name="type" defaultValue={editingCar.type} className="border-slate-200" required />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-seats">Seats</Label>
-                    <Input id="edit-seats" name="seats" type="number" defaultValue={editingCar.seats} required />
+                    <Label htmlFor="edit-seats" className="text-slate-700">Seats</Label>
+                    <Input id="edit-seats" name="seats" type="number" defaultValue={editingCar.seats} className="border-slate-200" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-luggage">Luggage Capacity</Label>
-                    <Input id="edit-luggage" name="luggage" type="number" defaultValue={editingCar.luggage} required />
+                    <Label htmlFor="edit-luggage" className="text-slate-700">Luggage Capacity</Label>
+                    <Input id="edit-luggage" name="luggage" type="number" defaultValue={editingCar.luggage} className="border-slate-200" required />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="edit-pricePerKm">Price per KM (₹)</Label>
-                    <Input id="edit-pricePerKm" name="pricePerKm" type="number" step="0.1" defaultValue={editingCar.pricePerKm} required />
+                    <Label htmlFor="edit-pricePerKm" className="text-slate-700">Price per KM (₹)</Label>
+                    <Input id="edit-pricePerKm" name="pricePerKm" type="number" step="0.1" defaultValue={editingCar.pricePerKm} className="border-slate-200" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="edit-pricePerDay">Price per Day (₹)</Label>
-                    <Input id="edit-pricePerDay" name="pricePerDay" type="number" defaultValue={editingCar.pricePerDay} />
+                    <Label htmlFor="edit-pricePerDay" className="text-slate-700">Price per Day (₹)</Label>
+                    <Input id="edit-pricePerDay" name="pricePerDay" type="number" defaultValue={editingCar.pricePerDay} className="border-slate-200" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-image">Image URL</Label>
-                  <Input id="edit-image" name="image" defaultValue={editingCar.image} required />
+                  <Label htmlFor="edit-image" className="text-slate-700">Image URL</Label>
+                  <Input id="edit-image" name="image" defaultValue={editingCar.image} className="border-slate-200" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-features">Features (comma separated)</Label>
-                  <Input id="edit-features" name="features" defaultValue={editingCar.features?.join(', ')} />
+                  <Label htmlFor="edit-features" className="text-slate-700">Features (comma separated)</Label>
+                  <Input id="edit-features" name="features" defaultValue={editingCar.features?.join(', ')} className="border-slate-200" />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-description">Description</Label>
-                  <Textarea id="edit-description" name="description" defaultValue={editingCar.description} />
+                  <Label htmlFor="edit-description" className="text-slate-700">Description</Label>
+                  <Textarea id="edit-description" name="description" defaultValue={editingCar.description} className="border-slate-200" />
                 </div>
               </div>
-              <div className="p-4 px-6 border-t bg-muted/30 shrink-0">
-                <Button type="submit" className="w-full">Update Vehicle</Button>
+              <div className="p-4 px-6 border-t border-slate-100 bg-slate-50 shrink-0">
+                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-white">Update Vehicle</Button>
               </div>
             </form>
           </DialogContent>

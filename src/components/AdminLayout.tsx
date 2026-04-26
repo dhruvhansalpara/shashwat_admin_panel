@@ -7,16 +7,20 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ onLogout }: AdminLayoutProps) {
   return (
-    <div className="flex min-h-screen bg-background font-sans selection:bg-primary/10 selection:text-primary">
+    <div className="flex min-h-screen bg-background font-sans selection:bg-primary/10">
       {/* Sidebar */}
-      <AdminSidebar onLogout={onLogout} />
+      <AdminSidebar />
       
       {/* Main Content Area */}
-      <main className="flex-1 relative overflow-y-auto">
-        {/* Subtle Background Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:32px_32px] opacity-[0.4] pointer-events-none" />
-        
-        <div className="relative z-10 p-10 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <main className="flex-1 overflow-y-auto flex flex-col">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center px-8 justify-between shrink-0 sticky top-0 z-10 shadow-sm">
+          <h2 className="text-sm font-semibold text-slate-800">Dashboard</h2>
+          <div className="flex items-center gap-4">
+             <ThemeToggle />
+          </div>
+        </header>
+
+        <div className="p-8 max-w-[1600px] mx-auto animate-in fade-in duration-500 w-full">
           <Outlet />
         </div>
       </main>

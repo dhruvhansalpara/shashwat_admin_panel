@@ -3,8 +3,9 @@ import { useState } from 'react';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Link, Upload, Image as ImageIcon } from 'lucide-react';
+import { Link, Upload, Image as ImageIcon, FileUp } from 'lucide-react';
 import { Button } from './ui/button';
+import { toast } from 'sonner';
 
 interface ImageUploadProps {
   value: string;
@@ -15,10 +16,36 @@ interface ImageUploadProps {
 
 export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
   const [url, setUrl] = useState(value);
+  const [uploading, setUploading] = useState(false);
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUrl(e.target.value);
     onChange(e.target.value);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    setUploading(true);
+    try {
+      const resp = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!resp.ok) throw new Error('Upload failed');
+      const data = await resp.json();
+      onChange(data.url);
+      setUrl(data.url);
+      toast.success('Image uploaded successfully');
+    } catch (err) {
+      toast.error('Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -26,12 +53,20 @@ export function ImageUpload({ value, onChange, label }: ImageUploadProps) {
       {label && <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</Label>}
       <div className="bg-muted/30 rounded-xl p-4 border border-dashed border-border/60">
         <Tabs defaultValue="url">
-          <TabsList className="grid w-full grid-cols-1 mb-4">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="url" className="gap-2">
               <Link className="w-3 h-3" /> Image URL
             </TabsTrigger>
+            <TabsTrigger value="upload" className="gap-2">
+              <FileUp className="w-3 h-3" /> Upload
+            </TabsTrigger>
           </TabsList>
           
+          <TabsContent value="upload" className="space-y-4">
+            <Input type="file" onChange={handleFileChange} disabled={uploading} accept="image/*" />
+            {uploading && <p className="text-xs">Uploading...</p>}
+          </TabsContent>
+
           <TabsContent value="url" className="space-y-4">
             <div className="space-y-2">
               <Input 
