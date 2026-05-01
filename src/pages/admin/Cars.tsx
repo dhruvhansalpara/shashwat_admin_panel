@@ -201,6 +201,14 @@ export function CarsPage({ cars, onAdd, onEdit, onDelete }: CarsPageProps) {
       </motion.div>
 
       <div className="flex flex-col gap-6">
+        {/* Column Titles */}
+        <div className="hidden md:grid grid-cols-[112px_1fr_1fr_1fr_1.2fr] gap-8 px-12 py-4">
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Vehicle Image</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Model & Class</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Fleet Specs</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Pricing Structure</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-right pr-20">Technical Actions</div>
+        </div>
         <AnimatePresence mode="popLayout">
           {filteredCars.map((car, idx) => (
             <motion.div 

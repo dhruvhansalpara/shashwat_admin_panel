@@ -27,9 +27,23 @@ export function StatsCard({ title, value, description, icon: Icon, trend, classN
 
   const iconStyles = {
     default: "bg-slate-50 text-slate-400",
-    primary: "bg-[#e0f2f1] text-[#009688]",
-    secondary: "bg-[#e0f2f1] text-[#009688]",
-    accent: "bg-[#e0f2f1] text-[#009688]",
+    primary: "bg-[#009688]/10 text-[#009688]",
+    secondary: "bg-[#e91e63]/10 text-[#e91e63]",
+    accent: "bg-[#fbc02d]/10 text-[#fbc02d]",
+  };
+
+  const hoverColors = {
+    default: "rgba(0, 150, 136, 0.2)",
+    primary: "rgba(0, 150, 136, 0.3)",
+    secondary: "rgba(233, 30, 99, 0.3)",
+    accent: "rgba(251, 192, 45, 0.3)",
+  };
+
+  const glowColors = {
+    default: "rgba(0, 150, 136, 0.08)",
+    primary: "rgba(0, 150, 136, 0.1)",
+    secondary: "rgba(233, 30, 99, 0.1)",
+    accent: "rgba(251, 192, 45, 0.1)",
   };
 
   return (
@@ -39,16 +53,23 @@ export function StatsCard({ title, value, description, icon: Icon, trend, classN
       whileHover={{ 
         y: -12, 
         scale: 1.02,
-        borderColor: "rgba(0, 150, 136, 0.2)",
+        borderColor: hoverColors[variant],
         transition: { duration: 0.3, ease: "easeOut" } 
       }}
       className={cn(
-        "relative border-2 bg-white p-8 rounded-[32px] transition-all duration-500 hover:shadow-[0_50px_100px_rgba(0,150,136,0.08)] group overflow-hidden", 
+        "relative border-2 bg-white p-8 rounded-[32px] transition-all duration-500 hover:shadow-2xl group overflow-hidden", 
         variantStyles[variant],
         className
       )}
+      style={{ boxShadow: `0 20px 50px ${glowColors[variant]}` }}
     >
-      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors duration-500" />
+      <div className={cn(
+        "absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl -mr-16 -mt-16 transition-all duration-1000",
+        variant === 'primary' ? "bg-[#009688]/10 group-hover:bg-[#009688]/20" :
+        variant === 'secondary' ? "bg-[#e91e63]/10 group-hover:bg-[#e91e63]/20" :
+        variant === 'accent' ? "bg-[#fbc02d]/10 group-hover:bg-[#fbc02d]/20" :
+        "bg-primary/5 group-hover:bg-primary/10"
+      )} />
       
       <div className="flex items-start justify-between relative z-10 mb-10">
         <div className="space-y-4">

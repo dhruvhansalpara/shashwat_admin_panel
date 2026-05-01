@@ -23,12 +23,13 @@ interface InquiriesPageProps {
 export function InquiriesPage({ inquiries, packages, onEdit, onDelete }: InquiriesPageProps) {
   const { token } = useAdmin();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const getPackageName = (id?: string) => {
     const pkg = packages.find(p => p.id === id);
     return pkg ? pkg.name : "N/A";
   };
-
+// ... (rest of the filteredInquiries and EditInquiryDialog logic remains the same)
   const filteredInquiries = useMemo(() => {
     const sorted = Array.isArray(inquiries) 
       ? [...inquiries].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -49,9 +50,10 @@ export function InquiriesPage({ inquiries, packages, onEdit, onDelete }: Inquiri
   const EditInquiryDialog = ({ inquiry }: { inquiry: Inquiry }) => {
     const [status, setStatus] = useState<InquiryStatus>(inquiry.status || 'new');
     const [priority, setPriority] = useState<InquiryPriority>(inquiry.priority || 'low');
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <Dialog>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-[#009688] hover:text-white transition-all border border-slate-50">
                     <Edit2 className="w-4 h-4" strokeWidth={3} />
@@ -102,7 +104,10 @@ export function InquiriesPage({ inquiries, packages, onEdit, onDelete }: Inquiri
                 <DialogFooter className="p-12 pt-0">
                     <Button 
                         className="w-full h-14 rounded-2xl bg-[#009688] hover:bg-[#00796b] text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-[#009688]/20 transition-all active:scale-95"
-                        onClick={() => { onEdit(inquiry.id, { status, priority }, token || ''); }}
+                        onClick={() => { 
+                            onEdit(inquiry.id, { status, priority }, token || '');
+                            setIsOpen(false);
+                        }}
                     >
                         Save Configuration
                     </Button>
@@ -153,6 +158,16 @@ export function InquiriesPage({ inquiries, packages, onEdit, onDelete }: Inquiri
       </motion.div>
 
       <motion.div variants={item} className="space-y-6">
+        {/* Column Titles */}
+        <div className="hidden md:grid grid-cols-[80px_2fr_1.5fr_1.5fr_1fr_120px] gap-8 px-8 py-2">
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Guest</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Contact & Info</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Message Snippet</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Package</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Status</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-right">Actions</div>
+        </div>
+
         <AnimatePresence mode="popLayout">
           {filteredInquiries.length > 0 ? filteredInquiries.map((inquiry, idx) => (
             <motion.div 
@@ -161,75 +176,117 @@ export function InquiriesPage({ inquiries, packages, onEdit, onDelete }: Inquiri
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: idx * 0.05 }}
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest('button')) return;
+                setSelectedId(selectedId === inquiry.id ? null : inquiry.id);
+              }}
               className={cn(
-                "group transition-all duration-500 relative flex items-center p-6 gap-8 border-2",
-                "rounded-[40px] select-none",
-                "bg-white border-transparent shadow-[0_8px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:bg-[#009688]/5 hover:border-[#009688]/30 hover:scale-[1.01]"
+                "group transition-all duration-500 relative flex flex-col md:flex-row items-stretch md:items-center p-6 gap-8 border-2 mb-4 overflow-hidden cursor-pointer",
+                "rounded-[32px] select-none",
+                selectedId === inquiry.id 
+                  ? "bg-[#009688]/5 border-[#009688]/30 shadow-[0_20px_50px_rgba(0,150,136,0.1)] scale-[1.01]" 
+                  : "bg-white border-transparent shadow-[0_8px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] hover:bg-[#009688]/5 hover:border-[#009688]/30 hover:scale-[1.01]"
               )}
             >
-              <div className="flex-shrink-0">
-                <div className="w-16 h-16 rounded-[24px] bg-[#e0f2f1] text-[#009688] flex items-center justify-center font-bold text-lg shadow-inner group-hover:bg-[#009688] group-hover:text-white transition-all duration-500 italic">
+              {/* Guest Avatar */}
+              <div className="flex-shrink-0 flex items-center justify-center">
+                <div className={cn(
+                  "w-14 h-14 rounded-[20px] flex items-center justify-center font-black text-lg transition-all duration-500 italic",
+                  selectedId === inquiry.id ? "bg-primary text-white shadow-lg shadow-primary/20 scale-110" : "bg-primary/10 text-primary"
+                )}>
                   {inquiry.name.charAt(0).toUpperCase()}
                 </div>
               </div>
 
-              <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-4 gap-8 items-center">
-                <div className="space-y-1.5">
-                  <div className="font-bold text-slate-800 text-base tracking-tight group-hover:text-[#009688] transition-colors uppercase font-display leading-none">{inquiry.name}</div>
-                  <div className="flex flex-col gap-2">
-                    <a 
-                      href={`tel:${inquiry.phone}`} 
-                      className="flex items-center gap-2 text-slate-400 hover:text-[#009688] transition-colors group/link"
-                    >
-                       <div className="w-6 h-6 rounded-lg bg-[#e0f2f1] flex items-center justify-center group-hover/link:bg-[#009688] group-hover/link:text-white transition-colors">
-                         <Phone className="w-3 h-3" strokeWidth={3} />
+              {/* Main Content Grid */}
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-[2fr_1.5fr_1.5fr_1fr] gap-8 items-center">
+                {/* Contact Info - Improved Visibility */}
+                <div className="space-y-4">
+                  <div className={cn(
+                    "font-black text-lg tracking-tight transition-colors uppercase font-display leading-none",
+                    selectedId === inquiry.id ? "text-primary" : "text-slate-800"
+                  )}>{inquiry.name}</div>
+                  <div className="flex flex-col gap-2.5">
+                    <a href={`tel:${inquiry.phone}`} className="flex items-center gap-3 group/link w-fit">
+                       <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center group-hover/link:bg-primary/10 transition-colors shadow-sm border border-slate-100">
+                         <Phone className="w-3.5 h-3.5 text-primary" strokeWidth={3} />
                        </div>
-                       <span className="text-xs font-bold uppercase tracking-tight">{inquiry.phone}</span>
+                       <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight group-hover/link:text-primary transition-colors">{inquiry.phone}</span>
                     </a>
-                    <a 
-                      href={`mailto:${inquiry.email}`} 
-                      className="flex items-center gap-2 text-slate-400 hover:text-[#009688] transition-colors group/link"
-                    >
-                       <div className="w-6 h-6 rounded-lg bg-[#e0f2f1] flex items-center justify-center group-hover/link:bg-[#009688] group-hover/link:text-white transition-colors">
-                         <Mail className="w-3 h-3" strokeWidth={3} />
+                    <a href={`mailto:${inquiry.email}`} className="flex items-center gap-3 group/link w-fit">
+                       <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center group-hover/link:bg-primary/10 transition-colors shadow-sm border border-slate-100">
+                         <Mail className="w-3.5 h-3.5 text-primary" strokeWidth={3} />
                        </div>
-                       <span className="text-xs font-bold uppercase tracking-tight">{inquiry.email}</span>
+                       <span className="text-[11px] font-black text-slate-600 uppercase tracking-tight truncate max-w-[180px] group-hover/link:text-primary transition-colors">{inquiry.email}</span>
                     </a>
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <div className="text-[10px] font-bold text-slate-600 leading-relaxed italic opacity-80 line-clamp-2">
-                    "{inquiry.message}"
+                {/* Message & Date - Bolder Snippet */}
+                <div className="space-y-4 border-l-2 border-slate-50 pl-8 h-full flex flex-col justify-center">
+                  <div className="relative">
+                    <span className="absolute -left-4 top-0 text-primary/20 text-3xl font-serif">"</span>
+                    <p className="text-[11px] font-black text-slate-700 leading-relaxed italic opacity-95 line-clamp-2 pl-2">
+                      {inquiry.message}
+                    </p>
                   </div>
-                  <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{format(new Date(inquiry.createdAt), 'MMM dd, yyyy')}</div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                   <Badge variant="secondary" className="px-3 py-1 rounded-xl capitalize text-[10px] font-bold bg-white border-slate-100 shadow-sm">{inquiry.status || 'new'}</Badge>
-                   <Badge variant={inquiry.priority === 'high' ? 'destructive' : 'default'} className="px-3 py-1 rounded-xl capitalize text-[10px] font-bold shadow-sm">{inquiry.priority || 'low'}</Badge>
-                </div>
-
-                <div className="flex items-center justify-between md:justify-end gap-6">
-                  <div className="px-4 py-2 bg-slate-50 rounded-xl border border-slate-100 group-hover:bg-white transition-all">
-                    <code className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate max-w-[100px]">
-                      {getPackageName(inquiry.packageId)}
-                    </code>
-                  </div>
-
-                  <div className="flex items-center gap-2 transition-all duration-500">
-                    <EditInquiryDialog inquiry={inquiry} />
-                    <Button variant="ghost" size="icon" onClick={() => { if(confirm("Permanently erase this inquiry?")) onDelete(inquiry.id, token || '') }} className="h-10 w-10 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-rose-500 hover:text-white transition-all border border-slate-50">
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                  <div className="flex items-center gap-2 pl-2">
+                    <Calendar className="w-3.5 h-3.5 text-slate-300" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{format(new Date(inquiry.createdAt), 'MMM dd, yyyy')}</span>
                   </div>
                 </div>
+
+                {/* Package Interest - Standard Pill */}
+                <div className="border-l-2 border-slate-50 pl-8">
+                  <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-2.5">Requested Tour</p>
+                  <Badge variant="secondary" className={cn(
+                    "px-4 py-1.5 rounded-xl capitalize text-[10px] font-black border-none shadow-sm transition-all",
+                    selectedId === inquiry.id ? "bg-primary text-white scale-105" : "bg-primary/5 text-primary"
+                  )}>
+                    {getPackageName(inquiry.packageId)}
+                  </Badge>
+                </div>
+
+                {/* Status Badges - Vibrant Pill Style */}
+                <div className="flex flex-col gap-3 border-l-2 border-slate-50 pl-8">
+                   <div className="flex items-center gap-2.5">
+                     <div className={cn("w-2 h-2 rounded-full shadow-lg animate-pulse", inquiry.status === 'new' ? 'bg-primary shadow-primary/50' : 'bg-emerald-500 shadow-emerald-500/50')} />
+                     <span className={cn(
+                       "text-[10px] font-black uppercase tracking-widest",
+                       inquiry.status === 'new' ? "text-primary" : "text-emerald-600"
+                     )}>{inquiry.status || 'new'}</span>
+                   </div>
+                   <Badge 
+                    variant={inquiry.priority === 'high' ? 'destructive' : 'default'} 
+                    className={cn(
+                      "px-3 py-1 rounded-lg capitalize text-[9px] font-black shadow-md text-center",
+                      inquiry.priority === 'high' ? "bg-rose-500 text-white" : "bg-slate-800 text-white"
+                    )}
+                   >
+                     {inquiry.priority || 'low'} Priority
+                   </Badge>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-3 min-w-[120px] border-l-2 border-slate-50 pl-8">
+                <EditInquiryDialog inquiry={inquiry} />
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => { if(confirm("Permanently erase this inquiry?")) onDelete(inquiry.id, token || '') }} 
+                  className="h-10 w-10 rounded-2xl bg-white shadow-xl shadow-slate-200/50 hover:bg-rose-500 hover:text-white transition-all border border-slate-50 active:scale-90"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
             </motion.div>
           )) : (
-            <div className="py-20 text-center flex flex-col items-center gap-3 text-slate-300">
-              <MessageSquare className="w-12 h-12 opacity-20" />
-              <p className="font-black uppercase tracking-widest text-xs text-slate-400">No inquiries recorded</p>
+            <div className="py-32 text-center flex flex-col items-center gap-6 text-slate-300 bg-white rounded-[48px] border-2 border-dashed border-slate-100">
+              <div className="w-24 h-24 rounded-[40px] bg-slate-50 flex items-center justify-center">
+                <MessageSquare className="w-10 h-10 opacity-20" strokeWidth={1} />
+              </div>
+              <p className="font-black uppercase tracking-[0.4em] text-xs text-slate-400">No Inquiries Found</p>
             </div>
           )}
         </AnimatePresence>

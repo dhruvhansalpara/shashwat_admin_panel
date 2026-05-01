@@ -153,6 +153,14 @@ export function DestinationsPage({ destinations, packages, onAdd, onEdit, onDele
       </motion.div>
 
       <motion.div variants={item} className="space-y-6">
+        {/* Column Titles */}
+        <div className="hidden md:grid grid-cols-[80px_1fr_1fr_1fr_1.2fr] gap-8 px-12 py-4">
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Map Preview</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Territory Info</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Regional Segment</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Package Volume</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-right pr-20">Technical Actions</div>
+        </div>
         <AnimatePresence mode="popLayout">
           {filteredDestinations.map((dest, idx) => {
             const packageCount = packages.filter(pkg => pkg.destination_ids?.includes(dest.id)).length;

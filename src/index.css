@@ -3,20 +3,20 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Montserrat", sans-serif;
-  --background: #fcfdfe;
+  --background: #fdfefe;
   --foreground: #020617;
   --card: #ffffff;
   --card-foreground: #020617;
   --primary: #009688;
   --primary-foreground: #ffffff;
-  --secondary: #fb923c;
+  --secondary: #e91e63;
   --secondary-foreground: #ffffff;
   --muted: #f8fafc;
   --muted-foreground: #94a3b8;
   --popover: #ffffff;
   --popover-foreground: #020617;
-  --accent: #009688;
-  --accent-foreground: #ffffff;
+  --accent: #fbc02d;
+  --accent-foreground: #020617;
   --border: #f1f5f9;
 }
 

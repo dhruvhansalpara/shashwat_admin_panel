@@ -201,6 +201,13 @@ export function PackagesPage({ packages, destinations, onAdd, onEdit, onDelete }
         </motion.div>
 
       <motion.div variants={item} className="space-y-6">
+        {/* Column Titles */}
+        <div className="hidden md:grid grid-cols-[112px_1fr_1fr_1.2fr] gap-8 px-12 py-4">
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Tour Image</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Package Details</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Destination Tags</div>
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 text-right pr-20">Pricing & Actions</div>
+        </div>
         <AnimatePresence mode="popLayout">
           {filteredPackages.length > 0 ? filteredPackages.map((pkg, idx) => (
             <motion.div 

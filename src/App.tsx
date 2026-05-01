@@ -142,7 +142,7 @@ export default function App() {
 
   return (
     <AdminProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/admin">
         <Routes>
           {/* Launch directly to Admin Login */}
           <Route path="/" element={<Navigate to="/admin/login" replace />} />
@@ -214,7 +214,7 @@ export default function App() {
               <AuthPageWrapper 
                 fetchData={fetchData} 
                 component={BannersPage} 
-                props={{ banners }} 
+                props={{ banners, packages, destinations, cars, inquiries }} 
                 actionHandlers={{ 
                   onAdd: (bnr: any, token: string) => handleAuthAction('/api/banners', 'POST', bnr, "Banner added", token),
                   onDelete: (id: string, token: string) => handleAuthAction(`/api/banners/${id}`, 'DELETE', null, "Banner deleted", token)
@@ -228,7 +228,7 @@ export default function App() {
               <AuthPageWrapper 
                 fetchData={fetchData} 
                 component={DestinationsAdminPage} 
-                props={{ destinations, packages }} 
+                props={{ destinations, packages, cars, banners, inquiries }} 
                 actionHandlers={{ 
                   onAdd: (dest: any, token: string) => handleAuthAction('/api/destinations', 'POST', dest, "Destination added", token),
                   onEdit: (id: string, dest: any, token: string) => handleAuthAction(`/api/destinations/${id}`, 'PUT', dest, "Destination updated", token),
@@ -243,7 +243,7 @@ export default function App() {
               <AuthPageWrapper 
                 fetchData={fetchData} 
                 component={CarsPage} 
-                props={{ cars }} 
+                props={{ cars, packages, destinations, banners, inquiries }} 
                 actionHandlers={{ 
                   onAdd: (car: any, token: string) => handleAuthAction('/api/cars', 'POST', car, "Car added", token),
                   onEdit: (id: string, car: any, token: string) => handleAuthAction(`/api/cars/${id}`, 'PUT', car, "Car updated", token),
@@ -271,7 +271,10 @@ export default function App() {
               <AuthPageWrapper 
                 fetchData={fetchData} 
                 component={SettingsPage} 
-                props={{ settings: settings || { whatsappNumber: '', defaultMessage: '', allowLogin: true, allowedEmails: [], siteName: 'Shashwat Holidays' } }} 
+                props={{ 
+                  settings: settings || { whatsappNumber: '', defaultMessage: '', allowLogin: true, allowedEmails: [], siteName: 'Shashwat Holidays' },
+                  packages, destinations, cars, banners, inquiries
+                }} 
                 actionHandlers={{ 
                   onUpdate: (sets: any, token: string) => handleAuthAction('/api/settings', 'PUT', sets, "Settings updated", token)
                 }} 
@@ -281,7 +284,9 @@ export default function App() {
 
           <Route path="/admin/users" element={
             <ProtectedRoute superAdminOnly>
-              <AdminLayout><AdminManagement /></AdminLayout>
+              <AdminLayout packages={packages} destinations={destinations} cars={cars} banners={banners} inquiries={inquiries}>
+                <AdminManagement />
+              </AdminLayout>
             </ProtectedRoute>
           } />
 
@@ -296,41 +301,55 @@ export default function App() {
 
 // Global Admin Layout
 const AdminLayout = ({ children, packages, destinations, cars, banners, inquiries }: any) => (
-  <div className="flex min-h-screen bg-[#fcfdfe] relative overflow-hidden font-display">
+  <div className="flex h-screen bg-[#fcfdfe] relative overflow-hidden font-display">
     {/* High-Contrast Futuristic Background */}
-    <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+    {/* High-Contrast Futuristic Background */}
+    <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0 bg-gradient-to-br from-white via-[#e0f2f1]/20 to-slate-50">
       <motion.div 
         animate={{ 
           scale: [1, 1.2, 1],
-          opacity: [0.03, 0.07, 0.03],
-          x: [-20, 20, -20]
+          opacity: [0.08, 0.15, 0.08],
+          x: [-50, 50, -50],
+          y: [-20, 20, -20]
         }}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-[#009688]/20 rounded-full blur-[160px]" 
+        className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#009688]/10 rounded-full blur-[140px]" 
       />
       <motion.div 
         animate={{ 
           scale: [1.2, 1, 1.2],
-          opacity: [0.02, 0.05, 0.02],
-          y: [20, -20, 20]
+          opacity: [0.06, 0.1, 0.06],
+          x: [30, -30, 30],
+          y: [50, -50, 50]
         }}
-        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        className="absolute bottom-[-15%] right-[-10%] w-[50%] h-[50%] bg-[#009688]/10 rounded-full blur-[140px]" 
+        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#e91e63]/5 rounded-full blur-[120px]" 
+      />
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.5, 1],
+          opacity: [0.03, 0.07, 0.03],
+          x: [100, -100, 100]
+        }}
+        transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+        className="absolute top-[20%] right-[10%] w-[40%] h-[40%] bg-[#fbc02d]/5 rounded-full blur-[100px]" 
       />
       {/* Subtle grid overlay */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.02] mix-blend-overlay" />
     </div>
     
     <AdminSidebar packages={packages} destinations={destinations} cars={cars} banners={banners} inquiries={inquiries} />
-    <main className="flex-1 p-8 md:p-12 lg:p-16 overflow-y-auto relative z-10 scrollbar-hide">
-      <motion.div 
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="max-w-7xl mx-auto"
-      >
-        {children}
-      </motion.div>
+    <main className="flex-1 overflow-y-auto relative z-10 scrollbar-hide">
+      <div className="p-8 md:p-12 lg:p-16">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-7xl mx-auto"
+        >
+          {children}
+        </motion.div>
+      </div>
     </main>
   </div>
 );

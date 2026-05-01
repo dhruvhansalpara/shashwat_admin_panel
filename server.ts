@@ -40,7 +40,7 @@ const io = new Server(httpServer, {
   }
 });
 
-const PORT = 3000;
+const PORT = 3002;
 const JWT_SECRET = process.env.JWT_SECRET || "shashwa-holidays-secret-key-123";
 
 app.use(cors());
@@ -316,6 +316,13 @@ async function initDb() {
     if (colsEmails.length === 0) {
       console.log("[DB] Adding missing allowed_emails column to settings table");
       await p.query("ALTER TABLE settings ADD COLUMN allowed_emails TEXT");
+    }
+    
+    // Safety check for site_name column
+    const [colsSiteName]: any = await p.query("SHOW COLUMNS FROM settings LIKE 'site_name'");
+    if (colsSiteName.length === 0) {
+      console.log("[DB] Adding missing site_name column to settings table");
+      await p.query("ALTER TABLE settings ADD COLUMN site_name VARCHAR(255) DEFAULT 'Shashwat Holidays'");
     }
 
     if (rows.length === 0) {
@@ -681,10 +688,26 @@ app.get("/api/settings", async (req, res) => {
     const p = await getPool();
     if (!p) {
       const db = getJsonDb();
-      return res.json(db.settings || {});
+      const s = db.settings || {};
+      return res.json({
+        whatsappNumber: s.whatsappNumber,
+        defaultMessage: s.defaultMessage,
+        allowLogin: !!s.allow_login,
+        allowedEmails: s.allowed_emails ? s.allowed_emails.split(',').map((e: string) => e.trim()) : [],
+        siteName: s.site_name,
+        updatedAt: s.updatedAt
+      });
     }
     const [rows]: any = await p.query("SELECT * FROM settings WHERE id = 'global'");
-    res.json(rows[0] || {});
+    const s = rows[0] || {};
+    res.json({
+      whatsappNumber: s.whatsappNumber,
+      defaultMessage: s.defaultMessage,
+      allowLogin: !!s.allow_login,
+      allowedEmails: s.allowed_emails ? s.allowed_emails.split(',').map((e: string) => e.trim()) : [],
+      siteName: s.site_name,
+      updatedAt: s.updatedAt
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -694,14 +717,25 @@ app.put("/api/settings", authenticateToken, isSuperAdmin, async (req, res) => {
   try {
     const p = await getPool();
     const sett = req.body;
+    const allowedEmailsStr = Array.isArray(sett.allowed_emails) 
+      ? sett.allowed_emails.join(',') 
+      : (sett.allowed_emails || '');
+
     if (!p) {
       const db = getJsonDb();
-      db.settings = { ...db.settings, ...sett, updatedAt: new Date().toISOString() };
+      db.settings = { 
+        ...db.settings, 
+        ...sett, 
+        allow_login: sett.allowLogin !== undefined ? sett.allowLogin : db.settings.allow_login,
+        site_name: sett.siteName !== undefined ? sett.siteName : db.settings.site_name,
+        allowed_emails: allowedEmailsStr, 
+        updatedAt: new Date().toISOString() 
+      };
       saveJsonDb(db);
     } else {
       await p.query(
         "UPDATE settings SET whatsappNumber=?, defaultMessage=?, allow_login=?, allowed_emails=?, site_name=? WHERE id='global'",
-        [sett.whatsappNumber, sett.defaultMessage, sett.allow_login ? 1 : 0, sett.allowed_emails, sett.site_name]
+        [sett.whatsappNumber, sett.defaultMessage, sett.allowLogin ? 1 : 0, allowedEmailsStr, sett.siteName]
       );
     }
     notifyClients("settings_updated");
